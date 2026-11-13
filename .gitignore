@@ -1,0 +1,32 @@
+# Dependencies and build output
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+
+# Tool caches and local workspace settings
+.openai/
+.sites-runtime/
+.codex/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+
+# Earlier local experiments and backend reference checkout
+/teslang/
+/prototype/
+/reference-backend/
+/teslang-preview.jpg
+/notion-*-feedback*.jpg
+/notion-pm-meeting-order.jpg

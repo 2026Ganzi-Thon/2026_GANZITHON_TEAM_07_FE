@@ -1,0 +1,198 @@
+[
+  {
+    "n": 1,
+    "title": "간지톤 7팀",
+    "id": "4055b968a98b8013ac5ad38ca4ebeff5",
+    "url": "https://app.notion.com/p/7-4055b968a98b8013ac5ad38ca4ebeff5",
+    "method": "Notion Markdown & CSV",
+    "folder": "원문/01_간지톤 7팀",
+    "files": [
+      "간지톤 7팀 4055b968a98b8013ac5ad38ca4ebeff5.md"
+    ],
+    "checked_date": "2026-11-13",
+    "status": "본문 있음"
+  },
+  {
+    "n": 2,
+    "title": "기획안",
+    "id": "4085b968a98b8024b134de83dc0b329a",
+    "url": "https://app.notion.com/p/4085b968a98b8024b134de83dc0b329a",
+    "method": "Notion Markdown & CSV",
+    "folder": "원문/02_기획안",
+    "files": [
+      "기획안 4085b968a98b8024b134de83dc0b329a.md",
+      "사용자_플로우.png",
+      "말랑이_만지기.png",
+      "감정_기록하기.png",
+      "마음_기록함.png",
+      "AI_상담_프로세스.png"
+    ],
+    "checked_date": "2026-11-13",
+    "status": "본문 있음"
+  },
+  {
+    "n": 3,
+    "title": "기능 명세서",
+    "id": "40a5b968a98b80b79d9ef517f066bddf",
+    "url": "https://app.notion.com/p/40a5b968a98b80b79d9ef517f066bddf",
+    "method": "Notion Markdown & CSV",
+    "folder": "원문/03_기능 명세서",
+    "files": [
+      "기능 명세서 40a5b968a98b80b79d9ef517f066bddf.md",
+      "핵심 기능 40a5b968a98b8042b707c898d342d409.csv",
+      "기능명세서 40a5b968a98b807c9d27f7fbe0903fa4.csv",
+      "핵심 기능 40a5b968a98b8042b707c898d342d409_all.csv",
+      "기능명세서 40a5b968a98b807c9d27f7fbe0903fa4_all.csv"
+    ],
+    "checked_date": "2026-11-13",
+    "status": "본문 있음"
+  },
+  {
+    "n": 4,
+    "title": "와이어프레임 (예시)",
+    "id": "40a5b968a98b802aaa2befccb8eb551a",
+    "url": "https://app.notion.com/p/40a5b968a98b802aaa2befccb8eb551a",
+    "method": "Notion Markdown & CSV",
+    "folder": "원문/04_와이어프레임 (예시)",
+    "files": [
+      "와이어프레임 (예시) 40a5b968a98b802aaa2befccb8eb551a.md",
+      "와이어_프레임_후보.png",
+      "수면모드ㅜ.png"
+    ],
+    "checked_date": "2026-11-13",
+    "status": "본문 있음"
+  },
+  {
+    "n": 5,
+    "title": "자료",
+    "id": "40f5b968a98b80e2a3a9cdda1608571d",
+    "url": "https://app.notion.com/p/40f5b968a98b80e2a3a9cdda1608571d",
+    "method": "화면 본문 전사",
+    "folder": "원문/05_자료",
+    "files": [
+      "원문.md"
+    ],
+    "checked_date": "2026-11-13",
+    "status": "본문 있음"
+  },
+  {
+    "n": 6,
+    "title": "인지행동치료",
+    "id": "40b5b968a98b8052bd40eb30e8ad856d",
+    "url": "https://app.notion.com/p/40b5b968a98b8052bd40eb30e8ad856d",
+    "method": "Notion Markdown & CSV",
+    "folder": "원문/06_인지행동치료",
+    "files": [
+      "인지행동치료 40b5b968a98b8052bd40eb30e8ad856d.md"
+    ],
+    "checked_date": "2026-11-13",
+    "status": "본문 있음"
+  },
+  {
+    "n": 7,
+    "title": "소크라테스 문답법",
+    "id": "40b5b968a98b8090845cebedf688f302",
+    "url": "https://app.notion.com/p/40b5b968a98b8090845cebedf688f302",
+    "method": "Notion Markdown & CSV",
+    "folder": "원문/07_소크라테스 문답법",
+    "files": [
+      "소크라테스 문답법 40b5b968a98b8090845cebedf688f302.md",
+      "image.png",
+      "image 1.png",
+      "image 2.png"
+    ],
+    "checked_date": "2026-11-13",
+    "status": "본문 있음"
+  },
+  {
+    "n": 8,
+    "title": "해결중심 단기치료 (SFBT 척도)",
+    "id": "40c5b968a98b80dcb281f890b80d719a",
+    "url": "https://app.notion.com/p/40c5b968a98b80dcb281f890b80d719a",
+    "method": "Notion Markdown & CSV",
+    "folder": "원문/08_해결중심 단기치료 (SFBT 척도)",
+    "files": [
+      "해결중심 단기치료 (SFBT 척도) 40c5b968a98b80dcb281f890b80d719a.md"
+    ],
+    "checked_date": "2026-11-13",
+    "status": "본문 있음"
+  },
+  {
+    "n": 9,
+    "title": "추가사항",
+    "id": "40f5b968a98b8026b6f2e045ebc92fb8",
+    "url": "https://app.notion.com/p/40f5b968a98b8026b6f2e045ebc92fb8",
+    "method": "Notion Markdown & CSV",
+    "folder": "원문/09_추가사항",
+    "files": [
+      "추가사항 40f5b968a98b8026b6f2e045ebc92fb8.md"
+    ],
+    "checked_date": "2026-11-13",
+    "status": "본문 있음"
+  },
+  {
+    "n": 11,
+    "title": "system.v4",
+    "id": "4125b968a98b80d797aaeec378aba154",
+    "url": "https://app.notion.com/p/4125b968a98b80d797aaeec378aba154",
+    "method": "Notion Markdown & CSV",
+    "folder": "원문/11_system.v4",
+    "files": [
+      "system v4(프롬포트 본문) 4125b968a98b80d797aaeec378aba154.md"
+    ],
+    "checked_date": "2026-11-13",
+    "status": "본문 있음"
+  },
+  {
+    "n": 12,
+    "title": "fewshot.v4",
+    "id": "4125b968a98b80dd954df7dac6ebfcf5",
+    "url": "https://app.notion.com/p/4125b968a98b80dd954df7dac6ebfcf5",
+    "method": "Notion Markdown & CSV",
+    "folder": "원문/12_fewshot.v4",
+    "files": [
+      "fewshot v4(프롬포트가 예시로 쓸 사례) 4125b968a98b80dd954df7dac6ebfcf5.md"
+    ],
+    "checked_date": "2026-11-13",
+    "status": "본문 있음"
+  },
+  {
+    "n": 13,
+    "title": "AI 감정 대화 관련 사항",
+    "id": "4141ad3970c7809dac04cbcfb9c34abe",
+    "url": "https://app.notion.com/p/AI-4141ad3970c7809dac04cbcfb9c34abe",
+    "method": "내보내기 비활성화: 화면 본문 전사",
+    "folder": "원문/13_AI 감정 대화 관련 사항",
+    "files": [
+      "원문.md"
+    ],
+    "checked_date": "2026-11-13",
+    "status": "본문 있음"
+  },
+  {
+    "n": 18,
+    "title": "회의록",
+    "id": "4055b968a98b80bc8e2bc0f17df48c7f",
+    "url": "https://app.notion.com/p/4055b968a98b80bc8e2bc0f17df48c7f",
+    "method": "Notion Markdown & CSV",
+    "folder": "원문/18_회의록",
+    "files": [
+      "회의록 4055b968a98b80bc8e2bc0f17df48c7f.md"
+    ],
+    "checked_date": "2026-11-13",
+    "status": "본문 있음"
+  },
+  {
+    "n": 19,
+    "title": "개발 로드맵",
+    "id": "4055b968a98b80589925eef68258395c",
+    "url": "https://app.notion.com/p/4055b968a98b80589925eef68258395c",
+    "method": "화면 본문 전사",
+    "folder": "원문/19_개발 로드맵",
+    "files": [
+      "원문.md"
+    ],
+    "checked_date": "2026-11-13",
+    "status": "본문 있음"
+  }
+]

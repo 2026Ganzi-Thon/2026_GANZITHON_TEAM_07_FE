@@ -1,0 +1,208 @@
+{
+  "checked_date": "2026-11-13",
+  "approved_pages": [
+    {
+      "n": 1,
+      "title": "간지톤 7팀",
+      "url": "https://app.notion.com/p/7-4055b968a98b8013ac5ad38ca4ebeff5",
+      "status": "본문 있음",
+      "method": "Notion Markdown & CSV",
+      "note": "팀 정보와 서비스·진행 문서 링크. 원문에 참여자 연락처 포함.",
+      "checked_date": "2026-11-13"
+    },
+    {
+      "n": 2,
+      "title": "기획안",
+      "url": "https://app.notion.com/p/4085b968a98b8024b134de83dc0b329a",
+      "status": "본문 있음",
+      "method": "Notion Markdown & CSV",
+      "note": "서비스 기획 전체와 첨부 이미지 5장.",
+      "checked_date": "2026-11-13"
+    },
+    {
+      "n": 3,
+      "title": "기능 명세서",
+      "url": "https://app.notion.com/p/40a5b968a98b80b79d9ef517f066bddf",
+      "status": "본문 있음",
+      "method": "Notion Markdown & CSV",
+      "note": "상위 MD, 핵심 기능 13행·상세 명세 115행 CSV와 전체 보기 CSV. 읽기용 MD 표 추가.",
+      "checked_date": "2026-11-13"
+    },
+    {
+      "n": 4,
+      "title": "와이어프레임 (예시)",
+      "url": "https://app.notion.com/p/40a5b968a98b802aaa2befccb8eb551a",
+      "status": "본문 있음",
+      "method": "Notion Markdown & CSV",
+      "note": "텍스트가 적어도 이미지 2장이 있어 내용 있는 페이지로 분류.",
+      "checked_date": "2026-11-13"
+    },
+    {
+      "n": 5,
+      "title": "자료",
+      "url": "https://app.notion.com/p/40f5b968a98b80e2a3a9cdda1608571d",
+      "status": "본문 있음",
+      "method": "화면 본문 전사",
+      "note": "자료 소개 본문과 CBT·소크라테스·SFBT 연결.",
+      "checked_date": "2026-11-13"
+    },
+    {
+      "n": 6,
+      "title": "인지행동치료",
+      "url": "https://app.notion.com/p/40b5b968a98b8052bd40eb30e8ad856d",
+      "status": "본문 있음",
+      "method": "Notion Markdown & CSV",
+      "note": "인지행동치료 참고 설명과 외부 참고 링크.",
+      "checked_date": "2026-11-13"
+    },
+    {
+      "n": 7,
+      "title": "소크라테스 문답법",
+      "url": "https://app.notion.com/p/40b5b968a98b8090845cebedf688f302",
+      "status": "본문 있음",
+      "method": "Notion Markdown & CSV",
+      "note": "문답법 본문과 사례·주의점·체크리스트 이미지 3장.",
+      "checked_date": "2026-11-13"
+    },
+    {
+      "n": 8,
+      "title": "해결중심 단기치료 (SFBT 척도)",
+      "url": "https://app.notion.com/p/40c5b968a98b80dcb281f890b80d719a",
+      "status": "본문 있음",
+      "method": "Notion Markdown & CSV",
+      "note": "해결중심 접근·척도 질문과 예시.",
+      "checked_date": "2026-11-13"
+    },
+    {
+      "n": 9,
+      "title": "추가사항",
+      "url": "https://app.notion.com/p/40f5b968a98b8026b6f2e045ebc92fb8",
+      "status": "본문 있음",
+      "method": "Notion Markdown & CSV",
+      "note": "추가 제안과 위험 대응·데이터 구조 제안. 제안 상태 유지.",
+      "checked_date": "2026-11-13"
+    },
+    {
+      "n": 10,
+      "title": "AI 프롬포트",
+      "url": "https://app.notion.com/p/4125b968a98b803ea9e9df26bd97c7e6",
+      "status": "연결 페이지",
+      "method": "화면 확인",
+      "note": "system.v4와 fewshot.v4 링크. 연결 관계만 보존하고 별도 빈 MD는 생성하지 않음.",
+      "checked_date": "2026-11-13"
+    },
+    {
+      "n": 11,
+      "title": "system.v4",
+      "url": "https://app.notion.com/p/4125b968a98b80d797aaeec378aba154",
+      "status": "본문 있음",
+      "method": "Notion Markdown & CSV",
+      "note": "시스템 프롬프트 본문. 코드블록 포함 원문 보존.",
+      "checked_date": "2026-11-13"
+    },
+    {
+      "n": 12,
+      "title": "fewshot.v4",
+      "url": "https://app.notion.com/p/4125b968a98b80dd954df7dac6ebfcf5",
+      "status": "본문 있음",
+      "method": "Notion Markdown & CSV",
+      "note": "JSON 대화 사례. 코드블록 포함 원문 보존.",
+      "checked_date": "2026-11-13"
+    },
+    {
+      "n": 13,
+      "title": "AI 감정 대화 관련 사항",
+      "url": "https://app.notion.com/p/AI-4141ad3970c7809dac04cbcfb9c34abe",
+      "status": "본문 있음",
+      "method": "내보내기 비활성화: 화면 본문 전사",
+      "note": "내보내기 비활성화. 화면 본문 전체 구간을 읽고 전사. 11월 11일 수정사항 및 남은 결정 포함.",
+      "checked_date": "2026-11-13"
+    },
+    {
+      "n": 14,
+      "title": "API 명세서",
+      "url": "https://app.notion.com/p/4055b968a98b80c8aa19d7444a0fc133",
+      "status": "빈 페이지",
+      "method": "화면 확인",
+      "note": "제목 외 본문 없음. API가 존재하지 않는다는 뜻이 아니라 이 페이지에 명세가 없다는 뜻.",
+      "checked_date": "2026-11-13"
+    },
+    {
+      "n": 15,
+      "title": "BE",
+      "url": "https://app.notion.com/p/4055b968a98b80909138cf6c74ad3575",
+      "status": "작업 틀만 있음",
+      "method": "화면 확인",
+      "note": "TODO 표의 이름·날짜·담당자 등이 비어 있고 시작 전 상태인 틀. 실제 작업 내용 없음.",
+      "checked_date": "2026-11-13"
+    },
+    {
+      "n": 16,
+      "title": "FE",
+      "url": "https://app.notion.com/p/4055b968a98b8019b9bbfa632f0b0427",
+      "status": "작업 틀만 있음",
+      "method": "화면 확인",
+      "note": "TODO 표의 이름·날짜·담당자 등이 비어 있고 시작 전 상태인 틀. 실제 작업 내용 없음.",
+      "checked_date": "2026-11-13"
+    },
+    {
+      "n": 17,
+      "title": "P&D",
+      "url": "https://app.notion.com/p/4055b968a98b80b5b313cff0c7d28a96",
+      "status": "작업 틀·연결 페이지",
+      "method": "화면 확인",
+      "note": "실제 작업명이 없는 TODO 틀(담당자 류다현 표시)과 별도 기능 명세서 링크. 연결 페이지는 범위 밖.",
+      "checked_date": "2026-11-13"
+    },
+    {
+      "n": 18,
+      "title": "회의록",
+      "url": "https://app.notion.com/p/4055b968a98b80bc8e2bc0f17df48c7f",
+      "status": "본문 있음",
+      "method": "Notion Markdown & CSV",
+      "note": "10/26 본문 및 10/29 연결 링크. 별도 회의록 내용은 수집 제외.",
+      "checked_date": "2026-11-13"
+    },
+    {
+      "n": 19,
+      "title": "개발 로드맵",
+      "url": "https://app.notion.com/p/4055b968a98b80589925eef68258395c",
+      "status": "본문 있음",
+      "method": "화면 본문 전사",
+      "note": "1주차 아이디어 도출·회의의 짧은 실제 본문. 빈 페이지로 제외하지 않음.",
+      "checked_date": "2026-11-13"
+    }
+  ],
+  "excluded_pages": [
+    {
+      "title": "아이디어 도출",
+      "url": "https://app.notion.com/p/4055b968a98b801bacf1e21fa22957c3",
+      "found_in": "N01 팀 메인",
+      "status": "사용자 요청으로 수집 제외"
+    },
+    {
+      "title": "P&D 안의 별도 기능 명세서",
+      "url": "https://app.notion.com/p/40a5b968a98b80c19246def68a3cdade",
+      "found_in": "N17 P&D",
+      "status": "사용자 요청으로 수집 제외"
+    },
+    {
+      "title": "마음말랑이",
+      "url": "https://app.notion.com/p/4055b968a98b80908596e330bee8ed6b",
+      "found_in": "N18 회의록",
+      "status": "사용자 요청으로 수집 제외"
+    },
+    {
+      "title": "생각 분리수거",
+      "url": "https://app.notion.com/p/4055b968a98b80adbf37e84f219de935",
+      "found_in": "N18 회의록",
+      "status": "사용자 요청으로 수집 제외"
+    },
+    {
+      "title": "10/29 연결 회의록",
+      "url": "https://app.notion.com/p/4095b968a98b809db401c2e8b48a1055",
+      "found_in": "N18 회의록",
+      "status": "사용자 요청으로 수집 제외"
+    }
+  ]
+}

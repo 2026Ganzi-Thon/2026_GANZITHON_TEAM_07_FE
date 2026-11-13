@@ -1,0 +1,12 @@
+* text=auto
+*.md text eol=lf
+*.json text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+
+# Preserve archived Notion files byte-for-byte, including original line endings.
+docs/notion/** -text
+
+*.png binary
+*.jpg binary
+*.zip binary
