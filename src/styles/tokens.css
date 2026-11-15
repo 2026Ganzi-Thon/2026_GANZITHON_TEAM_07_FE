@@ -1,0 +1,16 @@
+:root {
+  --ivory: #fff9f2;
+  --muted: #dfdad5;
+  --accent: #909cb2;
+  --slate: #6a7281;
+  --gray: #848587;
+  --warm-gray: #868079;
+  --text: #2d2d2d;
+  --secondary: #5e5a53;
+  --ink: #5e5a53;
+  --danger: #aa3939;
+  --line: #e7e1d9;
+  --home-play-background: linear-gradient(180deg, #6a7281, #9c9fa3 56%, #cccac5);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}

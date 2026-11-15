@@ -22,6 +22,12 @@ coverage/
 .DS_Store
 Thumbs.db
 *.log
+test-results/
+playwright-report/
+/artifacts/
+
+# Private assistant work journal (team handoff lives in docs/handoff.md)
+/memory.md
 
 # Earlier local experiments and backend reference checkout
 /teslang/
