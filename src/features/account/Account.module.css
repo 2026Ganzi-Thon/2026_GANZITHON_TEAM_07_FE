@@ -1,0 +1,24 @@
+.intro { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 18px 0 25px; gap: 16px; }.intro h2 { font-weight: 400; font-size: 26px; line-height: 1.5; margin: 0; }.intro p { margin: 0; color: var(--secondary); font-size: 13px; line-height: 1.9; }
+.accounts { display: grid; gap: 10px; margin: 0 0 24px; }.accounts button { min-height: 78px; display: flex; align-items: center; gap: 14px; text-align: left; background: #fffcf7; border: 1px solid var(--line); border-radius: 16px; padding: 16px; }.accounts button[aria-pressed=true] { background: #e8ebf1; border-color: var(--accent); }.accounts span { flex: 1; font-size: 15px; }.accounts small { display: block; font-size: 11px; margin-top: 8px; color: var(--secondary); }
+.profile { display: flex; align-items: center; gap: 13px; margin-bottom: 14px; }.profile strong { font-size: 15px; }.profile p { font-size: 12px; margin: 7px 0 0; }
+.links { display: grid; margin-bottom: 24px; }.links a, .links button { display: flex; align-items: center; gap: 12px; background: transparent; border-bottom: 1px solid var(--line); padding: 18px 4px; font-size: 14px; text-align: left; min-height: 56px; }.links svg:last-child { margin-left: auto; }
+.qa { padding: 16px; border: 1px solid var(--line); border-radius: 16px; margin-bottom: 24px; }.qa summary { cursor: pointer; font-size: 13px; min-height: 30px; }.qa label { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 13px; }.qa input { width: 18px; height: 18px; accent-color: #6a7281; }
+
+.profileCard { background: #fff; border: 1px solid #848587; border-radius: 36px; min-height: 147px; padding: 27px 17px; box-shadow: 0 3px 3px #2d2d2d22; margin-bottom: 11px; }
+.profile { margin-bottom: 0; min-height: 74px; }
+.profileCard > a { margin-top: 18px; }
+.userIcon { width: 71px; height: 71px; flex-shrink: 0; display: grid; place-items: center; border-radius: 50%; background: #d8d8d8; color: #fff; box-shadow: 0 3px 4px #2d2d2d22; }
+.profile strong { font-size: 16px; line-height: 19px; font-weight: 600; }.profile p { font-size: 11px; color: #77716b; }
+.links { border-top: 1px solid #c4bdb4; padding-top: 21px; gap: 5px; }
+.links a, .links button { border: 1px solid #dfdad5; border-radius: 11px; background: #fff; min-height: 48px; padding: 10px 12px; font-size: 16px; line-height: 20px; }
+.links a > svg:first-child { width: 14px; height: 14px; }
+.qa { margin-top: 30px; background: #f6f0e8; font-size: 11px; }.qa summary { font-size: 11px; }
+.accounts button { min-height: 64px; border-radius: 10px; }
+.intro h2 { font-size: 30px; font-weight: 600; }
+
+/* MY 71:267: profile 334×147, radius36; menu 334×48, gap5. */
+.settingsPage > header h1 { font-size: 24px; line-height: 29px; font-weight: 600; }
+.settingsPage > div { padding: 22px 34px calc(26px + var(--safe-bottom)); }
+.profile > div { min-width: 0; }
+.profile p { overflow-wrap: anywhere; }
+@media(max-width:370px) { .settingsPage > div { padding-left: 24px; padding-right: 24px; } .profileCard { padding-left: 14px; padding-right: 14px; } }
