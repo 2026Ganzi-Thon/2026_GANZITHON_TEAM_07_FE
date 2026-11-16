@@ -6,7 +6,7 @@
 .content { position: relative; flex: 1; min-height: 0; display: grid; place-items: center; padding-bottom: 28px; }
 .characterButton { background: transparent; padding: 0; border-radius: 45%; transform: scale(1.12); touch-action: none; user-select: none; -webkit-user-select: none; }
 .characterButton:active > div { transition-duration: .05s; }
-.playControls { position: absolute; z-index: 2; top: calc(80px + var(--safe-top)); left: 24px; right: 24px; display: flex; align-items: center; justify-content: space-between; }
+
 .typeSelect { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 10px 18px; border-radius: 24px; background: #fff9f2b0; color: #3e4958; font-size: 13px; }
 .playActions { display: flex; align-items: center; gap: 6px; }
 .playActions button { background: #fff9f233; color: #fffaf3; }
@@ -22,15 +22,10 @@
 .chatTrigger { width: 100%; min-height: 76px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; background: transparent; border-radius: 22px; color: var(--text); touch-action: none; }
 .chatTrigger > span:last-child { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; }
 .handle { width: 34px; height: 4px; border-radius: 4px; background: #9d968c; opacity: .65; }
-.chatEntry { display: grid; gap: 18px; }
-.tess { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; }
-.chatEntry textarea { box-sizing: border-box; width: 100%; min-height: 110px; max-height: 200px; resize: vertical; padding: 16px; border: 1px solid #d7d0c7; border-radius: 16px; background: #fffdf9; color: var(--text); line-height: 1.7; font-size: 16px; }
-.chatEntry textarea::placeholder { color: #77716a; }
-.begin { display: flex; justify-content: space-between; align-items: center; min-height: 52px; border-radius: 16px; padding: 14px 20px; background: var(--ink); color: var(--ivory); font-size: 14px; }
 @media (max-width: 370px) { .characterButton { transform: scale(1); }.header { padding-left: 20px; padding-right: 20px; } }
 @media (max-height: 650px) { .characterButton { transform: scale(.85); }.content { padding-bottom: 12px; } }
 @media (max-height: 450px) { .header { padding-top: 6px; }.characterButton { transform: scale(.6); }.footer { padding-bottom: 4px; }.chatTrigger { min-height: 58px; gap: 8px; }.menuDock { bottom: 76px; }.content { overflow: hidden; padding: 0; } }
-@media (max-height: 450px) { .playControls { top: 54px; }.playReset { bottom: calc(8px + var(--safe-bottom)); }.typeSelect { padding: 8px 12px; } }
+@media (max-height: 450px) { .playReset { bottom: calc(8px + var(--safe-bottom)); }.typeSelect { padding: 8px 12px; } }
 @media (prefers-reduced-motion: reduce) { .home::before, .footer, .playControls, .playReset { transition: none; } }
 /* Original palette and geometry; D36 entry/menu overrides follow below. */
 .header { justify-content: flex-end; padding: calc(14px + var(--safe-top)) 18px 0; }
@@ -39,9 +34,8 @@
 .content { padding: 0 0 52px; }
 .menuDock { right: 32px; bottom: calc(24px + var(--safe-bottom)); z-index: 5; }
 .typeSelect { background: #5e626bb3; color: var(--ivory); min-height: 38px; border-radius: 25px; font-size: 12px; }
-.playControls { top: calc(86px + var(--safe-top)); left: 24px; right: 22px; }
 .playReset { right: 92px; left: 20px; bottom: calc(26px + var(--safe-bottom)); }
-@media(max-height:450px) { .content { padding: 0; }.playControls { top: 58px; }.menuDock { bottom: 16px; }.playReset { bottom: 16px; } }
+@media(max-height:450px) { .content { padding: 0; }.menuDock { bottom: 16px; }.playReset { bottom: 16px; } }
 
 /* The supplied 402x268 image stays on the same canvas when interaction starts. */
 .characterButton { width: 100%; max-width: 402px; transform: none; }
