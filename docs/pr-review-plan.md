@@ -1,5 +1,15 @@
 # 기능별 PR 구성과 검토 순서
 
+## 제출된 PR
+
+- [#6 디자인 자산·서체](https://github.com/2026Ganzi-Thon/2026_GANZITHON_TEAM_07_FE/pull/6) — 기준: feat/results-archive
+- [#7 메인 시트·메뉴·모션](https://github.com/2026Ganzi-Thon/2026_GANZITHON_TEAM_07_FE/pull/7) — 기준: feat/design-assets-followup
+- [#8 결과·보관함·MY 관리](https://github.com/2026Ganzi-Thon/2026_GANZITHON_TEAM_07_FE/pull/8) — 기준: feat/home-interaction-followup
+- [#9 대화·음성·인수인계](https://github.com/2026Ganzi-Thon/2026_GANZITHON_TEAM_07_FE/pull/9) — 기준: feat/records-followup
+
+2026-11-16 생성. 적용 순서는 기존 #1~#5 이후 #6 → #7 → #8 → #9다. 이번 작업에서는 머지하지 않았다. 제공 꾹꾹체 TTF 원본은 #6에 포함했다.
+
+
 2026-11-16. 기존 제출분 이후 자산·메인·기록·대화 보완을 검토하기 위한 문서다. 네 개의 추가 PR로 전달하며 기존 PR과 main은 변경하지 않는다. 머지는 별도 진행한다.
 
 ## 기존 제출분과 기준
