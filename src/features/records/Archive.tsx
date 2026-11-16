@@ -1,3 +1,4 @@
+import { SettingsLink } from '../../components/SettingsLink';
 import { useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
@@ -19,9 +20,11 @@ export function Archive() {
 function ArchiveContent() {
   const location = useLocation();
   const user = useProfile(); const preview = usePreview();
-  const [month, setMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
-  const [selected, setSelected] = useState(() => localDate(new Date()));
-  const [view, setView] = useState<'month' | 'week' | 'list'>('month');
+  const restored = location.state?.archiveView;
+  const restoreDate = (value: unknown) => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(new Date(value + 'T12:00:00').getTime()) ? new Date(value + 'T12:00:00') : new Date();
+  const [month, setMonth] = useState(() => { const date = restoreDate(restored?.month); return new Date(date.getFullYear(), date.getMonth(), 1); });
+  const [selected, setSelected] = useState(() => localDate(restoreDate(restored?.selected)));
+  const [view, setView] = useState<'month' | 'week' | 'list'>(() => restored?.view === 'week' || restored?.view === 'list' ? restored.view : 'month');
   const query = useQuery({ queryKey: ['preview', user.data!.id, 'records'], queryFn: () => { const fail = preview.faults.list; preview.faults.list = false; return previewApi.records(fail); } });
   const records = newestFirst((query.data ?? []).filter(record => !record.hidden));
   const daily = records.filter(record => localDate(record.createdAt) === selected);
@@ -37,9 +40,9 @@ function ArchiveContent() {
   const emotionRecords = monthly.filter(record => record.context.primary !== null);
   const frequency = Object.entries(emotionRecords.reduce<Record<string, number>>((result, record) => { const key = record.context.primary!; result[key] = (result[key] ?? 0) + 1; return result; }, {})).sort((a, b) => b[1] - a[1]);
   const legend = [...new Set(['불안', '분노', '서운함', '슬픔', ...emotionRecords.map(record => record.context.primary!)])];
-  return <Page title="마음 보관함" titlePlacement="body" className={styles.page} action={<Link to="/settings" aria-label="MY 및 설정"><Settings size={21} /></Link>}>
+  return <Page title="마음 보관함" titlePlacement="body" className={styles.page} action={<SettingsLink returnState={{ archiveView: { month: localDate(month), selected, view } }}><Settings size={21} /></SettingsLink>}>
     {location.state?.saved && <p role="status" className={styles.caption}>여기까지 나눈 이야기를 보관했어요.</p>}
-    <p className={styles.caption}>{new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })} · 기록 {records.length}개</p>
+    <p className={styles.caption}>{new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })} · {query.data ? `기록 ${records.length}개` : query.isError ? '기록 수 확인 불가' : '기록 불러오는 중'}</p>
     {query.isPending ? <Pending>기록을 불러오고 있어요.</Pending> : query.isError ? <ErrorState message={query.error.message} retry={() => query.refetch()} /> : <>
       <div className={styles.tabs} role="group" aria-label="기록 보기 방식">{([['month', '월간'], ['week', '주간'], ['list', '목록']] as const).map(([key, label]) => <button key={key} aria-pressed={view === key} onClick={() => setView(key)}>{label}</button>)}</div>
       <div className={styles.period}>

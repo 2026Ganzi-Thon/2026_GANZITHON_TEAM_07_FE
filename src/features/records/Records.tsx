@@ -1,5 +1,6 @@
+import { SettingsLink } from '../../components/SettingsLink';
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, ChevronRight, Settings } from 'lucide-react';
 import { ErrorState, Page, Pending, PrimaryLink } from '../../components/Page';
@@ -38,7 +39,8 @@ export function Result() {
   const active = selected ?? query.data?.recommended ?? 'SLANGI';
   const advice = query.data ? adviceFor(query.data) : null;
   if (query.data?.hidden || query.data?.partial) return <Page title="마음 기록"><p>{query.data.hidden ? '가려 둔 기록이에요.' : '중간에 보관한 이야기예요.'}</p><PrimaryLink to={`/records/${id}`}>기록 확인하기</PrimaryLink></Page>;
-  return <Page title="오늘의 마음 정리" titlePlacement="hidden" className={styles.resultPage} action={<Link to="/settings" aria-label="MY 및 설정"><Settings size={21} /></Link>}>{query.isPending ? <Pending>이야기를 정리하고 있어요.</Pending> : query.isError ? <><ErrorState message={query.error.message} retry={draft.current ? () => query.refetch() : undefined} /><p className={s.small}>{draft.current ? '저장 완료로 처리하지 않았어요. 다시 시도하면 입력 내용을 유지해요.' : '기록을 찾을 수 없어요. 새 대화를 시작할 수 있어요.'}</p></> : <div aria-label="상담 결과" role="region">
+  return <Page title="오늘의 마음 정리" titlePlacement="hidden" className={styles.resultPage} action={<SettingsLink><Settings size={21} /></SettingsLink>}>{query.isPending ? <Pending>이야기를 정리하고 있어요.</Pending> : query.isError ? <><ErrorState message={query.error.message} retry={draft.current ? () => query.refetch() : undefined} /><p className={s.small}>{draft.current ? '저장 완료로 처리하지 않았어요. 다시 시도하면 입력 내용을 유지해요.' : '기록을 찾을 수 없어요. 새 대화를 시작할 수 있어요.'}</p></> : <div aria-label="상담 결과" role="region">
+      <div className={styles.resultFirstView}>
       <section className={styles.recommend}><h2>지금 마음에 맞는 말랑이</h2><span className={styles.toyPill} aria-live="polite">{TOYS[active].name}</span><button className={styles.recommendArtwork} aria-label="다른 말랑이 선택 보기" onClick={() => { options.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); options.current?.querySelector<HTMLButtonElement>('button[aria-pressed=true]')?.focus({ preventScroll: true }); }}><Malangi variant={TOYS[active].tint} /></button><p>{TOYS[active].instruction}</p></section>
       <section className={styles.insight}><span>대화에서 남은 문장</span><blockquote>{query.data.summary}</blockquote>{advice && <p className={styles.smallAction}><img src={`/assets/design/advice-${advice.kind}.svg`} width={advice.kind === 'walk' ? 14 : 15} height={advice.kind === 'walk' ? 12 : 10} alt="" /><span>{advice.chosen ? '작은 실천' : '작은 조언'} · {advice.text}</span></p>}</section>
       <section className={styles.alternatives} aria-label="다른 말랑이"><header><h2>다른 말랑이도 있어요</h2><span>눌러서 바꿀 수 있어요</span></header><div ref={options} role="group" aria-label="체험할 말랑이 선택">{(Object.keys(TOYS) as ToyType[]).map(type => {
@@ -46,6 +48,7 @@ export function Result() {
         return <button key={type} aria-label={`${TOYS[type].name} 선택`} aria-pressed={active === type} onClick={() => setSelected(type)}>{content}</button>;
       })}</div></section>
       <div className={styles.resultActions}><PrimaryLink to={`/malangi?type=${active}`}>{TOYS[active].name} 만지러 가기</PrimaryLink><Link className={styles.recordLink} to={`/records/${id}`}>저장된 기록 확인하기<ChevronRight size={12} /></Link></div>
+      </div>
       <div className={styles.saved} role="status"><Check size={14} />기록을 보관함에 남겼어요</div>
       <RecordBody record={query.data} /><div className={s.stack}><Link className={s.secondary} to="/archive">마음 보관함으로</Link><Link className={s.textLink} to="/">메인으로 돌아가기</Link></div>
     </div>}</Page>;
@@ -54,6 +57,7 @@ export function Result() {
 export { Archive } from './Archive';
 const emotionColor = (emotion: string | null) => presentEmotion(emotion).color;
 export function RecordDetail() {
+  const location = useLocation();
   const { id = '' } = useParams(); const user = useProfile(); const preview = usePreview(); const client = useQueryClient(); const navigate = useNavigate(); const [confirm, setConfirm] = useState(false);
   const query = useQuery({ queryKey: ['preview', user.data!.id, 'record', id], queryFn: () => previewApi.record(id) });
   const [params, setParams] = useSearchParams(); const history = params.get('view') === 'conversation'; const [revealed, setRevealed] = useState(false);
@@ -73,9 +77,9 @@ export function RecordDetail() {
   const cardActions = record && <footer className={styles.recordActions}>
     <button aria-label={record.hidden ? '보관함에 다시 표시하기' : '기록 가리기'} disabled={visibility.isPending} onClick={() => visibility.mutate()}>{visibility.isPending ? '변경 중…' : record.hidden ? '다시 표시' : '숨기기'}</button>
     <button className={styles.deleteRecord} aria-label="기록 삭제" disabled={visibility.isPending} onClick={event => { event.currentTarget.focus(); setConfirm(true); }}>삭제</button>
-    {!record.hidden || revealed ? <button className={styles.detailLink} aria-label="대화 자세히 보기" onClick={() => { const next = new URLSearchParams(params); next.set('view', 'conversation'); setParams(next); }}>자세히 보기<ChevronRight size={13} /></button> : null}
+    {!record.hidden || revealed ? <button className={styles.detailLink} aria-label="대화 자세히 보기" onClick={() => { const next = new URLSearchParams(params); next.set('view', 'conversation'); setParams(next, { state: location.state }); }}>자세히 보기<ChevronRight size={13} /></button> : null}
   </footer>;
-  return <Page className={styles.detailPage} title={record ? new Date(record.createdAt).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' }) : '마음 기록'} back={history ? `/records/${id}${params.get('manage') === '1' ? '?manage=1' : ''}` : back}>
+  return <Page className={styles.detailPage} title={record ? new Date(record.createdAt).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' }) : '마음 기록'} back={history ? `/records/${id}${params.get('manage') === '1' ? '?manage=1' : ''}` : back} backState={location.state}>
     {query.isPending ? <Pending /> : query.isError ? <ErrorState message={query.error.message} retry={query.error instanceof ApiError && query.error.status === 404 ? undefined : () => query.refetch()} /> : record && <>
       {visibility.isError && <p role="alert" className={s.error}>{visibility.error.message} 다시 눌러주세요.</p>}
       {record.hidden && !revealed ? <section className={styles.recordCard}><h2>가려 둔 기록이에요</h2><button className={s.secondary} onClick={() => setRevealed(true)}>이번에만 내용 보기</button>{cardActions}</section> : history ? <section className={styles.transcript} aria-label="저장된 대화 내용">

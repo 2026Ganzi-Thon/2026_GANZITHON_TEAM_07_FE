@@ -109,3 +109,44 @@
 .recordActions .detailLink { display: flex; align-items: center; gap: 3px; margin-left: auto; color: #504d48; }
 .detailPage .transcript { padding-top: 0; }
 .detailPage .usedToy { margin-top: 28px; }
+
+/* D41: fit the record link in the first view for ordinary short summaries.
+   Size artwork against the app height, leaving long content scrollable. */
+.resultPage { container-type: size; }
+.resultPage > div { padding-top: 12px; }
+.recommend { min-height: 0; padding: 16px 14px; }
+.recommend h2 { margin-bottom: 12px; line-height: 24px; }
+.recommendArtwork { height: clamp(90px, calc(100cqh - 570px), 208px); min-height: 0; margin: 8px 0 10px; }
+.recommendArtwork > div { height: 100%; width: auto; max-width: 100%; }
+.recommendArtwork img { width: auto; height: 100%; max-width: 100%; object-fit: contain; }
+.insight { margin: 12px 3px; }
+.alternatives { margin: 12px 3px; }
+.recordLink { margin-top: 4px; }
+
+@container (max-height: 720px) {
+  .resultPage > header { min-height: 60px; }
+  .resultPage > div { padding-top: 8px; }
+  .recommend { padding-top: 12px; padding-bottom: 12px; }
+  .recommend h2 { margin-bottom: 8px; }
+  .insight { padding: 8px 14px; margin-top: 10px; margin-bottom: 10px; }
+  .insight blockquote { margin: 4px 0 6px; }
+  .insight .smallAction { margin-top: 6px; }
+  .alternatives { margin-top: 10px; margin-bottom: 10px; }
+  .alternatives > div > button { min-height: 82px; padding: 8px 4px; gap: 4px; }
+  .alternatives i { width: 22px; height: 22px; }
+}
+
+/* End the first viewport at the record link; details start below the fold. */
+.resultPage > div { container-type: size; }
+.resultFirstView {
+  min-height: calc(100cqh + 26px + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(12px + var(--safe-bottom));
+}
+.resultFirstView > .recommend { flex: 1; }
+.resultFirstView .recommendArtwork { position: relative; flex: 1; min-height: 90px; }
+.resultFirstView .recommendArtwork > div { position: absolute; inset: 0; width: 100%; height: 100%; max-width: 310px; margin: auto; }
+.resultFirstView > .insight,
+.resultFirstView > .alternatives,
+.resultFirstView > .resultActions { flex-shrink: 0; }
