@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createToyModel, pressToy, moveToy, releaseToy, clearToy, stepToy } from './physics';
+import { createToyModel, pressToy, moveToy, releaseToy, clearToy, stepToy, containsToyPoint, hitShell } from './physics';
 import { TOY_DESIGNS } from './designs';
 import type { ToyModel } from './physics';
 function settle(model: ToyModel, end: number, start = 0) { for (let t = start + 16; t <= end; t += 16) stepToy(model, .016, t); }
@@ -33,7 +33,7 @@ describe('local toy materials', () => {
   });
   it('breaks nearest remaining shell regions and resets all regions', () => {
     const m = createToyModel('WAKPPU', 'heart');
-    pressToy(m, { x: 55, y: 45 }, 0); expect(m.shards.filter(s => s.brokenAt !== null)).toHaveLength(2);
+    pressToy(m, { x: 80, y: 95 }, 0); expect(m.shards.filter(s => s.brokenAt !== null)).toHaveLength(2);
     expect(m.shards[0].brokenAt).toBe(0); expect(m.shards[11].brokenAt).toBeNull();
     for (let i = 1; i < 6; i++) { releaseToy(m, i * 100 - 1); pressToy(m, { x: 150, y: 130 }, i * 100); }
     expect(m.cracks).toBe(6); expect(m.shards.every(s => s.brokenAt !== null)).toBe(true);
@@ -42,7 +42,7 @@ describe('local toy materials', () => {
   });
   it('all nine shapes stay finite after extreme drags and suspended frames', () => {
     for (const [type, designs] of Object.entries(TOY_DESIGNS)) for (const design of designs) {
-      const m = createToyModel(type as ToyModel['type'], design.id); pressToy(m, { x: 5, y: 5 }, 0); moveToy(m, { x: 10000, y: -10000 });
+      const m = createToyModel(type as ToyModel['type'], design.id); pressToy(m, { x: 150, y: 132 }, 0); moveToy(m, { x: 10000, y: -10000 });
       for (let i = 1; i < 100; i++) stepToy(m, 20, i * 20000);
       expect(m.nodes.every(n => Number.isFinite(n.x) && Number.isFinite(n.y) && n.x > -10 && n.x < 310 && n.y > -10 && n.y < 270)).toBe(true);
     }
@@ -51,5 +51,27 @@ describe('local toy materials', () => {
     const m = createToyModel('SLANGI', 'cloud'); pressToy(m, { x: 220, y: 130 }, 0); moveToy(m, { x: 280, y: 170 }); stepToy(m, .016, 100, true);
     expect(m.nodes.some(n => delta(n) > 1)).toBe(true); releaseToy(m, 100);
     expect(stepToy(m, .016, 101, true)).toBe(false); expect(m.nodes.every(n => delta(n) === 0)).toBe(true);
+  });
+});
+
+describe('wax hit area', () => {
+  it.each(['pearl', 'heart', 'gem'] as const)('ignores canvas padding for %s without changing material state', shape => {
+    const model = createToyModel('WAKPPU', shape);
+    for (const point of [{ x: 5, y: 5 }, { x: 150, y: 270 }, { x: -20, y: 130 }, { x: 298, y: 132 }]) {
+      expect(containsToyPoint(model, point)).toBe(false);
+      expect(pressToy(model, point, 100)).toBe(false);
+      expect(hitShell(model, point, 100)).toBe(false);
+    }
+    expect(model.cracks).toBe(0); expect(model.touches).toBe(0); expect(model.pointer).toBeNull();
+    expect(pressToy(model, { x: 150, y: 132 }, 100)).toBe(true);
+    expect(model.cracks).toBe(1);
+  });
+  it('excludes the heart notch even inside the bounding box', () => {
+    const model = createToyModel('WAKPPU', 'heart');
+    const minY = Math.min(...model.nodes.map(node => node.y));
+    const point = { x: 150, y: minY + 5 };
+    expect(containsToyPoint(model, point)).toBe(false);
+    expect(pressToy(model, point, 0)).toBe(false);
+    expect(model.cracks).toBe(0);
   });
 });
