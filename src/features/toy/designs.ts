@@ -4,7 +4,7 @@ export type Shape = 'drop' | 'pudding' | 'cloud' | 'mochi' | 'toast' | 'star' | 
 export interface ToyDesign { id: Shape; label: string; light: string; body: string; shade: string; wax: string }
 export const TOY_DESIGNS: Record<ToyType, readonly ToyDesign[]> = {
   SLANGI: [
-    { id: 'drop', label: '물방울', light: '#fffefb', body: '#f3ede3', shade: '#c8c0b3', wax: '#e7dcca' },
+    { id: 'drop', label: '양', light: '#fffefb', body: '#f3ede3', shade: '#c8c0b3', wax: '#e7dcca' },
     { id: 'pudding', label: '푸딩', light: '#fff8d8', body: '#e9cb8b', shade: '#b39161', wax: '#e7dcca' },
     { id: 'cloud', label: '구름', light: '#f6fcff', body: '#c9dce5', shade: '#8ba6b5', wax: '#e7dcca' },
   ],

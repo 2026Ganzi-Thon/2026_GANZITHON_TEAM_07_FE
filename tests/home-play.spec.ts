@@ -31,7 +31,8 @@ test('first drag activates the same canvas without navigation or layout movement
   expect(await toy.evaluate((el, previous) => el === previous, original)).toBe(true);
   expect(await toy.boundingBox()).toEqual(before);
   await expect(page.getByRole('button', { name: '메뉴 열기', exact: true })).toBeVisible();
-  await expect(page.locator('footer')).toHaveCount(0);
+  await expect(page.locator('footer')).toHaveAttribute('inert', '');
+  await expect(page.getByRole('button', { name: '테스와 이야기하기', exact: true })).toHaveCount(0);
   await page.mouse.up();
   await expect(page.getByRole('status')).toHaveText('1번 함께 쉬었어요');
   await page.getByRole('button', { name: '처음 모양으로' }).click();

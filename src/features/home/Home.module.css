@@ -2,7 +2,7 @@
 .home::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: var(--home-play-background); opacity: 0; transition: opacity .65s ease; }
 .home[data-playing=true]::before { opacity: 1; }
 .header { position: relative; z-index: 1; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: calc(16px + var(--safe-top)) 24px 0; color: #fffaf3; }
-.header button { background: #fff9f213; border: 1px solid #fff9f224; }
+
 .content { position: relative; flex: 1; min-height: 0; display: grid; place-items: center; padding-bottom: 28px; }
 .characterButton { background: transparent; padding: 0; border-radius: 45%; transform: scale(1.12); touch-action: none; user-select: none; -webkit-user-select: none; }
 .characterButton:active > div { transition-duration: .05s; }
@@ -32,22 +32,9 @@
 @media (max-height: 450px) { .header { padding-top: 6px; }.characterButton { transform: scale(.6); }.footer { padding-bottom: 4px; }.chatTrigger { min-height: 58px; gap: 8px; }.menuDock { bottom: 76px; }.content { overflow: hidden; padding: 0; } }
 @media (max-height: 450px) { .playControls { top: 54px; }.playReset { bottom: calc(8px + var(--safe-bottom)); }.typeSelect { padding: 8px 12px; } }
 @media (prefers-reduced-motion: reduce) { .home::before, .footer, .playControls, .playReset { transition: none; } }
-.menuButton { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; color: #fffdf7; background: linear-gradient(145deg, #d1c8bc, #938a80); box-shadow: inset 0 1px 2px #fff9, inset 0 -2px 4px #5e564750, 0 3px 9px #5a504b20; border: 1px solid #fffc; transition: transform .2s; }
-.menuButton:hover { transform: translateY(-2px); }
-.menuList { display: grid; gap: 8px; }
-.menuList button { width: 100%; padding: 10px 14px; display: flex; align-items: center; gap: 13px; background: var(--ivory); text-align: left; border-radius: 18px; border: 1px solid #fff9; box-shadow: 0 4px 16px #302c2620; }
-.menuList button:hover { background: #fffdf9; }
-.menuList button > span:nth-child(2) { flex: 1; }.menuList strong { display: block; font-size: 15px; font-weight: 500; }.menuList small { display: block; font-size: 11px; color: var(--secondary); margin-top: 6px; line-height: 1.6; }
-.menuIcon { display: grid; place-items: center; border-radius: 15px; background: #e9e3da; width: 44px; height: 44px; color: #72756f; }
-.settingsCard { display: flex; align-items: center; gap: 16px; background: #e9e3da66; border: 1px solid #e5ded4; padding: 20px 16px; border-radius: 18px; }
-.settingsCard strong { font-size: 14px; font-weight: 500; }.settingsCard p { margin: 6px 0 0; font-size: 12px; }.info { padding: 8px 2px; }.info h3 { font-size: 13px; margin: 20px 0 8px; }.info p { font-size: 12px; margin: 0; }
-.comingSoon { text-align: center; padding: 24px 0 4px; }.comingSoon > svg { color: var(--warm-gray); }.comingSoon h3 { font-weight: 500; font-size: 19px; margin: 20px 0 8px; }
-.primary { background: var(--ink); color: var(--ivory); padding: 16px 20px; border-radius: 16px; min-height: 50px; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; margin-top: 14px; }
-.toyPreview { display: flex; flex-direction: column; align-items: center; text-align: center; }.toyPreview p { margin-top: -15px; }
-
-/* D33: latest exported frame, no heading or persistent chat CTA. */
+/* Original palette and geometry; D36 entry/menu overrides follow below. */
 .header { justify-content: flex-end; padding: calc(14px + var(--safe-top)) 18px 0; }
-.header button { border: 0; background: transparent; }
+
 .home { background: linear-gradient(180deg,var(--gray) 0%,#acaaa7 47%,var(--ivory) 100%); }
 .content { padding: 0 0 52px; }
 .menuDock { right: 32px; bottom: calc(24px + var(--safe-bottom)); z-index: 5; }
@@ -55,3 +42,41 @@
 .playControls { top: calc(86px + var(--safe-top)); left: 24px; right: 22px; }
 .playReset { right: 92px; left: 20px; bottom: calc(26px + var(--safe-bottom)); }
 @media(max-height:450px) { .content { padding: 0; }.playControls { top: 58px; }.menuDock { bottom: 16px; }.playReset { bottom: 16px; } }
+
+/* The supplied 402x268 image stays on the same canvas when interaction starts. */
+.characterButton { width: 100%; max-width: 402px; transform: none; }
+.characterButton > div { width: 100%; }
+@media(max-height:650px) { .characterButton { max-width: 320px; } }
+@media(max-height:450px) { .characterButton { max-width: 240px; } }
+
+/* D36: stable character geometry while the entry fades out during play. */
+.header { z-index: 6; }
+
+.footer { position: absolute; left: 0; right: 0; bottom: 0; padding: 0 24px calc(14px + var(--safe-bottom)); z-index: 2; }
+.header > div > button { border: 2px solid #e4ded5; background: linear-gradient(155deg,#ffffe9 0%,#b6afa5 47%,#958c8b 100%); }
+.header > div > button[aria-expanded=true] { border-color: #aaa59c; background: linear-gradient(145deg,#5e5a53,#868079); }
+.playReset { left: 24px; right: 24px; }
+@media(max-height:450px) { .footer { padding-bottom: 4px; }.header > div > button { width: 44px; height: 44px; } }
+.invitation { position: absolute; z-index: 1; top: calc(50% - 145px); left: 28px; padding: 8px 18px; border-radius: 20px 20px 0 20px; background: var(--ivory); color: #868079; font-size: 12px; line-height: 18px; pointer-events: none; transition: opacity .25s; }
+.home[data-playing=true] .invitation { opacity: 0; }
+.content[data-resting=true] .characterButton canvas { animation: breathe 4.8s ease-in-out infinite; transform-origin: 50% 70%; }
+@keyframes breathe { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-3px) scale(1.012,1.022); } }
+@media(max-height:650px) { .invitation { top: calc(50% - 110px); } }
+@media(max-height:450px) { .invitation { top: 5px; left: 22px; padding: 4px 12px; } }
+@media(prefers-reduced-motion:reduce) { .content[data-resting=true] .characterButton canvas { animation: none; }.invitation { transition: none; } }
+
+/* D39: anchor to the visible lamb, not the canvas' transparent top margin.
+   PNG top ~29/268; drawn at y45 with h200 in a 300x290 canvas => ~23%. */
+.characterGroup { position: relative; width: min(100%, 402px); }
+.characterGroup .characterButton { max-width: none; display: block; }
+.characterGroup .invitation { top: auto; bottom: calc(77% + 22px); left: 13%; max-width: 74%; padding: 0; border-radius: 0; background: transparent; color: #665f58; font-size: 12px; line-height: 18px; transition: opacity .25s ease, translate .3s ease; }
+.invitation > span { display: block; position: relative; padding: 9px 16px; border: 1px solid #fffdf4b3; border-radius: 18px; background: linear-gradient(150deg,#fffdf8,#f3ece3); box-shadow: 0 3px 9px #514b4614, inset 0 1px 0 #fff; word-break: keep-all; }
+.invitation > span::after { content: ''; position: absolute; right: 23px; bottom: -6px; width: 10px; height: 10px; border-radius: 0 0 3px 0; background: #f3ece3; transform: rotate(45deg); }
+.content[data-resting=true] .invitation > span { animation: invitationAppear .55s ease-out both, invitationFloat 4.8s .55s ease-in-out infinite; }
+.home[data-playing=true] .invitation { opacity: 0; translate: 0 -5px; }
+.characterGroup:has(canvas[data-artwork=procedural]) .invitation { bottom: calc(94% + 14px); }
+@keyframes invitationAppear { from { opacity: 0; transform: translateY(6px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes invitationFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@media(max-height:650px) { .characterGroup { width: min(100%, 320px); } }
+@media(max-height:450px) { .characterGroup { width: min(100%, 210px); }.characterGroup .invitation { bottom: calc(77% + 20px); left: 9%; font-size: 11px; }.invitation > span { padding: 6px 12px; } }
+@media(prefers-reduced-motion:reduce) { .content[data-resting=true] .invitation > span { animation: none; }.characterGroup .invitation { transition: none; } }

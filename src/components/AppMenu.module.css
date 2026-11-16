@@ -6,3 +6,26 @@
 .bubble button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; border-radius: 9px; background: var(--ivory); color: #56534e; border: 1px solid #d5cfc5; box-shadow: inset 0 -2px 3px #b9b0a777,0 2px 3px #413a3722; font-size: 18px; }
 .bubble button:hover { background: #f0ebe3; }
 @media(max-height:450px) { .trigger { width: 56px; height: 56px; }.bubble { bottom: 74px; gap: 4px; padding: 7px; } }
+
+/* Figma text nodes measured on 2026-11-15. Body text remains Pretendard. */
+.bubble button { font-family: var(--font-display); font-weight: 400; font-synthesis: none; }
+
+/* D36: home menu opens downwards; the bottom entry remains separate. */
+.dock[data-placement=top] .trigger { width: 48px; height: 48px; }
+.dock[data-placement=top] .bubble { top: 62px; bottom: auto; right: 0; width: 200px; max-height: calc(100dvh - 94px - var(--safe-top)); }
+.dock[data-placement=top] .bubble::after { top: -13px; bottom: auto; transform: rotate(180deg); }
+.bubble svg { flex-shrink: 0; }
+
+@media(max-height:350px) { .dock[data-placement=top] .bubble { overflow-y: auto; } }
+.bubble .settingsItem { font-family: 'Pretendard', sans-serif; font-size: 16px; font-weight: 600; }
+.bubble { opacity: 0; visibility: hidden; transform: translateY(8px) scale(.97); transform-origin: bottom right; transition: opacity .22s ease, transform .22s ease, visibility .22s; pointer-events: none; }
+.bubble[data-open=true] { opacity: 1; visibility: visible; transform: none; pointer-events: auto; }
+.dock[data-placement=top] .bubble { width: 164px; padding: 6px; gap: 4px; top: 58px; border-radius: 13px; transform-origin: top right; }
+.dock[data-placement=top] .bubble:not([data-open=true]) { transform: translateY(-8px) scale(.97); }
+.dock[data-placement=top] .bubble button { justify-content: flex-start; padding: 8px 11px; gap: 8px; font-size: 16px; min-height: 44px; }
+.dock[data-placement=top] .bubble svg { width: 18px; height: 18px; }
+.dock[data-placement=top] .bubble .settingsItem { font-size: 15px; }
+/* Open-menu source: 74px, outer 0/4/2.5 #282422 29%, inner 4/7/1.4 #26201F 52%.
+   Scale the measured effects to the deliberately compact 48px web control. */
+.dock[data-placement=top] .trigger.active { box-shadow: 0 2.59px 1.62px rgb(40 36 34 / 29%), inset 2.59px 4.54px .91px rgb(38 32 31 / 52%); }
+@media(prefers-reduced-motion:reduce) { .bubble { transition: none; transform: none; } }

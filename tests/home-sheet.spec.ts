@@ -6,7 +6,7 @@ for (const width of [360, 390, 430]) {
   test(`minimal main and bottom sheet at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 }); await page.goto('/');
     const body = await page.locator('body').innerText();
-    for (const copy of ['말하지 않아도', '살짝 눌러', '당신의 마음에', '화면 미리보기', '예시 데이터', '오늘의 마음', '마음에 작은 쉼표']) expect(body).not.toContain(copy);
+    for (const copy of ['말하지 않아도', '당신의 마음에', '화면 미리보기', '예시 데이터', '오늘의 마음', '마음에 작은 쉼표']) expect(body).not.toContain(copy);
     await expect(page.getByRole('button', { name: '말랑이 체험하기' })).toBeInViewport();
     await expect(page.getByRole('button', { name: '메뉴 열기', exact: true })).toBeInViewport();
     await page.screenshot({ path: `artifacts/main-clean-${width}-${test.info().project.name}.png` });

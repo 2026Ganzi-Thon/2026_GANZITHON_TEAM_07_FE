@@ -32,7 +32,7 @@ async function openAllTypes(page: Page) {
 
 test('all nine designs draw distinct canvases and fit the shape picker', async ({ page }) => {
   test.setTimeout(60000); await openAllTypes(page);
-  const variants = [['슬랑이', ['물방울', '푸딩', '구름']], ['스퀴시', ['모찌', '식빵', '별']], ['왁뿌볼', ['진주', '하트', '조약돌']]] as const;
+  const variants = [['슬랑이', ['양', '푸딩', '구름']], ['스퀴시', ['모찌', '식빵', '별']], ['왁뿌볼', ['진주', '하트', '조약돌']]] as const;
   let active = '슬랑이'; const images = new Set<string>();
   for (const [type, shapes] of variants) {
     if (active !== type) {
@@ -65,7 +65,7 @@ test('all nine designs draw distinct canvases and fit the shape picker', async (
   await page.getByRole('button', { name: '닫기', exact: true }).click();
 });
 
-test('local dent is rendered and recovery stops drawing once settled', async ({ page }) => {
+test('press and drag change the image and recovery stops drawing once settled', async ({ page }) => {
   await page.goto('/'); await page.getByTestId('toy-interaction').click();
   await page.getByRole('button', { name: '처음 모양으로' }).click();
   const canvas = page.locator('canvas'); await expect(canvas).toHaveAttribute('data-phase', 'idle');
