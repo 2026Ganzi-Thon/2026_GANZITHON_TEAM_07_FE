@@ -1,0 +1,53 @@
+[
+  {
+    "file": "socrates-with-toy.png",
+    "sha256": "51a274597c9db3a75144d313119d300a0295612b380253a14381794f2c681f8f",
+    "source": "team-provided PNG",
+    "modified": false
+  },
+  {
+    "file": "lamb.png",
+    "sha256": "a9cde88f8d3c782859d2c43e15d5fafe89d7ffbd183e42c269ace6145e4a8156",
+    "source": "team-provided PNG",
+    "modified": false
+  },
+  {
+    "file": "socrates.png",
+    "sha256": "91bdf5da024fb0c7a8f54b86b5f21d6d3ecf3e676aa775edc51d98d0f8f34f52",
+    "source": "team-provided PNG",
+    "modified": false
+  },
+  {
+    "file": "lamb-sleep.png",
+    "sha256": "15317ca8364123d459398d605b3b7934ee6a7b7ea34fb8e695b74859047faa10",
+    "source": "team-provided PNG",
+    "modified": false
+  },
+  {
+    "file": "teslang-logo.png",
+    "sha256": "f0207f94749114c01457f32eb024d58b4227448159fb6764df049617e1058bc5",
+    "source": "team-provided PNG",
+    "modified": false
+  },
+  {
+    "file": "advice-walk.svg",
+    "sha256": "acda41d4089faa83aa7648e7650c48476f256e04282063591246351e20833252",
+    "source": "team Figma SVG copy, node 190:12577, 2026-11-16",
+    "modified": false,
+    "note": "Path/fill/viewBox retained; whitespace normalized."
+  },
+  {
+    "file": "advice-rest.svg",
+    "sha256": "13a9a5a10f538e7153de323845d4108b18905c631315caf4394fb61f36819787",
+    "source": "team Figma SVG copy, node 276:1145, 2026-11-16",
+    "modified": false,
+    "note": "Path/fill/viewBox retained; whitespace normalized."
+  },
+  {
+    "file": "advice-write.svg",
+    "sha256": "ff67a8341281d314a2e87a122e4976be5ea596900cb3d588e474b3eff5e68907",
+    "source": "team Figma SVG copy, node 276:1147, 2026-11-16",
+    "modified": false,
+    "note": "Path/fill/viewBox retained; whitespace normalized."
+  }
+]

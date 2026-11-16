@@ -1,27 +1,36 @@
-# 시안 자산 기록
+# 자산·서체 기록
 
-## 색상과 화면 근거
+2026-11-16 현재 상태. 시각 근거는 [11/15 Figma 직접 확인표](design/figma-inspection-2026-11-15.md)와 팀이 전달한 개별 파일이다. D38에서 사이드패널 조회로 원본 조언 SVG 3개를 확보했고 아래에 기록했다. MCP 세션 인증 오류와 사이드패널 조회 성공은 별개다.
 
-- [피그마 전체 이미지](design/figma-overview-2026-11-14.png)와 [담당자 설명](design/담당자전달사항-2026-11-14.md)을 참고했다.
-- 2026-11-15 Design 속성 패널에서 주요 레이어를 확인했다. 직접 확인한 값은 [원본 확인표](design/figma-inspection-2026-11-15.md)에 한정하며 전체 자산 추출·전수 검증은 미완료다.
-- `tokens.css`는 최신 Figma 확인값을 반영한다. 이미지 표본값과 직접 확인값의 범위는 design.md에서 구분한다.
+## 팀 제공 PNG
 
-## 소크라테스 프로필 — 임시 생성 자산
+`public/assets/design/manifest.json`에 각 파일의 SHA-256을 기록했다. 전달 파일의 해상도·투명도·여백과 바이트를 그대로 유지하며 재생성·배경 제거·이미지 편집을 하지 않았다.
 
-- 파일: `public/assets/socrates-preview.png`
-- 제작: 내장 image_gen 도구, 2026-11-14. 생성 결과를 수정하지 않고 프로젝트로 복사했다.
-- 용도: 대화 화면 프로필과 초기 안내 아바타.
-- 원본 Figma의 석상을 복제한 것이 아니라 흰 대리석·따뜻한 회색 분위기에 맞춘 임시 해석이다. 팀의 정식 자산을 받으면 교체한다.
-## 말랑이·아이콘
+| 파일 | 크기 | 용도 |
+|---|---|---|
+| `lamb.png` | 402×268 | 메인 기본 양, 모양 선택 썸네일, 결과·기록 상세 |
+| `socrates.png` | 471×707 | 로그인 안내, CSS 얼굴 크롭으로 대화 프로필 |
+| `socrates-with-toy.png` | 471×707 | D37 음성 화면 VoiceView에 적용 |
+| `lamb-sleep.png` | 419×295 | 수면 화면용 보관. 해당 화면 미구현 |
+| `teslang-logo.png` | 200×200 | 브라우저 favicon. 앱/PWA 도입 아님 |
 
-- `src/components/Malangi.tsx`와 CSS: 결과 화면·기본 대체 표시용 말랑이. 조작 화면은 아래의 Canvas 렌더러를 사용한다.
-- 아이콘: Lucide React 패키지의 아이콘. 배포 라이선스는 패키지의 ISC 라이선스를 따른다.
-- 로고 파비콘: 프로젝트에서 작성한 단순 SVG 시안.
-- 글꼴: 아래 Pretendard 로컬 웹폰트를 사용한다. 메뉴 꾹꾹체는 웹 임베딩 제한으로 미적용.
+제공된 PNG의 출처는 팀 디자인 자료다. 외부 배포 라이선스를 별도로 발급받았다고 표시하지 않는다. 별도 아바타 원본은 아직 없어 전신 얼굴을 CSS로 잘라 사용한다. 기존 생성 아바타 `socrates-preview.png`와 시안 `favicon.svg`는 더 이상 코드에서 참조하지 않는다.
 
-## 조작용 형태 9개 — 2026-11-14
+## 서체
 
-`src/features/toy/designs.ts`, `paintToy.ts`, `physics.ts`에서 작성한 절차적 윤곽·명암·얼굴·껍질이다. 물방울/푸딩/구름, 모찌/식빵/별, 진주/하트/조약돌을 세 종류 안의 선택으로 제공한다. 외부 모델·참고 사이트 소스·캐릭터 텍스처를 가져오지 않았다. 팀 최종 캐릭터 승인과는 구분한다.
+- 기본 글꼴: Pretendard. 본문·채팅·입력·버튼·달력·헤더 등은 기존 가변 WOFF2를 사용한다.
+- 공식 배포처: https://github.com/orioncactus/pretendard
+- 파일: `public/fonts/PretendardVariable.woff2`, 2,057,688 bytes. SHA-256: `9599f12fd42fc0bce1cd50b47a0c022e108d7aa64dd0d1bb0ed44f3282d900b4`.
+- 공식 저장소에서 11/15 수령, 수정 없음. SIL OFL1.1 원문 `Pretendard-LICENSE.txt` 동봉. Figma 설치본의 정확한 버전은 미확인.
+- 제공 꾹꾹체: `public/fonts/MemomentKkukkukk.ttf`, 5,384,836 bytes. 메뉴18px·MY 항목16px·추천 제목20px·동적 요약15px/24.4px, Regular400에만 적용한다. 인위적인 굵기 합성을 끄고 실패 시 Pretendard로 대체한다.
+- TTF SHA-256: `632244da34f4c8ac752ae0aa9b7d649721fb7dd1361dfb0cc6a6e7fa1d9309b9`. 사용자 제공 파일을 그대로 복사했으며 OTF 중복 포함·WOFF 변환·서브셋 처리는 하지 않았다.
+- 이전 [공식 안내](https://www.memoment.kr/font) 확인에서 웹 임베딩/재배포 제한을 기록했다. 제공 TTF 원본을 이번 저장소 전달분에 포함한다. 파일 내 라이선스 설명이나 별도 재배포 허락 문서는 확보하지 않았으므로, 파일 포함 사실과 외부 라이선스 증빙을 구분한다.
+
+## 말랑이 렌더링과 아이콘
+
+기본 ‘양’은 전달 PNG를 Canvas에서 그리며 누름·드래그·복원 시 전체 크기와 기울기로 반응한다. 국소 메시 변형은 아니다. 내부 `drop` ID는 호환을 위해 유지한다. 푸딩/구름, 모찌/식빵/별, 진주/하트/조약돌의8개 모양은 기존 절차적 Canvas 시안이다. 공통 양을 종류별 최종 캐릭터로 확정한 것은 아니다.
+
+아이콘은 Lucide React(ISC)이며 정식 아이콘 SVG는 미수령이다. 수면 UI 참고 PNG는 실제 조작 UI 대신 이미지로 붙이지 않는다. 수령 상태는 [인계표](design/asset-handoff.md)를 따른다.
 
 ## 조작 효과음 — CC0 가공 자산
 
@@ -43,23 +52,16 @@
 
 다운로드 실패 시 Web Audio로 짧은 잡음 기반 효과를 생성한다. 이 대체 효과는 실제 녹음이 아니며, 음원 로딩 실패 상태를 설정창에 표시한다. 실제 스피커/이어폰 청취 검수는 별도다.
 
+## D37 음성 화면 적용
 
-## 원본 조회와 Pretendard — 2026-11-15
+제공 `socrates-with-toy.png`를 `VoiceView.tsx`에서 사용한다. 원본 파일을 다시 생성하거나 크롭하지 않았다. 원본 레이어의 배치439×658/X−28/Y167을 확인했고 웹 반응형 차이는 [D37 기록](design/dialogue-voice-2026-11-16.md)에 남겼다. 수면 PNG는 계속 보관 상태다. 발자국·마이크·음소거·채팅·중단은 Lucide 아이콘으로 구현하며 원본 SVG와의 완전 일치를 뜻하지 않는다.
 
-사이드패널 Design 패널에서 원본 본문 Pretendard/메뉴 MemomentKkukkukk를 확인했다. 기존 연결 실패 기록은 과거 상태다. [원본 수치 기록](design/figma-inspection-2026-11-15.md)의 확인 범위만 원본 기반으로 취급한다. 원본 로고/캐릭터 다운로드는 브라우저 정책에 막혀 기존 임시 이미지를 유지한다.
+## D38 원본 조언 SVG
 
-- 공식 배포처: https://github.com/orioncactus/pretendard
-- 파일: `public/fonts/PretendardVariable.woff2` (2,057,688 bytes)
-- SHA256: `9599f12fd42fc0bce1cd50b47a0c022e108d7aa64dd0d1bb0ed44f3282d900b4`
-- 획득: 공식 저장소 `main/packages/pretendard/dist/web/variable/woff2/PretendardVariable.woff2`, 2026-11-15. Figma에 설치된 정확한 빌드 버전은 미확인.
-- 라이선스: SIL OFL1.1. `public/fonts/Pretendard-LICENSE.txt`를 원문 그대로 동봉. 폰트 수정 없음.
-- 본문400, 제목600. `@font-face` 가변 굵기45~920 명시, 로컬 제공/선로딩. 시스템 폰트는 실패 시 대체용.
-- 메뉴 꾹꾹체: https://www.memoment.kr/font 의 웹 임베딩/재배포 제한 확인. 폰트 파일 복사·변환 없음. 별도 웹 사용 허락 또는 정적 글자 자산 제공을 확인할 대상.
+| 파일 | 원본 노드 | 원본 크기/색 |
+|---|---|---|
+| `advice-walk.svg` | `190:12577` | frame14×11.2, SVG14×12 / #868079 |
+| `advice-rest.svg` | `276:1145` | 15×10 / #868079 |
+| `advice-write.svg` | `276:1147` | 15×10 / #868079 |
 
-## 후속 자산 인계 — 2026-11-15
-
-2026-11-16 기준 로고·수면 UI PNG를 전달받았으며 미적용 상태다. [인계표](design/asset-handoff.md)의 나머지 캐릭터·아바타·아이콘·고정 글자 SVG는 전달 대기다. 원본 파일은 아직 앱에 연결하지 않았다. 추가 조회에서 추천 제목20px, 동적 요약15px, MY 메뉴16px도 MemomentKkukkukk임을 확인했다. 고정 글자는 SVG로 교체 가능하지만 동적 요약은 웹 사용 허락 전 Pretendard를 유지한다. 폰트 파일을 복사하거나 변환하지 않았다.
-
-## 인계 상태 갱신 — 2026-11-16
-
-로고 PNG와 수면 설정 화면·버튼·타이머·토글 PNG가 전달됐다. 아직 앱에 연결하지 않았으며 현재 빌드의 favicon은 기존 SVG다. 버튼 PNG는 여러 상태를 합친 참고 자료이므로 클릭 영역 전체를 이미지로 대체하지 않는다. 정식 말랑이 2D 자산은 디자인 담당자 전달 대기다. 상세 수령/적용 상태는 [인계표](design/asset-handoff.md)를 따른다.
+팀 Figma에서 SVG로 복사했다. path·fill·viewBox는 유지하고 코드 정리 시 공백만 바뀌었다. 출처와 SHA-256은 동일 manifest에 기록했다. 원본 라이브러리의 별도 배포 허락을 새로 확인했다는 의미는 아니다. 결과 화면의 실제 실천/보조 조언에 연결하며 수면 자산은 변경하지 않았다.
