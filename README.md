@@ -6,13 +6,13 @@
 
 **처음 작업한다면 [프론트엔드 인수인계](docs/handoff.md)부터 확인해 주세요.** 실행 방법, API 교체 지점, 코드 규칙, 남은 화면을 정리했습니다.
 
-2026-11-16 추가 변경의 검토 범위는 [기능별 PR 준비안](docs/pr-review-plan.md), 이어서 작업할 항목은 [전달 요약](docs/delivery-2026-11-16.md)에 있습니다. 기존 PR 이후의 추가 변경을 네 개 기능별 PR로 전달합니다.
+2026-11-16 추가 변경의 검토 범위는 [기능별 PR 준비안](docs/pr-review-plan.md), 이어서 작업할 항목은 [전달 요약](docs/delivery-2026-11-16.md)에 있습니다. 기존 PR #7~#9에 리뷰 수정과 D40~D42 보완을 반영합니다. 최종 전체 코드는 `feat/dialogue-voice-followup`에서 확인할 수 있습니다.
 
 ## 현재 진행 상태
 
 현재 **기본 화면 9개를 예시 데이터로 연결**했습니다. 대화 → 결과·추천 → 말랑이 체험 → 달력·기록 상세·삭제까지 체험할 수 있습니다. 실제 AI·인증·백엔드의 영속 저장은 연결하지 않았습니다. 메인 하단 대화 시트·우상단 4개 메뉴, 하오체 예시 대화, 보관함 월간/주간/목록을 반영했습니다. [최신 화면 적용 범위](docs/design/navigation-archive-2026-11-16.md)를 참고해 주세요.
 
-- 제품 요구사항: [PRD v1.12](prd.md)
+- 제품 요구사항: [PRD v1.15](prd.md)
 - 화면 구성·시각 기준: [Design v0.13](design.md)
 - 필수 기능별 실제·임시·미구현 구분: [requirements-status.md](docs/requirements-status.md)
 - 기술 구성·연동 경계: [engineering.md](docs/engineering.md)
