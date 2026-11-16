@@ -1,3 +1,4 @@
+import { failOnce } from './support/faults';
 import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
@@ -10,6 +11,9 @@ async function openChat(page: Page) {
 async function reachEmotions(page: Page) {
   await openChat(page);
   await page.getByRole('button', { name: /오늘 조금 속상한 일이/ }).click();
+  await expect(page.getByLabel('답변 준비 중')).toHaveCount(0);
+  await page.getByRole('textbox').fill('회의에서 의견을 말했는데 아무도 반응하지 않았어요');
+  await page.getByRole('button', { name: '메시지 보내기' }).click();
   await expect(page.getByRole('region', { name: '감정 선택' })).toBeVisible();
 }
 async function reachThought(page: Page) {
@@ -36,11 +40,12 @@ test('main, accessible menu, unavailable features and settings', async ({ page }
   await expect(page.getByText('수면 모드는 아직 준비 중이에요.')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await page.getByRole('button', { name: 'MY 및 설정' }).click();
+  await page.getByRole('button', { name: '메뉴 열기' }).click();
+  await page.getByRole('button', { name: '설정/MY' }).click();
   await expect(page.getByRole('heading', { name: 'MY' })).toBeVisible();
-  await page.getByRole('button', { name: '체험 데이터 안내', exact: true }).click();
+  await page.getByRole('button', { name: '서비스 이용 안내', exact: true }).click();
   await page.getByRole('button', { name: '닫기', exact: true }).click();
-  await expect(page.getByRole('button', { name: '체험 데이터 안내', exact: true })).toBeFocused();
+  await expect(page.getByRole('button', { name: '서비스 이용 안내', exact: true })).toBeFocused();
   expect(errors).toEqual([]);
 });
 
@@ -53,9 +58,6 @@ test('complete scripted flow, optional secondary emotion, explicit zero and skip
   await page.getByRole('button', { name: '0점', exact: true }).click();
   await page.getByRole('button', { name: '천천히 이어가기' }).click();
   await send(page, '내 의견은 중요하지 않다는 생각이 들었어요.');
-  await send(page, '지금은 다르게 생각하기 어려워요.');
-  await send(page, '내 의견을 끝까지 들어주길 바랐어요.');
-  await send(page, '산책하면서 마음을 가라앉힌 적이 있어요.');
   await page.getByRole('button', { name: '오늘은 충분히 쉬기' }).click();
   await expect(page.getByRole('region', { name: '사후 강도 선택' })).toBeVisible();
   await expect(page.getByRole('button', { name: '대화 마무리하기' })).toBeDisabled();
@@ -63,14 +65,16 @@ test('complete scripted flow, optional secondary emotion, explicit zero and skip
   await expect(page.getByRole('heading', { name: '오늘의 마음 정리' })).toBeVisible();
   await expect(page.getByText('미입력', { exact: true })).toBeVisible();
   await expect(page.getByText('0점', { exact: true })).toBeVisible();
+  const practice = page.getByText('작은 실천 · 오늘은 충분히 쉬기', { exact: true });
+  await expect(practice).toBeVisible();
+  await expect(practice.locator('..').locator('img[src$="advice-rest.svg"]')).toBeVisible();
+  await page.screenshot({ path: `artifacts/result-practice-${test.info().project.name}.png` });
   expect(await page.evaluate(() => Object.keys(localStorage))).toEqual([]);
 });
 
 test('failed request retries without duplicating the user message', async ({ page }) => {
   await openChat(page);
-  await page.getByRole('button', { name: '대화 설정' }).click();
-  await page.getByText('개발 검수 도구', { exact: true }).click(); await page.getByRole('button', { name: /응답 실패 상태 확인/ }).click();
-  await page.getByRole('button', { name: '닫기', exact: true }).click();
+  await failOnce(page, '/__preview__/messages', 'POST', '답변을 불러오지 못했어요.');
   const text = '내일 중요한 발표가 있는데 걱정돼요.';
   await page.getByRole('textbox').fill(text);
   await page.getByRole('button', { name: '메시지 보내기' }).click();
@@ -85,16 +89,18 @@ test('exit before emotion selection returns home without a result', async ({ pag
   await send(page, '그냥 힘들어요');
   await expect(page.getByRole('region', { name: '감정 선택' })).toHaveCount(0);
   await page.getByRole('button', { name: '대화 나가기' }).click();
+  await page.getByRole('dialog', { name: '대화를 마무리할까요?' }).getByRole('button', { name: /점수 남기고 마무리하기|저장 없이 나가기/ }).first().click();
   await expect(page).toHaveURL(/\/$/);
 });
 
 test('exit after emotion selection requires the post step; refreshing does not resume', async ({ page }) => {
   await reachThought(page);
   await page.getByRole('button', { name: '대화 나가기' }).click();
+  await page.getByRole('dialog', { name: '대화를 마무리할까요?' }).getByRole('button', { name: /점수 남기고 마무리하기|저장 없이 나가기/ }).first().click();
   await expect(page.getByRole('region', { name: '사후 강도 선택' })).toBeVisible();
   await page.reload();
   await page.getByRole('button', { name: '체험 계정으로 계속하기' }).click();
-  await expect(page.getByRole('log').getByText(/안녕하세요, 테스예요/)).toBeVisible();
+  await expect(page.getByRole('log').getByText(/반갑소, 테스요/)).toBeVisible();
   await expect(page.getByRole('region', { name: '사후 강도 선택' })).toHaveCount(0);
 });
 
@@ -103,20 +109,20 @@ test('empty input and Korean composition do not send; rapid submit sends once', 
   const box = page.getByRole('textbox');
   await box.fill('   ');
   await expect(page.getByRole('button', { name: '메시지 보내기' })).toBeDisabled();
-  await box.fill('오늘 발표가 걱정돼요');
+  await box.fill('오늘 발표를 준비했는데 내용을 잊어버렸어요');
   await box.dispatchEvent('compositionstart');
   await box.press('Enter');
-  await expect(page.getByRole('log')).not.toContainText('오늘 발표가 걱정돼요');
+  await expect(page.getByRole('log')).not.toContainText('오늘 발표를 준비했는데 내용을 잊어버렸어요');
   await box.dispatchEvent('compositionend');
   await box.press('Enter');
   await box.press('Enter');
   await expect(page.getByRole('region', { name: '감정 선택' })).toBeVisible();
-  await expect(page.getByText('오늘 발표가 걱정돼요', { exact: true })).toHaveCount(1);
+  await expect(page.getByText('오늘 발표를 준비했는데 내용을 잊어버렸어요', { exact: true })).toHaveCount(1);
 });
 
 test('long input does not overflow and composer remains reachable', async ({ page }) => {
   await openChat(page);
-  await send(page, `오늘 회의에서 ${'정리되지않은생각'.repeat(150)}`);
+  await send(page, `오늘 회의에서 의견을 말했는데 ${'정리되지않은생각'.repeat(150)}`);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await expect(page.getByRole('textbox')).toBeInViewport();
   await expect(page.getByRole('region', { name: '감정 선택' })).toBeInViewport();
@@ -168,8 +174,11 @@ test('initial greeting, secondary emotion and score cards remain reachable', asy
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await openChat(page);
   await expect.poll(() => page.getByTestId('conversation-scroll').evaluate(el => el.scrollTop)).toBe(0);
-  await expect(page.getByRole('log').getByText(/안녕하세요, 테스예요/)).toBeInViewport();
+  await expect(page.getByRole('log').getByText(/반갑소, 테스요/)).toBeInViewport();
   await page.getByRole('button', { name: /오늘 조금 속상한 일이/ }).click();
+  await expect(page.getByLabel('답변 준비 중')).toHaveCount(0);
+  await page.getByRole('textbox').fill('회의에서 의견을 말했는데 아무도 반응하지 않았어요');
+  await page.getByRole('button', { name: '메시지 보내기' }).click();
   const primary = page.getByRole('group', { name: '대표 감정', exact: true });
   await primary.getByRole('button', { name: '속상함' }).click();
   await page.getByRole('button', { name: /함께 느낀 감정도 있어요/ }).click();
@@ -201,7 +210,7 @@ test('reading older content is not interrupted by a reply', async ({ page }) => 
       return original(input, init);
     };
   });
-  await page.getByRole('textbox').fill(`오늘 회의에서 ${'마음에 남은 이야기가 있어요. '.repeat(70)}`);
+  await page.getByRole('textbox').fill(`오늘 회의에서 의견을 말했는데 ${'마음에 남은 이야기가 있어요. '.repeat(70)}`);
   await page.getByRole('button', { name: '메시지 보내기' }).click();
   await expect(page.getByLabel('답변 준비 중')).toBeVisible();
   const list = page.getByTestId('conversation-scroll');

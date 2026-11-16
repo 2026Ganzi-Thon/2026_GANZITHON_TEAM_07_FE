@@ -96,3 +96,22 @@
 .emotionSummary meter::-webkit-meter-optimum-value { background: var(--secondary); }
 .emotionSummary meter::-moz-meter-bar { background: var(--secondary); }
 @media(max-width:370px) { .conversation { padding: 0 12px; } }
+.bubble { word-break: keep-all; overflow-wrap: anywhere; }
+.voiceBar { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; font-size: 11px; margin-bottom: 8px; }
+.voiceBar > span { flex: 1 1 100%; }
+.voiceBar button, .voiceError button { min-height: 44px; padding: 8px 10px; border-radius: 12px; background: #dfdad5; }
+.voiceError { padding: 10px; font-size: 12px; line-height: 1.6; }
+.voiceError button { margin: 4px; }
+.settingRow { display: flex; gap: 12px; align-items: center; min-height: 48px; font-size: 14px; }
+.settingRow input { width: 22px; height: 22px; accent-color: var(--secondary); }
+.settingNote { font-size: 13px; line-height: 1.7; }
+
+/* D39: distinct continuation and destructive exit actions. */
+.continueConversation { width: 100%; min-height: 48px; margin-top: 10px; border: 1px solid #c9c1b7; border-radius: 12px; background: #fffdf9; color: #504d48; font-size: 14px; font-weight: 600; }
+.finishScore { display: block; margin: 6px auto 0; min-height: 44px; padding: 8px 16px; background: transparent; font-size: 13px; color: #68635d; }
+.discardArea { border-top: 1px solid #e5ddd4; margin-top: 20px; padding-top: 8px; display: flex; justify-content: center; }
+.discardArea button { min-height: 44px; padding: 10px 22px; border-radius: 10px; background: transparent; color: #a0443e; font-size: 13px; }
+.discardArea button:hover { background: #aa39390a; }
+.continueOpening { display: flex; align-items: center; gap: 6px; min-height: 44px; margin: 16px auto 0; padding: 10px 16px; border: 1px solid #d6cfc5; border-radius: 22px; background: #fffdf9; font-size: 13px; color: #5e5a53; }
+.inputError { margin: 0 0 8px; color: #a0443e; font-size: 12px; }
+.bubble { word-break: keep-all; overflow-wrap: anywhere; }

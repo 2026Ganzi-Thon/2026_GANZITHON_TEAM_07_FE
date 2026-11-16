@@ -10,6 +10,7 @@ const sizes = [
 async function inspect(page: Page, screen: string, project: string) {
   for (const size of sizes) {
     await page.setViewportSize(size);
+    await page.evaluate(() => document.fonts.ready);
     const main = page.getByRole('main');
     await expect(main).toBeVisible();
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
@@ -38,9 +39,12 @@ test('result, archive, detail and MY remain readable across mobile, landscape an
   await page.getByRole('button', { name: '7점', exact: true }).click();
   await page.getByRole('button', { name: '천천히 이어가기' }).click();
   await page.getByRole('button', { name: '끝내기', exact: true }).click();
+  await page.getByRole('dialog', { name: '대화를 마무리할까요?' }).getByRole('button', { name: /점수 남기고 마무리하기|저장 없이 나가기/ }).first().click();
   await page.getByRole('button', { name: '3점', exact: true }).click();
   await page.getByRole('button', { name: '대화 마무리하기' }).click();
   await expect(page.getByText('기록을 보관함에 남겼어요')).toBeVisible();
+  await expect(page.getByRole('heading', { name: '지금 마음에 맞는 말랑이' })).toHaveCSS('font-family', /MemomentKkukkukk/);
+  await expect(page.locator('blockquote')).toHaveCSS('font-family', /MemomentKkukkukk/);
   await inspect(page, 'result', info.project.name);
   await page.getByRole('link', { name: '마음 보관함으로', exact: true }).click();
   await expect(page.getByRole('region', { name: '월간 기록 달력' })).toBeVisible();
@@ -52,11 +56,14 @@ test('result, archive, detail and MY remain readable across mobile, landscape an
   await page.getByRole('button', { name: '대화 자세히 보기' }).click();
   await expect(page.getByRole('region', { name: '저장된 대화 내용' })).toContainText('팀 발표 자료');
   await page.getByRole('link', { name: '뒤로가기', exact: true }).click();
+  await expect(page.getByRole('region', { name: '기록 요약' })).toBeVisible();
+  await page.getByRole('link', { name: '마음 보관함으로', exact: true }).click();
   await page.getByRole('link', { name: 'MY 및 설정' }).click();
   await inspect(page, 'my', info.project.name);
   await expect(page.getByRole('heading', { name: 'MY', exact: true })).toHaveCSS('font-size', '24px');
-  await page.getByRole('button', { name: '회원정보 수정' }).click();
+  await expect(page.getByRole('button', { name: '회원정보 수정' })).toBeDisabled();
+  await page.getByRole('button', { name: '서비스 이용 안내' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.keyboard.press('Escape');
-  await expect(page.getByRole('button', { name: '회원정보 수정' })).toBeFocused();
+  await expect(page.getByRole('button', { name: '서비스 이용 안내' })).toBeFocused();
 });

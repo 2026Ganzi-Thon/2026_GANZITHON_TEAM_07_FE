@@ -17,6 +17,7 @@ async function complete(page: Page) {
   await page.getByRole('button', { name: '0점', exact: true }).click();
   await page.getByRole('button', { name: '천천히 이어가기' }).click();
   await page.getByRole('button', { name: '끝내기', exact: true }).click();
+  await page.getByRole('dialog', { name: '대화를 마무리할까요?' }).getByRole('button', { name: /점수 남기고 마무리하기|저장 없이 나가기/ }).first().click();
   await page.getByRole('button', { name: '점수 없이 마무리할게요' }).click();
 }
 // Intercept browser fetch before MSW. No production fault switches or real network calls.

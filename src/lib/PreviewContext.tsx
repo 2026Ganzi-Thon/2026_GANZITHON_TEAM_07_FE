@@ -14,8 +14,8 @@ export function usePreview() { const value = useContext(PreviewContext); if (!va
 export function useProfile() { return useQuery({ queryKey: ['preview', 'me'], queryFn: previewApi.me, staleTime: Infinity }); }
 export function RequirePreview({ children }: { children: ReactNode }) {
   const user = useProfile(); const location = useLocation();
-  if (user.isPending) return <div className="bootError" role="status">미리보기를 준비하고 있어요.</div>;
-  if (user.isError) return <div className="bootError" role="alert"><p>체험 계정을 확인하지 못했어요.</p><button onClick={() => user.refetch()}>다시 시도하기</button></div>;
+  if (user.isPending) return <div className="bootError" role="status">화면을 준비하고 있어요.</div>;
+  if (user.isError) return <div className="bootError" role="alert"><p>계정을 확인하지 못했어요.</p><button onClick={() => user.refetch()}>다시 시도하기</button></div>;
   if (!user.data) return <Navigate to={`/login?next=${encodeURIComponent(location.pathname + location.search)}`} replace />;
   return children;
 }
