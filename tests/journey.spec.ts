@@ -143,10 +143,11 @@ test('preview accounts cannot see each others records', async ({ page }) => {
 });
 
 test('public help is available and risk does not save or recommend', async ({ page }) => {
-  await page.goto('/help'); await expect(page.getByRole('link', { name: '109 전화 연결' })).toHaveAttribute('href', 'tel:+82109?oai_link_source=model_response_hotline');
+  await page.goto('/help'); await expect(page.getByRole('link', { name: '109 전화 연결' })).toHaveAttribute('href', 'tel:109');
   await goHome(page); await page.getByRole('button', { name: '메뉴 열기' }).click(); await page.getByRole('button', { name: '감정 기록', exact: true }).click(); await page.getByRole('button', { name: '대화 시작하기', exact: true }).click(); await page.getByRole('button', { name: '체험 계정으로 계속하기' }).click();
   await page.getByRole('textbox').fill('자해하고 싶어요'); await page.getByRole('button', { name: '메시지 보내기' }).click();
   await expect(page).toHaveURL(/\/help$/);
+  await expect(page.getByRole('link', { name: '뒤로가기', exact: true })).toHaveAttribute('href', '/');
   expect(await page.evaluate(async () => (await (await fetch('/__preview__/records')).json()).length)).toBe(0);
 });
 

@@ -16,7 +16,7 @@
 .messageList { display: flex; flex-direction: column; gap: 19px; }
 .message { display: flex; flex-direction: column; align-items: flex-start; max-width: 88%; animation: arrive .22s ease-out; }
 .messageName { margin: 0 0 7px 2px; font-size: 11px; color: #777069; }
-.bubble { font-size: 16px; line-height: 1.85; padding: 14px 17px; border-radius: 3px 19px 19px 19px; background: #e9e4de; color: #413e39; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere; }
+.bubble { font-size: 16px; line-height: 1.85; padding: 14px 17px; border-radius: 3px 19px 19px 19px; background: #e9e4de; color: #413e39; white-space: pre-wrap; word-break: keep-all; overflow-wrap: anywhere; }
 .time { font-size: 9px; margin: 6px 3px 0; color: #8f867b; }
 .user { align-self: flex-end; align-items: flex-end; }.user .bubble { background: var(--accent); border-radius: 19px 3px 19px 19px; color: #232b39; }
 .typing { display: flex; gap: 5px; background: #e9e4de; border-radius: 3px 18px 18px 18px; padding: 20px; }.typing span { width: 5px; height: 5px; border-radius: 50%; background: #90887d; animation: pulse 1.2s infinite; }.typing span:nth-child(2) { animation-delay: .2s; }.typing span:nth-child(3) { animation-delay: .4s; }
@@ -112,6 +112,5 @@
 .discardArea { border-top: 1px solid #e5ddd4; margin-top: 20px; padding-top: 8px; display: flex; justify-content: center; }
 .discardArea button { min-height: 44px; padding: 10px 22px; border-radius: 10px; background: transparent; color: #a0443e; font-size: 13px; }
 .discardArea button:hover { background: #aa39390a; }
-.continueOpening { display: flex; align-items: center; gap: 6px; min-height: 44px; margin: 16px auto 0; padding: 10px 16px; border: 1px solid #d6cfc5; border-radius: 22px; background: #fffdf9; font-size: 13px; color: #5e5a53; }
 .inputError { margin: 0 0 8px; color: #a0443e; font-size: 12px; }
 .bubble { word-break: keep-all; overflow-wrap: anywhere; }

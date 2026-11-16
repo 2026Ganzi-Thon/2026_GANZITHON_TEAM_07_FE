@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ChevronRight, CircleHelp, Mic, MessageCircle, Settings, Send, RefreshCw } from 'lucide-react';
 import { Avatar, IconButton, Modal } from '../../components/ui';
 import { previewApi } from '../../lib/api';
-import { chatReducer, initialChat, isTextStage, makeMessage, SAMPLE_ACTIONS, suggestions } from './model';
+import { chatReducer, initialChat, isTextStage, hasStoryText, makeMessage, SAMPLE_ACTIONS, suggestions } from './model';
 import type { PreviewRequest } from './model';
 import { useVoice } from './useVoice';
 import { VoiceView } from './VoiceView';
@@ -92,9 +92,9 @@ export function Chat() {
     const timer = requestAnimationFrame(() => { if (stickToBottom.current) toBottom('instant'); else setHasNew(true); });
     return () => cancelAnimationFrame(timer);
   }, [voice.interim]);
-  function askFinish() { if (!pending) { savePartial.reset(); partialDraft.current = null; setConfirmEnd(true); } }
+  function askFinish() { if (!pending && !busy.current) { savePartial.reset(); partialDraft.current = null; setConfirmEnd(true); } }
   function saveAndLeave() {
-    if (pending || savePartial.isPending || !state.messages.some(message => message.role === 'user')) return;
+    if (pending || busy.current || savePartial.isPending || !state.messages.some(message => message.role === 'user')) return;
     voice.stop();
     partialDraft.current ??= { id: conversationId.current, partial: true, messages: structuredClone(state.messages), context: { stage: state.stage, primary: state.primary, secondary: state.secondary, pre: state.pre, post: state.post, slots: structuredClone(state.slots), unknowns: { ...state.unknowns } } };
     savePartial.mutate();
@@ -102,13 +102,13 @@ export function Chat() {
   function startVoice() { voice.start(); if (voice.supported && window.isSecureContext) setVoiceScreen(true); }
 
 
-  function send(text: string, clearDraft = true, continueOpening = false) {
+  function send(text: string, clearDraft = true) {
     const trimmed = text.trim();
     if (!trimmed || trimmed.length > 2000 || busy.current || failed || !canType) return;
-    if (!/[가-힣a-zA-Z]{2}/.test(trimmed)) { setDraft(current => clearDraft ? text : current ? `${current} ${text}` : text); setInputError('이야기를 짧은 문장으로 적어주세요.'); return; }
+    if (!hasStoryText(trimmed)) { setDraft(current => clearDraft ? text : current ? `${current} ${text}` : text); setInputError('이야기를 짧은 문장으로 적어주세요.'); return; }
     setInputError('');
     busy.current = true; stickToBottom.current = true;
-    const request: PreviewRequest = { context: { stage: state.stage, primary: state.primary, secondary: state.secondary, pre: state.pre, post: state.post, slots: state.slots, unknowns: state.unknowns }, text: trimmed, history: state.messages, continueOpening, requestId: crypto.randomUUID() };
+    const request: PreviewRequest = { context: { stage: state.stage, primary: state.primary, secondary: state.secondary, pre: state.pre, post: state.post, slots: state.slots, unknowns: state.unknowns }, text: trimmed, history: state.messages, requestId: crypto.randomUUID() };
     lastRequest.current = request;
     dispatch({ type: 'sent', message: makeMessage('user', trimmed) }); if (clearDraft) setDraft('');
     mutation.mutate({ request, fail: false });
@@ -129,7 +129,7 @@ export function Chat() {
     mutation.mutate({ request: lastRequest.current, fail: false });
   }
   function finish() {
-    if (pending) return;
+    if (pending || busy.current || failed || savePartial.isPending) return;
     voice.stop(); setConfirmEnd(false);
     mutation.reset();
     if (!state.primary || ended) { navigate('/'); return; }
@@ -160,7 +160,6 @@ export function Chat() {
       {!pending && !failed && state.stage === 'EMOTIONS' && <EmotionCard onSubmit={(primary, secondary) => { stickToBottom.current = true; dispatch({ type: 'emotions', primary, secondary }); }} />}
       {!pending && !failed && (state.stage === 'PRE' || state.stage === 'POST') && <IntensityCard key={state.stage} after={state.stage === 'POST'} onSubmit={value => { stickToBottom.current = true; dispatch({ type: 'intensity', value }); }} />}
       {!pending && !failed && state.stage === 'ACTION' && <section className={styles.actions} aria-label="실천 예시"><p>작은 일 하나면 충분해요</p>{SAMPLE_ACTIONS.map(text => <button key={text} onClick={() => send(text)}>{text}<ArrowUp size={15} /></button>)}</section>}
-      {!pending && !failed && state.stage === 'OPEN' && !fresh && <button className={styles.continueOpening} onClick={() => send('이 내용으로 계속할게요.', true, true)}>이 내용으로 계속하기<ChevronRight size={14} /></button>}
       {ended && <p role="status">다음 화면으로 이동하고 있어요.</p>}
       <div className={styles.scrollTail} />
     </div>
@@ -181,7 +180,8 @@ export function Chat() {
       {savePartial.isError && <p role="alert">{savePartial.error.message} 대화 내용은 그대로 있어요.</p>}
       {state.messages.some(message => message.role === 'user') && <button className={styles.cardSubmit} disabled={savePartial.isPending} onClick={saveAndLeave}>{savePartial.isPending ? '보관하고 있어요…' : savePartial.isError ? '다시 보관하기' : '여기까지 보관하고 나가기'}</button>}
       <button className={styles.continueConversation} disabled={savePartial.isPending} onClick={() => setConfirmEnd(false)}>계속 대화하기</button>
-      {state.primary && <button className={styles.finishScore} disabled={savePartial.isPending} onClick={finish}>점수 남기고 마무리하기</button>}
+      {failed && <p className={styles.settingNote}>답변을 받지 못했어요. 여기까지 중간 보관하거나, 대화로 돌아가 다시 시도해 주세요.</p>}
+      {state.primary && <button className={styles.finishScore} disabled={failed || pending || savePartial.isPending} onClick={finish}>점수 남기고 마무리하기</button>}
       <div className={styles.discardArea}><button disabled={savePartial.isPending} onClick={() => { voice.stop(); navigate('/', { replace: true }); }}>저장 없이 나가기</button></div></Modal>}
     {infoOpen && <Modal title="대화 설정" onClose={() => setInfoOpen(false)}><label className={styles.settingRow}><span>음성 대화에서 답변 읽어주기</span><input type="checkbox" checked={voice.readAloud} onChange={event => voice.setReadAloud(event.target.checked)} /></label><p className={styles.settingNote}>마이크 버튼으로 말하거나 글로 이야기를 나눌 수 있어요. 음성 인식에는 브라우저의 마이크 권한이 필요해요.</p></Modal>}
 

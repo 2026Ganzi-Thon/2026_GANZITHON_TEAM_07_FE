@@ -1,4 +1,4 @@
-import { isTextStage } from '../features/chat/model';
+import { isTextStage, hasStoryText } from '../features/chat/model';
 import type { PreviewReply, PreviewRequest, Stage, TextStage } from '../features/chat/model';
 
 // D38: shorter frontend walkthrough. Production stage decisions belong to the server.
@@ -13,7 +13,7 @@ const prompts: Partial<Record<Stage, string>> = {
 };
 
 // Deterministic visual-preview script. Not a counseling engine or a validated safety classifier.
-export function previewReply({ context, text, history = [], continueOpening = false }: PreviewRequest): PreviewReply {
+export function previewReply({ context, text, history = [] }: PreviewRequest): PreviewReply {
   const { stage } = context;
   const slots = { ...context.slots };
   const unknowns = { ...context.unknowns };
@@ -38,16 +38,16 @@ export function previewReply({ context, text, history = [], continueOpening = fa
   }
   if (stage === 'OPEN' && !unknown) {
     const prior = history.filter(message => message.role === 'user').map(message => message.text);
-    const meaningful = /[가-힣a-zA-Z]{2}/.test(trimmed);
+    const meaningful = hasStoryText(trimmed);
     // Local walkthrough only. Do not attempt semantic classification with an event whitelist.
     // One clarification for a plainly vague opener; then accept the user's own words.
     const vague = /^(?:(?:오늘|그냥|조금|너무|좀|많이)\s*)*(?:힘들어(?:요)?|속상해(?:요)?|슬퍼(?:요)?|불안해(?:요)?|걱정돼(?:요)?|혼났어(?:요)?|회의|친구가|속상한 일이 있었어요)[.!?~\s]*$/.test(trimmed)
       || trimmed === '앞으로의 일이 걱정돼요';
-    if (!continueOpening && (!meaningful || (vague && prior.length === 0))) {
-      return { stage, text: meaningful ? '어떤 일이 있었는지 조금만 더 들려주겠소? 지금 이야기한 내용으로 이어가도 괜찮소.' : '글이 잘 전달되지 않았소. 짧은 문장으로 적어주겠소?', slots, unknowns };
+    if (!meaningful || (vague && prior.length === 0)) {
+      return { stage, text: meaningful ? '어떤 일이 있었는지 조금만 더 들려주겠소?' : '글이 잘 전달되지 않았소. 짧은 문장으로 적어주겠소?', slots, unknowns };
     }
-    const words = continueOpening ? prior : [...prior, trimmed];
-    if (!words.some(word => /[가-힣a-zA-Z]{2}/.test(word))) return { stage, text: '먼저 이야기를 짧게 남겨주겠소?', slots, unknowns };
+    const words = [...prior, trimmed];
+    if (!words.some(word => hasStoryText(word))) return { stage, text: '먼저 이야기를 짧게 남겨주겠소?', slots, unknowns };
     slots.OPEN = words.join(' ').slice(0, 6000);
     return { stage: next.OPEN, text: prompts.EMOTIONS!, slots, unknowns };
   }

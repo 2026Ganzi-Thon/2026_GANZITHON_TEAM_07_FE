@@ -12,10 +12,12 @@ export interface Context {
   unknowns: Partial<Record<TextStage, number>>;
 }
 export interface ChatState extends Context { messages: Message[] }
-export interface PreviewRequest { context: Context; text: string; requestId: string; history?: Message[]; continueOpening?: boolean }
+export interface PreviewRequest { context: Context; text: string; requestId: string; history?: Message[] }
 export interface PreviewReply { stage: Stage; text: string; slots: Slots; unknowns: Context['unknowns'] }
 
 export const TEXT_STAGES: TextStage[] = ['OPEN', 'THOUGHT', 'REFRAME', 'NEED', 'COPING', 'ACTION'];
+// Accept real letters even when words are separated; reject bare jamo/symbol input.
+export function hasStoryText(text: string) { return /[가-힣a-zA-Z]/u.test(text.normalize('NFC')); }
 export function isTextStage(stage: Stage): stage is TextStage { return TEXT_STAGES.includes(stage as TextStage); }
 // A preview fixture only. These are not the team's final allowed emotion values.
 export const SAMPLE_EMOTIONS = ['불안', '속상함', '슬픔', '분노', '스트레스', '우울'];

@@ -1,3 +1,4 @@
+import { expectWholeKoreanWords } from './support/wrapping';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
@@ -256,7 +257,8 @@ test('unlisted events work from sheet and free text; vague follow-up cannot loop
   await page.getByRole('button', { name: '끝내기', exact: true }).click();
   await page.getByRole('button', { name: '저장 없이 나가기', exact: true }).click();
   await enter(page); await send(page, '그냥 힘들어요');
-  await expect(page.getByRole('button', { name: '이 내용으로 계속하기' })).toBeVisible();
+  await expect(page.getByText('어떤 일이 있었는지 조금만 더 들려주겠소?', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: '이 내용으로 계속하기' })).toHaveCount(0);
   await send(page, '조금 속상해');
   await expect(page.getByRole('region', { name: '감정 선택' })).toBeVisible();
   await expect(page.getByText('이야기 꺼내기', { exact: true })).toHaveCount(0);
@@ -264,9 +266,9 @@ test('unlisted events work from sheet and free text; vague follow-up cannot loop
 });
 
 
-test('explicit continuation advances without inventing an event and discard after emotions saves nothing', async ({ page }) => {
+test('text follow-up advances without a skip button and discard after emotions saves nothing', async ({ page }) => {
   await login(page); await enter(page, '그냥 힘들어요');
-  await page.getByRole('button', { name: '이 내용으로 계속하기' }).click();
+  await send(page, '친구와 다퉜어요');
   await page.getByRole('group', { name: '대표 감정', exact: true }).getByRole('button', { name: '불안', exact: true }).click();
   await page.getByRole('button', { name: '이 마음으로 이어가기' }).click();
   await page.getByRole('button', { name: '끝내기', exact: true }).click();
@@ -298,4 +300,16 @@ test('first invalid sheet text remains editable rather than disappearing or addi
   await send(page, '친구가 약속을 취소해서 서운해');
   await expect(page.getByRole('region', { name: '감정 선택' })).toBeVisible();
   await expect(page.getByRole('alert')).toHaveCount(0);
+});
+
+
+test('Korean words and particles remain together in chat and finish dialog', async ({ page }, info) => {
+  await page.setViewportSize({ width: 360, height: 640 });
+  await login(page); await enter(page);
+  await send(page, '친구들과 이야기했는데 마음이 복잡해서 조금만 더 이야기하고 싶어요.');
+  await expect(page.getByRole('region', { name: '감정 선택' })).toBeVisible();
+  await expectWholeKoreanWords(page, '[class*="bubble"]');
+  await page.getByRole('button', { name: '끝내기', exact: true }).click();
+  await expectWholeKoreanWords(page, 'dialog p, dialog h2, dialog button');
+  await page.screenshot({ path: `artifacts/d41-wrapping-${info.project.name}.png` });
 });

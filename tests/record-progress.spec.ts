@@ -125,8 +125,8 @@ test('home invitation tracks the visible artwork at supported sizes and respects
   for (const viewport of [{ width: 360, height: 640 }, { width: 390, height: 844 }, { width: 430, height: 932 }, { width: 844, height: 390 }]) {
     await page.setViewportSize(viewport);
     await expect(page.locator('canvas')).toHaveAttribute('data-artwork', 'lamb');
-    const balloon = await page.locator('[class*="invitation"]').boundingBox();
-    const visibleTop = await page.locator('canvas').evaluate((canvas: HTMLCanvasElement) => {
+    // Read both bounds in one frame and wait for viewport layout to settle.
+    await expect.poll(() => page.locator('canvas').evaluate((canvas: HTMLCanvasElement) => {
       const { width, height } = canvas;
       const pixels = canvas.getContext('2d')!.getImageData(0, 0, width, height).data;
       let firstRow = height;
@@ -136,11 +136,11 @@ test('home invitation tracks the visible artwork at supported sizes and respects
         if (opaque > width * .03) { firstRow = y; break; }
       }
       const box = canvas.getBoundingClientRect();
-      return box.y + firstRow / height * box.height;
-    });
-    expect(balloon!.y).toBeGreaterThanOrEqual(0);
-    const gap = visibleTop - (balloon!.y + balloon!.height + 7);
-    expect(gap).toBeGreaterThanOrEqual(10); expect(gap).toBeLessThanOrEqual(36);
+      const balloon = document.querySelector('[class*="invitation"]')!.getBoundingClientRect();
+      const visibleTop = box.y + firstRow / height * box.height;
+      const gap = visibleTop - (balloon.y + balloon.height + 7);
+      return { inViewport: balloon.y >= 0, gapInRange: gap >= 10 && gap <= 36 };
+    })).toEqual({ inViewport: true, gapInRange: true });
     await expect(page.locator('[class*="invitation"] > span')).toHaveCSS('animation-name', 'none');
     await page.screenshot({ path: `artifacts/d39-home-${viewport.width}-${info.project.name}.png` });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

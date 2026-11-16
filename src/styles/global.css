@@ -35,3 +35,7 @@ svg { flex-shrink: 0; }
 .bootError button { padding: 16px 24px; border-radius: 40px; background: var(--ink); color: white; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+
+/* Keep Korean words and attached particles together; break only oversized tokens. */
+body { word-break: keep-all; overflow-wrap: anywhere; }
+p, blockquote, dd { text-wrap: pretty; }

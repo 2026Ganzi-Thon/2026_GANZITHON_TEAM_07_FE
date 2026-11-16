@@ -100,12 +100,23 @@ describe('D39 open progression regressions', () => {
     const reply = previewReply({ text, context: newContext(), requestId: text });
     expect(reply.stage).toBe('EMOTIONS'); expect(reply.slots.OPEN).toBe(text);
   });
-  it('allows explicit continuation with only the words already shared', () => {
+  it('advances after a vague follow-up with only the words actually shared', () => {
     const history = [makeMessage('user', '그냥 힘들어')];
-    const reply = previewReply({ text: '이 내용으로 계속할게요.', history, context: newContext(), continueOpening: true, requestId: 'continue' });
-    expect(reply.stage).toBe('EMOTIONS'); expect(reply.slots.OPEN).toBe('그냥 힘들어');
+    const reply = previewReply({ text: '조금 속상해', history, context: newContext(), requestId: 'continue' });
+    expect(reply.stage).toBe('EMOTIONS'); expect(reply.slots.OPEN).toBe('그냥 힘들어 조금 속상해');
   });
-  it('does not accept an empty history through explicit continuation', () => {
-    expect(previewReply({ text: '이 내용으로 계속할게요.', context: newContext(), continueOpening: true, requestId: 'empty' }).stage).toBe('OPEN');
+  it('does not accept an empty opening', () => {
+    expect(previewReply({ text: '', context: newContext(), requestId: 'empty' }).stage).toBe('OPEN');
+  });
+});
+
+describe('spaced Korean words', () => {
+  it.each(['날 좀 봐 줘', '나 좀 도와 줘', '왜', '응', 'I am sad'])('accepts real letters in %s through the mock opening', text => {
+    const reply = previewReply({ text, context: newContext(), requestId: text });
+    expect(reply.stage).toBe('EMOTIONS');
+    expect(reply.slots.OPEN).toBe(text);
+  });
+  it.each(['ㄱㄱ', 'ㅁㄴㅇ', '!!!', '1234'])('does not turn %s into an event', text => {
+    expect(previewReply({ text, context: newContext(), requestId: text }).stage).toBe('OPEN');
   });
 });
