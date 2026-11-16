@@ -53,5 +53,6 @@ export const previewApi = {
   save: async (draft: ResultDraft, fail = false) => decodeRecord(await request('records', json(draft, 'POST', fail))),
   records: async (fail = false) => decodeRecords(await request('records', { headers: fail ? { 'X-Preview-Failure': 'once' } : {} })),
   record: async (id: string) => decodeRecord(await request(`records/${encodeURIComponent(id)}`)),
+  setRecordHidden: async (id: string, hidden: boolean) => decodeRecord(await request(`records/${encodeURIComponent(id)}`, json({ hidden }, 'PATCH'))),
   deleteRecord: async (id: string, fail = false) => decodeOk(await request(`records/${encodeURIComponent(id)}`, { method: 'DELETE', headers: fail ? { 'X-Preview-Failure': 'once' } : {} })),
 };

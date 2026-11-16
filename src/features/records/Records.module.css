@@ -4,7 +4,7 @@
 .recommend h2 { font-size: 20px; font-weight: 400; line-height: 18px; letter-spacing: -.0156em; color: #504d48; margin: 0 0 8px; }
 .toyPill { display: inline-block; background: var(--muted); border-radius: 14px; padding: 2px 22px; font-size: 12px; line-height: 18px; }
 .recommend > a { height: 252px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.recommend > a > div { flex-shrink: 0; transform: scale(.88); }
+.recommend > a > div { flex-shrink: 0; }
 .recommend p { font-size: 12px; line-height: 18px; margin: 0; }
 .insight { margin: 15px 3px; min-height: 111px; border-radius: 13px; background: var(--ivory); padding: 6px 17px; }
 .insight > span { font-size: 11px; color: #77716b; }
@@ -31,41 +31,14 @@
 .track i { display: block; height: 100%; border-radius: inherit; background: #9984da; }
 .scoreRows > div:last-child .track i { background: #b8a4e8; }
 .details { margin: 0; }.details > div { padding: 9px 0; }.details dt { color: #77716b; font-size: 11px; margin-bottom: 5px; }.details dd { font-size: 13px; line-height: 1.8; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
-.archiveCaption { color: #635c6f; font-size: 12px; line-height: 18px; letter-spacing: -.0039em; margin: 0 0 20px; }
-.tabs { display: flex; background: var(--muted); padding: 4px; border-radius: 11px; margin-bottom: 18px; }
-.tabs button { flex: 1; min-height: 38px; background: transparent; font-size: 12px; color: #77716b; border-radius: 8px; }
-.tabs button[aria-pressed=true] { background: #fff; box-shadow: 0 1px 3px #302c261a; color: var(--text); }
-.calendar { border: 1px solid var(--line); border-radius: 16px; background: #fff; padding: 8px; margin-bottom: 22px; }
-.month { display: flex; align-items: center; gap: 0; margin-bottom: 9px; }
-.month h2 { font-size: 14px; margin: 0; font-weight: 600; }
-.month > button { width: 36px; height: 44px; }
-.month .today { margin-left: auto; width: auto; min-width: 44px; background: transparent; border-radius: 20px; font-size: 11px; }
-.grid { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 2px; }
-.weekday { font-size: 10px; text-align: center; color: #868079; padding: 8px 0; }.weekday:first-child { color: #c77769; }.weekday:nth-child(7) { color: #728eb7; }
-.grid button { position: relative; min-height: 44px; padding: 8px 0 14px; border-radius: 12px; background: transparent; border: 1px solid transparent; font-size: 12px; color: #716d69; }
-.grid button[aria-current=date] { border-color: #ddd7ce; }
-.grid button[aria-pressed=true] { background: var(--warm-gray); color: #fff; }
-.dots { display: flex; justify-content: center; gap: 2px; position: absolute; bottom: 5px; left: 0; right: 0; }
-.dots i, .legend i, .emotionDot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-.legend { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 3px 4px; border-top: 1px solid #f1ede7; padding-top: 10px; }
-.legend span { display: flex; align-items: center; gap: 4px; font-size: 9px; color: #868079; }
-.dayTitle { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }.dayTitle span { font-size: 10px; color: #868079; }
-.recordList { display: grid; }
-.recordList a { display: grid; position: relative; gap: 7px; padding: 17px 25px 17px 2px; border-bottom: 1px solid #ded8cf; }
-.recordList a > span { display: flex; align-items: center; gap: 6px; font-size: 10px; color: #868079; }
-.recordList strong { font-size: 13px; font-weight: 500; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.6; overflow-wrap: anywhere; }
-.recordList p { font-size: 10px; color: #868079; margin: 0; }
-.recordList svg { position: absolute; right: 0; top: 45%; }
-.frequency { margin-top: 25px; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
-.frequency h2 { font-size: 14px; margin: 0; }.frequency p { font-size: 10px; color: #868079; margin: 10px 0 15px; }
-.frequency > div { display: grid; grid-template-columns: 44px 1fr 24px; gap: 8px; align-items: center; font-size: 11px; margin: 12px 0; }.frequency small { text-align: right; color: #868079; }
+.emotionDot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
 .recordMeta { display: flex; align-items: center; gap: 6px; font-size: 10px; color: #868079; }
 .recordCard .recordSummary { margin: 10px 0 0; font-size: 15px; line-height: 20.6px; font-weight: 600; letter-spacing: .0117em; color: #1d1c1b; overflow-wrap: anywhere; white-space: pre-wrap; }
 .transcript { padding: 24px 0; display: flex; flex-direction: column; gap: 16px; }
 .transcript > section { margin-top: 0; }
 .usedToy { display: flex; align-items: center; flex-direction: column; text-align: center; margin: 28px 0 20px; border: 1px solid var(--line); border-radius: 35px; padding: 20px 12px; }
 .usedToy h2 { background: var(--muted); padding: 7px 13px; border-radius: 12px; font-size: 13px; font-weight: 500; }
-@media(max-width:370px) { .grid { gap: 0; }.alternatives > div { gap: 6px; }.alternatives small { font-size: 11px; } }
+@media(max-width:370px) { .alternatives > div { gap: 6px; }.alternatives small { font-size: 11px; } }
 
 /* Read-only Figma inspection: 71:407, 140:2380, 113:658.
    Fixed source geometry becomes minimum sizing for real, variable content. */
@@ -73,7 +46,7 @@
 .resultActions { margin: 0 3px; }
 .resultActions > a:first-child { min-height: 48px; border-radius: 12px; font-size: 15px; line-height: 22.5px; font-weight: 600; letter-spacing: .0156em; gap: 7px; padding: 12px; }
 .recordLink { display: flex; align-items: center; justify-content: center; gap: 4px; min-height: 44px; margin-top: 8px; color: #5e5a53; font-size: 12px; }
-.archivePage > div { padding: 14px 24px calc(26px + var(--safe-bottom)); }
+
 .detailPage > header h1 { font-size: 15px; line-height: 22.5px; letter-spacing: .0156em; color: #2b2734; }
 .detailPage > div { padding: 24px 23px calc(26px + var(--safe-bottom)); }
 .detailSummary { border: 1px solid var(--line); border-radius: 20px; background: #fff; padding: 16px; }
@@ -86,3 +59,53 @@
 .detailSummary .details dd { font-size: 13px; line-height: 20px; }
 .historyButton { display: flex; align-items: center; justify-content: flex-end; gap: 4px; width: 100%; min-height: 44px; border-top: 1px solid var(--line); background: transparent; font-size: 12px; }
 .detailPage .usedToy { margin-top: 31px; min-height: 367px; }
+
+/* Figma text nodes measured on 2026-11-15. Body text remains Pretendard. */
+.recommend h2, .insight blockquote { font-family: var(--font-display); font-weight: 400; font-synthesis: none; }
+.smallAction { display: flex; align-items: flex-start; gap: 6px; }
+.smallAction svg { flex-shrink: 0; margin-top: 2px; }
+
+/* D38: source 15px card spacing, 8px option gap; content height remains intrinsic. */
+.recommend { display: flex; flex-direction: column; align-items: center; padding: 20px 14px; box-shadow: 0 4px 5.5px rgb(40 40 40 / 34%); }
+.recommend h2 { margin-bottom: 16px; }
+.recommendArtwork { display: flex; justify-content: center; align-items: center; width: 100%; padding: 0; background: transparent; margin: 12px 0 14px; min-height: 208px; border-radius: 28px; }
+.recommendArtwork > div { width: 100%; max-width: 310px; }
+.recommend > p { padding: 3px 12px; border-radius: 14px; background: #dfdad5; max-width: 100%; }
+.insight { padding: 12px 17px; min-height: 0; }
+.insight blockquote { margin: 8px 0 10px; word-break: keep-all; }
+.insight .smallAction { margin-top: 10px; font-size: 12px; line-height: 18px; color: #868079; }
+.alternatives { margin: 15px 3px 24px; }
+.alternatives > header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 8px; margin-bottom: 8px; }
+.alternatives h2 { margin: 0; }
+.alternatives header > span { font-size: 10px; line-height: 16px; color: #68635d; }
+.alternatives button[aria-pressed=true] { background: #868079; border-color: #fff9f2; color: #fff9f2; }
+.alternatives button[aria-pressed=true] small { color: #fff9f2; }
+.managementTabs { display: flex; padding: 4px; gap: 4px; background: #eee8df; border-radius: 12px; }
+.managementTabs button { flex: 1; min-height: 44px; border-radius: 9px; background: transparent; font-size: 14px; }
+.managementTabs button[aria-pressed=true] { background: white; box-shadow: 0 1px 2px #2d2d2d20; }
+.manageActions, .visibilityBar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0; }
+.manageActions > *, .visibilityBar button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 8px 12px; border-radius: 10px; background: #eee8df; font-size: 13px; }
+.visibilityBar span { font-size: 12px; color: #68635d; }
+
+.smallAction img { flex-shrink: 0; margin-top: 3.5px; object-fit: contain; }
+
+/* D39: 113:658 record selection hierarchy; allow variable content and touch targets. */
+.detailSummary { padding: 16px 16px 0; border-radius: 18px; margin-bottom: 20px; }
+.summaryMeta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.summaryMeta time { color: #8a8580; }
+.recommendTag { border-radius: 12px; padding: 3px 8px; background: #dfdad5; color: #5e5a53; font-size: 10px; white-space: nowrap; }
+.detailSummary > .recordSummary { font-size: 15px; line-height: 1.6; margin: 10px 0 12px; word-break: keep-all; overflow-wrap: anywhere; }
+.summaryThoughts { margin: 16px 0 0; }
+.summaryThoughts > div { margin: 0 0 16px; }
+.summaryThoughts dt { font-size: 11px; color: #868079; margin-bottom: 5px; }
+.summaryThoughts dd { margin: 0; font-size: 13px; line-height: 1.65; white-space: pre-wrap; word-break: keep-all; overflow-wrap: anywhere; }
+.summaryThoughts > div[data-perspective=true] { border-left: 2px solid #868079; padding-left: 12px; }
+.recordAction { display: flex; align-items: flex-start; gap: 7px; padding: 10px; margin: 12px 0; border-radius: 10px; background: #faf7f4; font-size: 12px; line-height: 1.6; word-break: keep-all; overflow-wrap: anywhere; }
+.recordAction svg { flex-shrink: 0; margin-top: 3px; color: #9984da; }
+.partialNote { font-size: 11px; color: #868079; margin: 14px 0; }
+.recordActions { display: flex; align-items: center; gap: 4px; border-top: 1px solid #eee8e2; margin-top: 14px; }
+.recordActions button { min-height: 44px; min-width: 44px; padding: 10px 4px; background: transparent; color: #77716b; font-size: 12px; }
+.recordActions .deleteRecord { color: #b05b50; }
+.recordActions .detailLink { display: flex; align-items: center; gap: 3px; margin-left: auto; color: #504d48; }
+.detailPage .transcript { padding-top: 0; }
+.detailPage .usedToy { margin-top: 28px; }
