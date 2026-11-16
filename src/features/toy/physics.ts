@@ -42,19 +42,45 @@ function shards(): Shard[] {
 export function createToyModel(type: ToyType, shape: Shape): ToyModel {
   return { type, shape, nodes: outline(shape).map(rest => ({ ...rest, rest, vx: 0, vy: 0 })), shards: shards(), pointer: null, anchor: { ...CENTER }, pull: { x: 0, y: 0 }, depth: 0, baseDepth: 0, releasedAt: null, cracks: 0, touches: 0, revision: 0, opacity: 0, recovery: 1 };
 }
+// Flatten the same quadratic outline used by paintToy, including concave heart edges.
+// Shadows and detached wax fragments are not interaction targets.
+export function containsToyPoint(model: ToyModel, point: Point) {
+  if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) return false;
+  const polygon: Point[] = [];
+  const nodes = model.nodes;
+  nodes.forEach((control, i) => {
+    const previous = nodes[(i + nodes.length - 1) % nodes.length];
+    const next = nodes[(i + 1) % nodes.length];
+    const start = { x: (previous.x + control.x) / 2, y: (previous.y + control.y) / 2 };
+    const end = { x: (control.x + next.x) / 2, y: (control.y + next.y) / 2 };
+    for (let step = 0; step < 12; step++) {
+      const t = step / 12, u = 1 - t;
+      polygon.push({ x: u * u * start.x + 2 * u * t * control.x + t * t * end.x, y: u * u * start.y + 2 * u * t * control.y + t * t * end.y });
+    }
+  });
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const a = polygon[i], b = polygon[j];
+    if ((a.y > point.y) !== (b.y > point.y) && point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x) inside = !inside;
+  }
+  return inside;
+}
+
 export function hitShell(model: ToyModel, point: Point, now: number) {
-  if (model.type !== 'WAKPPU' || model.cracks >= 6) return false;
+  if (model.type !== 'WAKPPU' || model.cracks >= 6 || !containsToyPoint(model, point)) return false;
   model.shards.filter(shard => shard.brokenAt === null).sort((a, b) => distance(a.center, point) - distance(b.center, point)).slice(0, 2).forEach(shard => { shard.brokenAt = now; });
   model.cracks++; model.revision++;
   return true;
 }
 export function pressToy(model: ToyModel, point: Point, now: number) {
+  if (model.type === 'WAKPPU' && !containsToyPoint(model, point)) return false;
   stepToy(model, 0, now);
   model.pointer = { origin: point, current: point, started: now };
   model.anchor = point; model.pull = { x: 0, y: 0 };
   model.baseDepth = clamp(model.depth * model.recovery + .22, .22, .62);
   model.depth = model.baseDepth; model.recovery = 1; model.releasedAt = null; model.touches++; model.revision++;
   hitShell(model, point, now);
+  return true;
 }
 export function moveToy(model: ToyModel, point: Point) {
   if (!model.pointer) return;

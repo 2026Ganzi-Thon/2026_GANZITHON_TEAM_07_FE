@@ -3,7 +3,7 @@ import type { CSSProperties, PointerEvent } from 'react';
 import type { ToyType } from '../../lib/domain';
 import { useToyPreferences } from './ToyPreferences';
 import { TOY_DESIGNS } from './designs';
-import { clearToy, createToyModel, moveToy, pressToy, releaseToy } from './physics';
+import { clearToy, containsToyPoint, createToyModel, moveToy, pressToy, releaseToy } from './physics';
 
 /** Shared input ownership; animation runs in the canvas, outside React rendering. */
 export function useToyInteraction(active: ToyType) {
@@ -41,8 +41,10 @@ export function useToyInteraction(active: ToyType) {
   const pointAt = (x: number, y: number, box: DOMRect) => ({ x: Math.max(5, Math.min(295, (x - box.x) / box.width * 300)), y: Math.max(5, Math.min(255, (y - box.y) / box.height * 290)) });
   function begin(event: PointerEvent<HTMLButtonElement>) {
     if (pointer.current || event.button !== 0 || !event.isPrimary) return false;
-    if (timer.current) clearTimeout(timer.current);
     const box = event.currentTarget.querySelector('canvas')?.getBoundingClientRect() ?? event.currentTarget.getBoundingClientRect();
+    const rawPoint = { x: (event.clientX - box.x) / box.width * 300, y: (event.clientY - box.y) / box.height * 290 };
+    if (active === 'WAKPPU' && !containsToyPoint(model, rawPoint)) return false;
+    if (timer.current) clearTimeout(timer.current);
     pointer.current = { id: event.pointerId, x: event.clientX, y: event.clientY, box };
     event.currentTarget.setPointerCapture(event.pointerId);
     const point = pointAt(event.clientX, event.clientY, box); lastSound.current = point;
