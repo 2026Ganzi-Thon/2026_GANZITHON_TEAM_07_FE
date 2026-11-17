@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router';
 import styles from './App.module.css';
 import { PreviewProvider } from './lib/PreviewContext';
+import { Login, Settings, Help } from './features/account/Account';
 
 export function App() {
   useEffect(() => {
@@ -12,6 +13,7 @@ export function App() {
   }, []);
   return <PreviewProvider><div className={styles.canvas}><div className={styles.app}><Routes>
     <Route path="/" element={<main className="bootError"><h1>테슬랑</h1><p>공통 실행 기반</p></main>} />
+    <Route path="/login" element={<Login />} /><Route path="/settings" element={<Settings />} /><Route path="/help" element={<Help />} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes></div></div></PreviewProvider>;
 }
