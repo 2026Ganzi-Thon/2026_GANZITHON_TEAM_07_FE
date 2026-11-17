@@ -1,0 +1,212 @@
+[
+  {
+    "file": "socrates-with-toy.png",
+    "sha256": "51a274597c9db3a75144d313119d300a0295612b380253a14381794f2c681f8f",
+    "source": "team-provided PNG",
+    "modified": false
+  },
+  {
+    "file": "lamb.png",
+    "sha256": "a9cde88f8d3c782859d2c43e15d5fafe89d7ffbd183e42c269ace6145e4a8156",
+    "source": "team-provided PNG",
+    "modified": false
+  },
+  {
+    "file": "socrates.png",
+    "sha256": "91bdf5da024fb0c7a8f54b86b5f21d6d3ecf3e676aa775edc51d98d0f8f34f52",
+    "source": "team-provided PNG",
+    "modified": false
+  },
+  {
+    "file": "lamb-sleep.png",
+    "sha256": "15317ca8364123d459398d605b3b7934ee6a7b7ea34fb8e695b74859047faa10",
+    "source": "team-provided PNG",
+    "modified": false
+  },
+  {
+    "file": "teslang-logo.png",
+    "sha256": "f0207f94749114c01457f32eb024d58b4227448159fb6764df049617e1058bc5",
+    "source": "team-provided PNG",
+    "modified": false
+  },
+  {
+    "file": "advice-walk.svg",
+    "sha256": "acda41d4089faa83aa7648e7650c48476f256e04282063591246351e20833252",
+    "source": "team Figma SVG copy, node 190:12577, 2026-11-16",
+    "modified": false,
+    "note": "Path/fill/viewBox retained; whitespace normalized."
+  },
+  {
+    "file": "advice-rest.svg",
+    "sha256": "13a9a5a10f538e7153de323845d4108b18905c631315caf4394fb61f36819787",
+    "source": "team Figma SVG copy, node 276:1145, 2026-11-16",
+    "modified": false,
+    "note": "Path/fill/viewBox retained; whitespace normalized."
+  },
+  {
+    "file": "advice-write.svg",
+    "sha256": "ff67a8341281d314a2e87a122e4976be5ea596900cb3d588e474b3eff5e68907",
+    "source": "team Figma SVG copy, node 276:1147, 2026-11-16",
+    "modified": false,
+    "note": "Path/fill/viewBox retained; whitespace normalized."
+  },
+  {
+    "file": "emotions/unknown.png",
+    "sha256": "60276f7f1b9f76a9d1f8f7690709854cb84e79a4946259e2be30223c0676e664",
+    "source": "team-provided 모르겠음.png, 2026-11-16",
+    "modified": false
+  },
+  {
+    "file": "emotions/anxious.png",
+    "sha256": "72933c1ed9b05d3862464d4f7299bc71f8806c2a441d087bff236f6718babd36",
+    "source": "team-provided 불안함.png, 2026-11-16",
+    "modified": false
+  },
+  {
+    "file": "emotions/disappointed.png",
+    "sha256": "e28086a4cfcfd684da4254d370a2daa9e4474f2a6efa967853018d7f62893dfb",
+    "source": "team-provided 서운함.png, 2026-11-16",
+    "modified": false
+  },
+  {
+    "file": "emotions/upset.png",
+    "sha256": "da2d3a03e9d40d7755b67b1b851e83a348b4abb0f46653177f9dcc4fad019702",
+    "source": "team-provided 속상함.png, 2026-11-16",
+    "modified": false
+  },
+  {
+    "file": "emotions/sad.png",
+    "sha256": "c38892719a546cc245a700f4c284038b9dd9790da313ec93bdcb15838d90295e",
+    "source": "team-provided 슬픔.png, 2026-11-16",
+    "modified": false
+  },
+  {
+    "file": "emotions/excited.png",
+    "sha256": "19ebb61726af5f6c6ad5c097f894c2b5beaaf41ae2cdca40d50a2f5df11be780",
+    "source": "team-provided 신남.png, 2026-11-16",
+    "modified": false
+  },
+  {
+    "file": "emotions/depressed.png",
+    "sha256": "a9b69793ffa156f17341d9254d34bc848f794fad95ef1f248ccf131f8b5dea92",
+    "source": "team-provided 우울함.png, 2026-11-16",
+    "modified": false
+  },
+  {
+    "file": "emotions/calm.png",
+    "sha256": "ef0a978fddc25ad56aed8392b3bd6408e759e6e6ad1b2bac965ad94779f2c783",
+    "source": "team-provided 평온.png, 2026-11-16",
+    "modified": false
+  },
+  {
+    "file": "emotions/happy.png",
+    "sha256": "5374ae84c3ce544889822673014b5c3751f66a01195a06b25119909529e4f4ed",
+    "source": "team-provided 행복함.png, 2026-11-16",
+    "modified": false
+  },
+  {
+    "file": "emotions/angry.png",
+    "sha256": "01c230225e08120ec2cee061b131d8b997eb04987efbe9bd32850e52ef177077",
+    "source": "team-provided 화남.png, 2026-11-16",
+    "modified": false
+  },
+  {
+    "file": "emotions/grateful.png",
+    "sha256": "55dbe628bedd9dd8764ef874772e364a2402e9909ea1f5a82e9667f18c23a764",
+    "source": "team-provided 감사함.png, 2026-11-16",
+    "modified": false
+  },
+  {
+    "file": "emotions/joyful.png",
+    "sha256": "aaf887599afe0f9b0f2fe76825a3f085b3b1ec25ecdde19d611e86f1f952fadf",
+    "source": "team-provided 기쁨.png, 2026-11-16",
+    "modified": false
+  },
+  {
+    "file": "sheep-squishy.png",
+    "sha256": "d314fe66daddc27750cbc25cae88572b6e2520f97997cab62d05f112d6a0b23f",
+    "source": "team-provided PNG",
+    "originalName": "양 스퀴시.png",
+    "modified": false
+  },
+  {
+    "file": "slime-lavender.png",
+    "sha256": "dd86ea0b6b4a3efbe8a032729d2babb28457daae06a92e4aba85fb8af80b066e",
+    "source": "team-provided PNG",
+    "originalName": "슬랑이 1.png",
+    "modified": false
+  },
+  {
+    "file": "slime-mint.png",
+    "sha256": "24efafcd31be1df1e5a4a04384d270eb25dadc1cc9427a9d59ce1d24c3d1d84f",
+    "source": "team-provided PNG",
+    "originalName": "슬랑이 2.png",
+    "modified": false
+  },
+  {
+    "file": "slime-pink.png",
+    "sha256": "bc5a907678d1c66106cb4bcf2ab2f72f47580ce1a98d84a352c77a464df63a12",
+    "source": "team-provided PNG",
+    "originalName": "슬랑이 3.png",
+    "modified": false
+  },
+  {
+    "file": "pudding-squishy.png",
+    "sha256": "dc10d1bf4c2b6f50e4051e0f6995cc7b4eb54ca81a48459a99771d6d550bf799",
+    "source": "team-provided PNG",
+    "originalName": "푸딩 스퀴시.png",
+    "modified": false
+  },
+  {
+    "file": "dumpling.png",
+    "sha256": "14fd57c40b4a6ab446a478079e2ab0f9ddc509914bbf56b461b7622339d283ae",
+    "source": "team-provided PNG",
+    "originalName": "만두 스퀴시.png",
+    "modified": false
+  },
+  {
+    "file": "butter.png",
+    "sha256": "c1781b36b666e4a39160beca1f6c6a04a160deb1120f8af180ea8293341b2a7a",
+    "source": "team-provided PNG",
+    "originalName": "버터 왁뿌볼.png",
+    "modified": false
+  },
+  {
+    "file": "heart.png",
+    "sha256": "5f49ca07a13ccb55d1f35fc7d6a22d1ce363656e62dbf3757df8389b9776305b",
+    "source": "team-provided PNG",
+    "originalName": "하트 왁뿌볼.png",
+    "modified": false
+  },
+  {
+    "file": "wax-cloud.png",
+    "sha256": "133c5b1e8153ac98b7e8adf8b9eda4f8a700d7e7aa409f863b7712d17cd13f38",
+    "source": "team-provided PNG",
+    "originalName": "구름 왁뿌볼.png",
+    "modified": false
+  },
+  {
+    "file": "voice-chat-icon.png",
+    "sha256": "22d1db9b5ce937f7c578bf9b8b1161fe5832a49b83b26d0e0f23ce2ef982eab5",
+    "source": "team-provided PNG, 2026-11-17",
+    "modified": false
+  },
+  {
+    "file": "socrates-sleeping-sheep.png",
+    "sha256": "2a4e9c44c0cddf3f2cc7f288999a212556914cf3133cece3373a7a9b796dbb78",
+    "source": "team-provided PNG, 2026-11-17",
+    "modified": false
+  },
+  {
+    "file": "my-profile-icon.png",
+    "sha256": "7d921177d7937e105bbfddaf27756f33deb9de63f2edff3422a43afc76e971a7",
+    "source": "team-provided PNG, 2026-11-17",
+    "modified": false
+  },
+  {
+    "file": "menu-bubble.png",
+    "sha256": "67072dee38f5401622df22a6ed0a94ab1d0b4379c26ddff340a00436ce092891",
+    "source": "team-provided PNG, 2026-11-17",
+    "modified": false
+  }
+]
