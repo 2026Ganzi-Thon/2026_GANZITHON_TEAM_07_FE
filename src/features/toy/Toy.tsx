@@ -25,7 +25,7 @@ export function Toy() {
   const entry = useChatEntry();
   const { audio } = useToyPreferences();
   const requested = params.get('type') as ToyType | null;
-  const active = requested && Object.hasOwn(TOYS, requested) ? requested : inventory.data?.selected ?? 'SLANGI';
+  const active = requested && Object.hasOwn(TOYS, requested) ? requested : inventory.data?.selected ?? 'SQUISHY';
   const toy = TOYS[active];
   const interaction = useToyInteraction(active);
   const selection = useMutation({ mutationFn: previewApi.selectToy, onSuccess: data => { client.setQueryData(key, data); setParams({ type: data.selected }, { replace: true }); setOpen(false); } });

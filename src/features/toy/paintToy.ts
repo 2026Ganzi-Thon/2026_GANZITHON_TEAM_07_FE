@@ -31,18 +31,9 @@ function surfaceGrain(ctx: CanvasRenderingContext2D, alpha: number) {
   const pattern = ctx.createPattern(grain, 'repeat');
   if (pattern) { ctx.save(); ctx.globalAlpha = alpha; ctx.globalCompositeOperation = 'soft-light'; ctx.fillStyle = pattern; ctx.fillRect(0, 0, 300, 260); ctx.restore(); }
 }
-export function paintToy(ctx: CanvasRenderingContext2D, model: ToyModel, design: ToyDesign, now: number, reduced: boolean, lamb?: HTMLImageElement | null) {
+export function paintToy(ctx: CanvasRenderingContext2D, model: ToyModel, design: ToyDesign, now: number, reduced: boolean) {
   ctx.clearRect(0, 0, 300, 290);
   const { pull, opacity: depth } = model;
-  if (model.shape === 'drop' && lamb) {
-    // Original PNG at its natural aspect ratio; affine deformation is visual feedback,
-    // not a claim of per-pixel soft-body simulation.
-    ctx.save(); ctx.translate(150, 145);
-    ctx.rotate(pull.x * .0004);
-    ctx.scale(1 + depth * .10 + Math.abs(pull.x) * .0005, 1 - depth * .12 + Math.abs(pull.y) * .0003);
-    ctx.drawImage(lamb, -150, -100, 300, 200);
-    ctx.restore(); return;
-  }
   ctx.save(); ctx.translate(150, 258); ctx.scale(1, .18);
   const shadow = ctx.createRadialGradient(0, 0, 5, 0, 0, 100); shadow.addColorStop(0, '#655f5940'); shadow.addColorStop(1, '#655f5900');
   ellipse(ctx, 0, 0, 102, 102, shadow); ctx.restore();

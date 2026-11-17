@@ -12,7 +12,7 @@ export function ToySurface({ active, interaction, className = styles.play, label
   onActivate?: () => void;
   playing?: boolean;
 }) {
-  return <button ref={interaction.surface} className={className} aria-label={label ?? `${TOYS[active].name} 누르기 또는 드래그`} data-testid="toy-interaction"
+  return <button ref={interaction.surface} className={className} disabled={!interaction.ready} aria-busy={!interaction.ready} aria-label={label ?? `${TOYS[active].name} 누르기 또는 드래그`} data-testid="toy-interaction"
     onPointerDown={event => { if (interaction.begin(event)) onActivate?.(); }}
     onPointerMove={interaction.move} onPointerUp={interaction.endPointer} onPointerCancel={interaction.endPointer}
     onLostPointerCapture={interaction.endPointer} onBlur={interaction.release}
