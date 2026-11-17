@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowUp, Check, ChevronDown, RotateCcw, X } from 'lucide-react';
-import { IconButton, Modal } from '../../components/ui';
+import { ArrowLeft, ArrowUp, Check, ChevronDown } from 'lucide-react';
+import { Modal } from '../../components/ui';
 import { ChatEntrySheet, useChatEntry } from '../chat/ChatEntrySheet';
 import { ToySurface } from '../toy/ToySurface';
 import { useToyInteraction } from '../toy/useToyInteraction';
@@ -36,8 +36,8 @@ export function Home() {
   const suppressClick = useRef(false);
   const entry = useChatEntry();
   const inventory = useQuery({ queryKey: ['preview', user.data?.id, 'inventory'], queryFn: previewApi.inventory, enabled: !!user.data, staleTime: Infinity });
-  const [guestToy, setGuestToy] = useState<ToyType>('SLANGI');
-  const active = user.data ? inventory.data?.selected ?? 'SLANGI' : guestToy;
+  const [guestToy, setGuestToy] = useState<ToyType>('SQUISHY');
+  const active = user.data ? inventory.data?.selected ?? 'SQUISHY' : guestToy;
   const interaction = useToyInteraction(active);
   const selection = useMutation({ mutationFn: previewApi.selectToy, onSuccess: data => {
     client.setQueryData(['preview', user.data?.id, 'inventory'], data); setPicker(false);
@@ -48,10 +48,10 @@ export function Home() {
   }
   function showChat() { interaction.release(); audio.stop(); setPlaying(false); setOpen(true); }
   return <main className={styles.home} data-playing={playing} aria-label="테슬랑 메인">
-    <header className={styles.header}><AppMenu placement="top" onChat={showChat} /></header>
+    <header className={styles.header}><AppMenu placement="top" onChat={showChat} subtle /></header>
     <div className={`${toyStyles.interactionControls} ${styles.playControls}`} inert={!playing} aria-hidden={!playing}>
       <button className={styles.typeSelect} disabled={user.isPending || (!!user.data && inventory.isPending)} onClick={event => { event.currentTarget.focus(); setPicker(true); }} aria-haspopup="dialog">{TOYS[active].name}<ChevronDown size={16} aria-hidden="true" /></button>
-      <div className={styles.playActions}><SoundButton /><IconButton label="말랑이 체험 마치기" onClick={finishPlay}><X size={19} /></IconButton></div>
+      <div className={styles.playActions}><SoundButton /></div>
     </div>
     <div className={styles.content} data-resting={!playing && !open && !hidden}>
       <div className={styles.characterGroup}>
@@ -60,7 +60,7 @@ export function Home() {
       </div>
     </div>
     <div className={styles.playReset} inert={!playing} aria-hidden={!playing}>
-      <button onClick={interaction.reset}><RotateCcw size={16} aria-hidden="true" />처음 모양으로</button>
+      <button className={styles.finishPlay} aria-label="말랑이 체험 마치기" onClick={finishPlay}><ArrowLeft size={17} aria-hidden="true" />체험 마치기</button>
       <span role="status" className={styles.srOnly}>{playing ? interaction.status : ''}</span>
     </div>
     <footer className={styles.footer} inert={playing} aria-hidden={playing}>

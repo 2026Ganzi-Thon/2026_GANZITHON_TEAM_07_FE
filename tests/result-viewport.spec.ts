@@ -15,8 +15,12 @@ test('short result includes the record link in the first view; long content rema
   await page.getByRole('button', { name: '점수 없이 마무리할게요' }).click();
   const link = page.getByRole('link', { name: '저장된 기록 확인하기' });
   await expect(link).toBeVisible();
+  await expect(page.locator('blockquote')).toHaveCSS('font-family', /Pretendard/);
+  await expect(page.locator('blockquote')).toHaveCSS('font-weight', '600');
+  await expect(page.locator('main')).toHaveCSS('background-color', 'rgb(255, 249, 242)');
+  await expect(page.locator('main')).toHaveCSS('background-image', 'none');
   await page.evaluate(() => document.fonts.ready);
-  for (const size of [{ width: 360, height: 640 }, { width: 390, height: 844 }, { width: 430, height: 932 }, { width: 1280, height: 900 }]) {
+  for (const size of [{ width: 360, height: 640 }, { width: 390, height: 844 }, { width: 429, height: 667 }, { width: 430, height: 932 }, { width: 900, height: 700 }, { width: 1280, height: 900 }]) {
     await page.setViewportSize(size);
     await page.locator('main > div').evaluate(el => { el.scrollTop = 0; });
     await expect.poll(() => link.evaluate(el => {
@@ -26,8 +30,23 @@ test('short result includes the record link in the first view; long content rema
     })).toEqual({ top: true, bottom: true, target: true, aligned: true });
     await expect(page.getByText('기록을 보관함에 남겼어요', { exact: true })).not.toBeInViewport();
     await expect(page.getByRole('button', { name: '왁뿌볼 선택', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    // A visible CTA alone does not catch an illustration covering the card copy.
+    const artwork = page.getByRole('button', { name: '다른 말랑이 선택 보기' });
+    await expect.poll(() => artwork.evaluate(el => {
+      const img = el.querySelector('img')!;
+      const image = img.getBoundingClientRect(), slot = el.getBoundingClientRect();
+      const pill = el.previousElementSibling!.getBoundingClientRect();
+      const instruction = el.nextElementSibling!.getBoundingClientRect();
+      const card = el.parentElement!.getBoundingClientRect();
+      return {
+        loaded: img.complete && img.naturalWidth > 0,
+        contained: image.left >= slot.left - 1 && image.right <= slot.right + 1 && image.top >= slot.top - 1 && image.bottom <= slot.bottom + 1,
+        separated: image.top >= pill.bottom + 7 && image.bottom <= instruction.top - 9,
+        copyInside: instruction.bottom <= card.bottom - 10,
+      };
+    })).toEqual({ loaded: true, contained: true, separated: true, copyInside: true });
     await expectWholeKoreanWords(page, 'main p, main blockquote, main h2');
-    await page.screenshot({ path: `artifacts/d41-result-${size.width}-${info.project.name}.png` });
+    await page.screenshot({ path: `artifacts/result-containment-${size.width}-${info.project.name}.png` });
   }
   const resultURL = page.url();
   await page.getByRole('link', { name: 'MY 및 설정' }).click();
@@ -53,4 +72,13 @@ test('short result includes the record link in the first view; long content rema
   }
   await link.click();
   await expect(page).toHaveURL(/\/records\/long-result$/);
+  const usedToy = page.locator('section').filter({ has: page.getByRole('heading', { name: /당시 추천 말랑이/ }) });
+  await usedToy.scrollIntoViewIfNeeded();
+  expect(await usedToy.evaluate(el => {
+    const image = el.querySelector('img')!.getBoundingClientRect();
+    const title = el.querySelector('h2')!.getBoundingClientRect();
+    const action = el.querySelector('a')!.getBoundingClientRect();
+    const card = el.getBoundingClientRect();
+    return image.top >= title.bottom && image.bottom <= action.top && image.left >= card.left && image.right <= card.right;
+  })).toBe(true);
 });

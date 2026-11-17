@@ -1,6 +1,14 @@
 # Audio sources
 
-All nine WAV files are derived from sources published as CC0, checked 2026-11-14.
+## D52 로컬 녹화 음원 비교
+
+버터·하트 비교용 추출 WAV3개는 Git 제외 `artifacts/wax-reference/`에만 있다. `public`·`dist`에 포함하지 않으며 Vite loopback 미들웨어로만 제공한다. 원본 녹화의0.97~1.72초/2.42~3.29초/3.85~4.81초,44.1kHz 스테레오,3ms 끝단 페이드다. 공개 재사용 조건은 미확인이며 CC0 목록에 포함하지 않는다. 독립 합성음은 구름 및 표본 미준비/비교 기능 비활성 시 사용한다.
+
+## D51 합성 균열음 (2026-11-17)
+
+D51은 음높이 성분 없이 거친 노이즈 입자를 겹친다. 왁뿌볼 파열음은 프로젝트의 `src/features/toy/waxSound.ts`에서 독립적으로 생성한다. 외부 사이트의 녹음/인코딩된 음원/합성 코드를 가져오지 않았다. 아래 shell-1~3 CC0 표본의 기존 출처 기록은 보존하지만 현재 런타임은 해당3개를 로딩/재생하지 않는다. 나머지12개 표본과 사용 조건은 그대로다.
+
+The original nine WAV files are derived from sources published as CC0, checked 2026-11-14.
 CC0: https://creativecommons.org/publicdomain/zero/1.0/
 
 - slime-1.wav, slime-2.wav, slime-3.wav: rubberduck, “40 CC0 water splash/slime SFX”, slime_01.ogg / slime_05.ogg / slime_09.ogg. https://opengameart.org/content/40-cc0-water-splash-slime-sfx
@@ -8,3 +16,12 @@ CC0: https://creativecommons.org/publicdomain/zero/1.0/
 - crack-1.wav, crack-2.wav, crack-3.wav: rubberduck, “75 CC0 breaking/falling/hit SFX”, bfh1_wood_breaking_01.ogg through 03.ogg. https://opengameart.org/content/75-cc0-breaking-falling-hit-sfx
 
 Changes: mono mix, trim/excerpts, DC removal, 32 kHz PCM16 conversion, peak/RMS limiting, endpoint fades. See manifest.json for hashes, timing and signal metrics, and scripts/prepare_audio.py for the reproducible transformation. The crack samples are adapted wood breaking sounds, not recordings of wax. Foam excerpts contain wet sponge/foam squeezing.
+
+
+## D48 material candidates — verified 2026-11-17
+
+- shell-1..3.wav: Joseph SARDIN, Plastic bottle crushed #1 (0775), CC0. https://bigsoundbank.com/plastic-bottle-crushed-1-s0775.html
+- bubble-1..3.wav: Joseph SARDIN, Suction cup on plastic (1261), CC0. https://bigsoundbank.com/suction-cup-on-plastic-s1261.html
+- foam-release-1..3.wav: Joseph SARDIN, Sponge and foam (0778), CC0. https://bigsoundbank.com/sponge-and-foam-s0778.html
+
+These are adapted foley candidates. Shell sounds are plastic, not actual wax; release sounds are reversed/filtered foam textures, not a separate recording of a squishy recovering. See material-manifest.json for source hashes, excerpts, output hashes and signal metrics. Reproduce with scripts/prepare_material_audio.py using the three original WAVs. The original crack-1..3 files remain on disk but are no longer selected by the runtime. No audio from wakbbuball.com was copied.
