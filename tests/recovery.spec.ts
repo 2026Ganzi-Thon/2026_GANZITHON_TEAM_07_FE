@@ -17,6 +17,7 @@ async function complete(page: Page) {
   await page.getByRole('button', { name: '0점', exact: true }).click();
   await page.getByRole('button', { name: '천천히 이어가기' }).click();
   await page.getByRole('button', { name: '끝내기', exact: true }).click();
+  await page.getByRole('dialog', { name: '대화를 마무리할까요?' }).getByRole('button', { name: /점수 남기고 마무리하기|저장 없이 나가기/ }).first().click();
   await page.getByRole('button', { name: '점수 없이 마무리할게요' }).click();
 }
 // Intercept browser fetch before MSW. No production fault switches or real network calls.
@@ -142,9 +143,9 @@ test('delete dialog stays modal during a request and can close after failure', a
 
 test('toy selection cannot dismiss during a request and restores focus after success', async ({ page }) => {
   await login(page); await page.getByRole('button', { name: '말랑이 체험하기', exact: true }).click();
-  const selector = page.getByRole('button', { name: '슬랑이', exact: true });
+  const selector = page.getByRole('button', { name: '스퀴시', exact: true });
   await selector.click(); await blockOnce(page, '/__preview__/inventory', 'PATCH');
-  await page.getByRole('dialog').getByRole('button', { name: '슬랑이 선택 가능' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: '스퀴시 선택 가능' }).click();
   await expect(page.getByRole('dialog')).toHaveAttribute('aria-busy', 'true');
   await page.keyboard.press('Escape'); await expect(page.getByRole('dialog')).toBeVisible();
   await release(page); await expect(page.getByRole('dialog')).toHaveCount(0);
@@ -153,20 +154,15 @@ test('toy selection cannot dismiss during a request and restores focus after suc
 
 test('unrelated pointers do not end a drag; window blur restores the toy', async ({ page }) => {
   await login(page); await page.getByRole('button', { name: '말랑이 체험하기', exact: true }).click();
-  const toy = page.getByTestId('toy-interaction'); const shape = toy.locator(':scope > div');
+  const toy = page.getByTestId('toy-interaction'), canvas = toy.locator('canvas');
   const bounds = (await toy.boundingBox())!;
   await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
   await page.mouse.down(); await page.mouse.move(bounds.x + bounds.width / 2 + 50, bounds.y + bounds.height / 2 + 20);
-  // Wait for React's pointermove update; WebKit also serializes translate(0, 0) as translate(0).
-  const translation = () => shape.evaluate(el => new DOMMatrix((el as HTMLElement).style.transform).m41);
-  await expect.poll(translation).toBe(15);
+  await expect(canvas).toHaveAttribute('data-phase', 'pressed');
   await toy.dispatchEvent('pointerup', { pointerId: 999, pointerType: 'touch', button: 0 });
-  await expect.poll(translation).toBe(15);
+  await expect(canvas).toHaveAttribute('data-phase', 'pressed');
   await page.evaluate(() => window.dispatchEvent(new Event('blur')));
-  await expect.poll(() => shape.evaluate(el => {
-    const matrix = new DOMMatrix((el as HTMLElement).style.transform);
-    return [matrix.m41, matrix.m42, matrix.a, matrix.d];
-  })).toEqual([0, 0, 1, 1]);
+  await expect(canvas).toHaveAttribute('data-phase', 'idle', { timeout: 5000 });
   await page.mouse.up();
   await toy.click({ button: 'right' });
   await expect(page.getByRole('status')).toHaveText('2번 함께 쉬었어요');

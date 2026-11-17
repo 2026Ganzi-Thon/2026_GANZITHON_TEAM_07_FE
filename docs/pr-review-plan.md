@@ -1,36 +1,24 @@
-# 기능별 PR 검토안
+# 기능별 PR 검토 안내
 
-2026-11-16 · 기능별 PR 분리와 검토 순서. 개인 대화와 개인 작업 일지는 업로드에서 제외한다. 이 문서는 각 PR의 범위와 통합 의존 관계를 설명한다.
+2026-11-16 리뷰 수정 및 D40~D42 보완. 기존 PR을 업데이트하며 새 PR을 만들거나 PR을 머지하지 않는다.
 
-## 분리와 기준 브랜치
+## 검토 순서와 최신 코드
 
-| 순서 | PR 제목 | 작업 브랜치 | 기준 브랜치 | 핵심 파일 |
-|---|---|---|---|---|
-| 1 | chore: 프론트엔드 실행 기반과 공통 UI·예시 API 구성 | `feat/frontend-foundation` | `main` | 실행 설정, 공통 components/styles, lib, mocks, chat/model |
-| 2 | feat: 체험 계정 진입과 MY·도움 화면 구현 | `feat/account-settings` | `feat/frontend-foundation` | features/account |
-| 3 | feat: 메인 대화 시트와 말랑이 조작·효과음 구현 | `feat/home-toy` | `feat/account-settings` | features/home, features/toy, audio 자산 |
-| 4 | feat: 감정 선택과 단계별 텍스트 대화 화면 구현 | `feat/chat-flow` | `feat/home-toy` | features/chat의 Chat·InputCards·스타일 |
-| 5 | feat: 상담 결과와 마음 보관함·기록 관리 구현 | `feat/results-archive` | `feat/chat-flow` | features/records, 통합 tests, 최신 문서 |
+기존 #1~#5 이후 #6 → #7 → #8 → #9 순서다. 최종 전체 코드는 `feat/dialogue-voice-followup`에 있다. 각 PR은 바로 앞 기능 브랜치를 기준으로 하므로 main과 직접 비교하면 이전 기능까지 포함된다.
 
-모든 PR에서 `App.tsx`에는 해당 단계까지 존재하는 경로만 연결한다. 임시 실행 셸은 메인 PR에서 교체한다. 메인→대화는 4번, 대화→결과·보관함은 5번까지 적용해야 이어진다. 각 PR은 독립 제품이 아니라 순서대로 누적하는 변경이다. 모든 PR을 main 기준으로 만들면 이전 기능이 중복 표시되므로 앞 브랜치를 기준으로 올린다.
+| PR | 작업 브랜치 | 기준 브랜치 | 이번 수정 |
+|---|---|---|---|
+| [#6](https://github.com/2026Ganzi-Thon/2026_GANZITHON_TEAM_07_FE/pull/6) | feat/design-assets-followup | feat/results-archive | 폰트 파일·적용 유지. 라이선스 확인 및 교체 예정 답글 |
+| [#7](https://github.com/2026Ganzi-Thon/2026_GANZITHON_TEAM_07_FE/pull/7) | feat/home-interaction-followup | feat/design-assets-followup | 메인/말랑이 진입 시트 공유, 음소거 위치 통일, 왁뿌볼 윤곽 판정 |
+| [#8](https://github.com/2026Ganzi-Thon/2026_GANZITHON_TEAM_07_FE/pull/8) | feat/records-followup | feat/home-interaction-followup | 기록 로딩 개수, 도움·설정 복귀 상태, 전화 링크, 결과 첫 화면 여백 |
+| [#9](https://github.com/2026Ganzi-Thon/2026_GANZITHON_TEAM_07_FE/pull/9) | feat/dialogue-voice-followup | feat/records-followup | 실패 시 정상 완료 차단·중간 보관 구분, 한 글자 단어 문장, 수동 계속 버튼 제거, 줄바꿈·통합 QA·인수인계 |
 
-## 커밋과 문서
+원래 #2~#5의 지적은 대응하는 #7~#9 수정으로 연결한다. 동일 구현을 과거 브랜치에 중복 추가하지 않는다. 기존 커밋은 재작성하지 않고 선행 수정 이력을 후속 브랜치에 포함한다. main 변경과 PR 병합은 별도다.
 
-각 PR의 제목과 같은 범위로 커밋한다. 공통 기반에는 대화 모델·mock fixture가 포함되지만 대화 UI는 4번 PR이다. 결과/보관함은 같은 파일과 데이터 흐름을 공유하므로 5번에 함께 둔다. 5번은 결과·보관함, 전체 여정 검사, 문서 인수인계 커밋으로 구분한다. 실제 개발 날짜를 소급하거나 개발 이력을 꾸미지 않는다.
+## 범위와 검증
 
-PR 본문에는 변경 동작, 기준 브랜치, 검증 범위, 미연동 기능을 기재한다. 팀원이 바로 작업할 수 있도록 [인수인계](handoff.md)에 실행 방법·코드 규칙·API 교체 위치·남은 화면을 정리했다.
-
-## 업로드 제외
-
-- 개인 대화 원문, 개인 일정, `memory.md`
-- PRD 작성 전 실험 폴더 `teslang/`, `prototype/` 및 백엔드 참고 체크아웃
-- `.env`, 자격증명, node_modules, dist, 캐시·로그·스크린샷·추적 파일
-- 검토용 로컬 복사본과 PR 준비 산출물인 `artifacts/`
-
-기존 Git에 올라간 디자인 전달 원문은 제품 동작 요약으로 수정한다. 과거 커밋은 이 작업에서 삭제하거나 재작성하지 않는다. 노션 보관 원문은 기존 추적 자료이며 이번에 재수집하거나 수정하지 않는다.
-
-## 검증 상태
-
-다섯 단계 각각 별도 로컬 복사본에서 빌드와 단위 검사를 통과했다. 1·2단계 단위 40개, 3·4·5단계 53개다. 최종 통합 브라우저 결과와 한계는 [QA 기록](qa.md)을 따른다. 중간 단계에서 전체 대화→결과 여정까지 검증했다고 의미하지 않는다.
-
-다섯 PR의 업로드 승인을 받은 범위로 진행한다. main에 직접 푸시하거나 머지하지 않는다.
+- 폰트·로그인 전체 흐름·수면은 구현을 변경하지 않는다. 꾹꾹체의 웹 임베딩/재배포 제한은 확인했으며 대체 서체와 파일·기존 이력 정리는 후속 협의 대상이다. 배포 허가가 확보된 상태가 아니다.
+- 실제 AI·인증·영속 저장·STT 연동 완료를 의미하지 않는다. 중간 보관/가리기는 현재 프론트 예시 계약이다.
+- 각 브랜치의 타입·빌드·단위 검사와 최종 브라우저 검증은 [QA](qa.md)에 기록한다. 원문 코멘트별 변경은 [리뷰 대응표](review-fixes-2026-11-16.md)를 따른다.
+- 사적 대화·memory.md·환경변수·이전 실험·참고 체크아웃·캐시·빌드·스크린샷은 제외한다. 팀 필수 정보는 [인수인계](handoff.md)에 남긴다.
+- 리뷰 답글은 코멘트 12개에 개별로 작성하며 자동 resolve나 PR 머지를 하지 않는다.

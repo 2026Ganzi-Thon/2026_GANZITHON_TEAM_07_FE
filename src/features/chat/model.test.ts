@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { chatReducer, initialChat, newContext } from './model';
+import { chatReducer, initialChat, newContext, makeMessage, suggestions } from './model';
 import { previewReply } from '../../mocks/dialogue';
 
 describe('chat input and finish boundaries', () => {
@@ -60,9 +60,28 @@ describe('explicitly scripted preview responses', () => {
 
 
 describe('documented skip boundaries in the preview', () => {
+  it('does not substitute an unchosen event for a suggestion', () => {
+    for (const suggestion of suggestions) expect(suggestion.text).toBe(suggestion.label);
+  });
+  it('accepts an event without the old topic keywords and keeps vague nouns in OPEN', () => {
+    for (const text of ['출근길에 지하철을 놓쳤어', '길에서 넘어져서 다쳤어요', '주문을 잘못 받아서 혼났어요']) {
+      expect(previewReply({ text, context: newContext(), requestId: text }).stage).toBe('EMOTIONS');
+    }
+    for (const text of ['회의', '친구가', 'ㄴㄴ', '혼났어', '오늘 조금 속상한 일이 있었어요']) {
+      expect(previewReply({ text, context: newContext(), requestId: text }).stage).toBe('OPEN');
+    }
+  });
+  it('uses follow-up context and does not repeat the same clarification immediately', () => {
+    const first = previewReply({ text: '오늘 조금 속상한 일이 있었어요', context: newContext(), requestId: '1' });
+    const history = [makeMessage('user', '오늘 조금 속상한 일이 있었어요'), makeMessage('assistant', first.text)];
+    const second = previewReply({ text: '그냥 힘들어', history, context: newContext(), requestId: '2' });
+    expect(second.text).not.toBe(first.text); expect(second.stage).toBe('EMOTIONS');
+    const event = previewReply({ text: '지하철을 놓쳤어', history, context: newContext(), requestId: '3' });
+    expect(event.stage).toBe('EMOTIONS'); expect(event.slots.OPEN).toContain('지하철을 놓쳤어');
+  });
   it('does not treat a word inside a substantive reply as an empty answer', () => {
     const response = previewReply({ text: '하루밖에 없어서 걱정이 됐어요', context: { ...newContext(), stage: 'THOUGHT' }, requestId: 'content' });
-    expect(response.stage).toBe('REFRAME'); expect(response.slots.THOUGHT).toBe('하루밖에 없어서 걱정이 됐어요');
+    expect(response.stage).toBe('ACTION'); expect(response.slots.THOUGHT).toBe('하루밖에 없어서 걱정이 됐어요');
   });
   it('accepts no need or resource immediately', () => {
     for (const stage of ['NEED', 'COPING'] as const) {
@@ -72,5 +91,32 @@ describe('documented skip boundaries in the preview', () => {
   });
   it('asks for context when only being scolded is mentioned', () => {
     expect(previewReply({ text: '혼났어', context: newContext(), requestId: 'vague' }).stage).toBe('OPEN');
+  });
+});
+
+
+describe('D39 open progression regressions', () => {
+  it.each(['친구랑 싸웠어', '친구가 내 뒷담화를 해서 속상해', '과제가 너무 많아서 잠을 못 잤어', '내일 면접이라 떨려', '친구가 약속을 취소해서 서운해', '비밀을 퍼뜨렸어', 'I had an argument with my friend'])('accepts %s without a predicate whitelist', text => {
+    const reply = previewReply({ text, context: newContext(), requestId: text });
+    expect(reply.stage).toBe('EMOTIONS'); expect(reply.slots.OPEN).toBe(text);
+  });
+  it('advances after a vague follow-up with only the words actually shared', () => {
+    const history = [makeMessage('user', '그냥 힘들어')];
+    const reply = previewReply({ text: '조금 속상해', history, context: newContext(), requestId: 'continue' });
+    expect(reply.stage).toBe('EMOTIONS'); expect(reply.slots.OPEN).toBe('그냥 힘들어 조금 속상해');
+  });
+  it('does not accept an empty opening', () => {
+    expect(previewReply({ text: '', context: newContext(), requestId: 'empty' }).stage).toBe('OPEN');
+  });
+});
+
+describe('spaced Korean words', () => {
+  it.each(['날 좀 봐 줘', '나 좀 도와 줘', '왜', '응', 'I am sad'])('accepts real letters in %s through the mock opening', text => {
+    const reply = previewReply({ text, context: newContext(), requestId: text });
+    expect(reply.stage).toBe('EMOTIONS');
+    expect(reply.slots.OPEN).toBe(text);
+  });
+  it.each(['ㄱㄱ', 'ㅁㄴㅇ', '!!!', '1234'])('does not turn %s into an event', text => {
+    expect(previewReply({ text, context: newContext(), requestId: text }).stage).toBe('OPEN');
   });
 });
