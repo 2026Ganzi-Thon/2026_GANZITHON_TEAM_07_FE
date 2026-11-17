@@ -13,7 +13,7 @@ export function useToyInteraction(active: ToyType) {
   const { designs, audio } = useToyPreferences();
   const design = TOY_DESIGNS[active].find(value => value.id === designs[active])!;
   const model = useMemo(() => {
-    const next = createToyModel(active, design.id, active === 'WAKPPU' && design.id === 'heart' ? 'crumple' : 'break'), id = design.id;
+    const next = createToyModel(active, design.id), id = design.id;
     if (isArtwork(id)) next.hitTest = point => {
       const shell = next.type === 'WAKPPU' && hasShell(next);
       return hitsArtwork(id, point, { anchor: next.visualAnchor, pull: shell ? { x: 0, y: 0 } : next.visualPull, depth: shell ? 0 : next.opacity });
@@ -41,8 +41,8 @@ export function useToyInteraction(active: ToyType) {
   const subscribe = useCallback((listener: () => void) => { listeners.current.add(listener); return () => { listeners.current.delete(listener); }; }, []);
   const wake = () => listeners.current.forEach(listener => listener());
   function release() {
+    if (active === 'SLANGI') audio.stopSlime();
     audio.cancelRecovery();
-    if (model.waxMode === 'crumple') audio.stop();
     const previous = pointer.current; pointer.current = null;
     if (timer.current) { clearTimeout(timer.current); timer.current = null; }
     if (previous && surface.current?.hasPointerCapture(previous.id)) surface.current.releasePointerCapture(previous.id);
@@ -68,7 +68,7 @@ export function useToyInteraction(active: ToyType) {
     };
   }, [model, audio]);
   const pointAt = (x: number, y: number, box: DOMRect) => ({ x: Math.max(0, Math.min(300, (x - box.x) / box.width * 300)), y: Math.max(0, Math.min(290, (y - box.y) / box.height * 290)) });
-  const playWax = (strength = .7) => audio.play('WAKPPU', strength, false, false, design.id === 'butter' || design.id === 'heart');
+  const playWax = (strength = .7) => audio.play('WAKPPU', strength);
   function begin(event: PointerEvent<HTMLButtonElement>) {
     if (pointer.current || event.button !== 0 || !event.isPrimary) return false;
     const box = event.currentTarget.querySelector('canvas')?.getBoundingClientRect() ?? event.currentTarget.getBoundingClientRect();
@@ -82,10 +82,6 @@ export function useToyInteraction(active: ToyType) {
     const before = model.shards.map(shard => shard.brokenAt);
     pressToy(model, point, performance.now());
     if (active !== 'WAKPPU') audio.play(active);
-    else if (model.waxMode === 'crumple') {
-      playWax();
-      audio.startWaxHold(() => !!pointer.current && !!model.pointer && containsToyPoint(model, model.pointer.current));
-    }
     else if (model.shards.some((shard, i) => shard.brokenAt !== null && shard.brokenAt !== before[i])) playWax(.45 + Math.min(1, event.pressure || .5) * .45);
     else if (hasSoftContact(model)) audio.play('SQUISHY', .5);
     update(value => value + 1); wake(); return true;
@@ -97,7 +93,12 @@ export function useToyInteraction(active: ToyType) {
     if (hasSoftContact(model)) {
       setPull({ x: Math.max(-85, Math.min(85, event.clientX - pointer.current.x)), y: Math.max(-60, Math.min(60, event.clientY - pointer.current.y)) });
       const distance = Math.hypot(point.x - lastSound.current.x, point.y - lastSound.current.y);
-      if (distance > 12) {
+      if (active === 'SLANGI' && distance > .5) {
+        const now = performance.now(), speed = distance / Math.max(16, now - lastSound.current.at);
+        const stretch = Math.hypot(event.clientX - pointer.current.x, event.clientY - pointer.current.y) / Math.max(1, pointer.current.box.width * .35);
+        audio.moveSlime(speed, stretch);
+        lastSound.current = { ...point, at: now };
+      } else if (active !== 'SLANGI' && distance > 12) {
         const now = performance.now(), speed = distance / Math.max(16, now - lastSound.current.at);
         audio.play(active === 'WAKPPU' ? 'SQUISHY' : active, Math.min(.9, .3 + speed * .7), true);
         lastSound.current = { ...point, at: now };

@@ -102,28 +102,28 @@ test('wax repeated keyboard input never redirects to another shell cell', async 
 });
 
 test('first touch enables default audio and decodes samples or shows unavailable state', async ({ page }) => {
-  const requests: string[] = []; page.on('request', r => { if (r.url().includes('/assets/audio/') && r.url().endsWith('.wav')) requests.push(r.url()); });
+  const requests: string[] = []; page.on('request', r => { if (r.url().includes('/assets/audio/') && /\.(wav|mp3)$/.test(new URL(r.url()).pathname)) requests.push(r.url()); });
   await page.goto('/'); await expect(page.getByTestId('toy-interaction')).toBeEnabled(); expect(requests).toHaveLength(0);
   const supported = await audioSupported(page);
   await page.getByTestId('toy-interaction').click();
   if (!supported) { await unsupportedAudio(page); expect(requests).toHaveLength(0); return; }
-  await expect.poll(() => requests.length).toBe(12);
+  await expect.poll(() => requests.length).toBe(10);
   await page.getByRole('button', { name: '스퀴시', exact: true }).click();
   await expect(page.getByText('소리를 불러오는 중이에요.')).toHaveCount(0);
   await expect(page.getByText(/일부 소리를 불러오지 못해/)).toHaveCount(0);
-  const decoded = await page.evaluate(async () => {
+  const decoded = await page.evaluate(async urls => {
     const ctx = new AudioContext();
-    try { return await Promise.all(['slime', 'foam', 'bubble', 'foam-release'].flatMap(type => [1, 2, 3].map(async i => {
-      const buffer = await ctx.decodeAudioData(await (await fetch(`/assets/audio/${type}-${i}.wav`)).arrayBuffer());
+    try { return await Promise.all(urls.map(async url => {
+      const buffer = await ctx.decodeAudioData(await (await fetch(url)).arrayBuffer());
       const values = buffer.getChannelData(0); let peak = 0, energy = 0;
       for (const sample of values) { peak = Math.max(peak, Math.abs(sample)); energy += sample * sample; }
-      return { duration: buffer.duration, channels: buffer.numberOfChannels, peak, rms: Math.sqrt(energy / values.length) };
-    }))); } finally { await ctx.close(); }
-  });
+      return { wax: url.includes('/touch-wax-'), originalSlime: url.includes('/slime-original.mp3'), duration: buffer.duration, channels: buffer.numberOfChannels, peak, rms: Math.sqrt(energy / values.length) };
+    })); } finally { await ctx.close(); }
+  }, [...requests]);
   await test.info().attach('decoded-audio-metrics', { body: JSON.stringify(decoded, null, 2), contentType: 'application/json' });
   // decodeAudioData resamples to the output context; interpolated peaks can exceed PCM sample peaks.
-  // The source manifest checks <= .72; the decoded output must remain below full scale.
-  for (const clip of decoded) { expect(clip.channels).toBe(1); expect(clip.duration).toBeGreaterThan(.05); expect(clip.duration).toBeLessThan(.81); expect(clip.peak).toBeLessThan(1); expect(clip.rms).toBeGreaterThan(.005); }
+  // Foam source peaks are <= .72; original slime and wax extracts retain their source amplitude.
+  for (const clip of decoded) { expect(clip.channels).toBe(clip.wax || clip.originalSlime ? 2 : 1); expect(clip.duration).toBeGreaterThan(.05); expect(clip.duration).toBeLessThan(clip.wax ? 1.1 : .85); expect(clip.peak).toBeLessThan(1); expect(clip.rms).toBeGreaterThan(.005); }
   await page.getByRole('slider', { name: '효과음 음량' }).fill('0'); await expect(page.getByText('0%', { exact: true })).toBeVisible();
   await page.getByRole('dialog').getByRole('button', { name: '효과음 끄기' }).click();
   await expect(page.getByRole('dialog').getByRole('button', { name: '효과음 켜기' })).toHaveAttribute('aria-pressed', 'false');
@@ -145,7 +145,7 @@ test('sample failures recover when supported and unsupported audio leaves play u
   if (!supported) { await unsupportedAudio(page); return; }
   await page.getByRole('button', { name: '스퀴시', exact: true }).click();
   await expect(page.getByText('일부 소리를 불러오지 못해 기본 효과음을 사용해요.')).toBeVisible();
-  expect(await page.evaluate(() => (window as unknown as { audioFault: { failures: number } }).audioFault.failures)).toBe(12);
+  expect(await page.evaluate(() => (window as unknown as { audioFault: { failures: number } }).audioFault.failures)).toBe(10);
   await page.getByRole('button', { name: '닫기', exact: true }).click();
   await page.getByTestId('toy-interaction').click(); await expect(page.getByRole('status')).toContainText('2번');
   await page.evaluate(() => { (window as unknown as { audioFault: { reject: boolean } }).audioFault.reject = false; });

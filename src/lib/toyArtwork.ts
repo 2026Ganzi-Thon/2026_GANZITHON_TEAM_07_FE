@@ -9,7 +9,7 @@ export const TOY_ARTWORK = {
   'slime-pink': { src: `${root}slime-pink.png`, rect: { x: 34.402, y: 28.410, width: 236.519, height: 240.844 } },
   'pudding-squishy': { src: `${root}pudding-squishy.png`, rect: { x: 15.293, y: 58.159, width: 269.413, height: 179.681 } },
   dumpling: { src: `${root}dumpling.png`, rect: { x: -19.762, y: 31.205, width: 340.189, height: 226.941 } },
-  butter: { src: `${root}butter.png`, rect: { x: 11.419, y: 51.860, width: 274.482, height: 182.988 } },
+  butter: { src: `${root}butter.png`, rect: { x: 0, y: 36, width: 290, height: 193.333 } },
   heart: { src: `${root}heart.png`, rect: { x: 28.625, y: 27.740, width: 241.821, height: 224.362 } },
   'wax-cloud': { src: `${root}wax-cloud.png`, rect: { x: .194, y: 45.771, width: 297.674, height: 198.450 } },
 } satisfies Record<string, { src: string; rect: ArtworkRect }>;

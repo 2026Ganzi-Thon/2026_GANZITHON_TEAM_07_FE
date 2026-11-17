@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 
 test.setTimeout(90000);
 
-for (const shape of ['버터', '구름']) test(`${shape}: repeated right taps only remove the touched cell`, async ({ page }, info) => {
+for (const shape of ['버터', '하트', '구름']) test(`${shape}: repeated right taps only remove the touched cell`, async ({ page }, info) => {
   await page.addInitScript(() => {
     const meter = { starts: 0 }; Object.assign(window, { waxAudioMeter: meter });
     const Original = window.AudioContext;
