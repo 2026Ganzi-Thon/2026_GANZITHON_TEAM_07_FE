@@ -1,5 +1,5 @@
-.scene { width: 100%; max-width: 402px; aspect-ratio: 402 / 268; display: grid; place-items: center; }
-.scene img { display: block; width: 100%; height: auto; pointer-events: none; user-select: none; transition: transform .25s ease; }
+.scene { position: relative; width: 100%; max-width: 402px; aspect-ratio: 402 / 268; display: grid; place-items: center; }
+.scene img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; user-select: none; transition: transform .25s ease; }
 .pressed img { transform: scale(1.06,.92); }
 .small { max-width: 150px; }
 @media(prefers-reduced-motion: reduce) { .scene img { transition: none; } }

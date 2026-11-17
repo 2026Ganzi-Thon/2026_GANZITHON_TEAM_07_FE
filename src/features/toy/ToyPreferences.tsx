@@ -4,6 +4,7 @@ import { Volume2, VolumeX } from 'lucide-react';
 import { IconButton } from '../../components/ui';
 import type { ToyType } from '../../lib/domain';
 import { TactileAudio } from './audio';
+import { TOY_ARTWORK, DEFAULT_ARTWORK, isArtwork } from '../../lib/toyArtwork';
 import { TOY_DESIGNS, outline, outlinePath } from './designs';
 import type { Shape } from './designs';
 import styles from './Toy.module.css';
@@ -13,7 +14,7 @@ const PreferencesContext = createContext<Preferences | null>(null);
 export function ToyPreferencesProvider({ children }: { children: ReactNode }) {
   const [audio] = useState(() => new TactileAudio());
   const lifetime = useRef(0);
-  const [designs, setDesigns] = useState<Record<ToyType, Shape>>({ SLANGI: 'drop', SQUISHY: 'mochi', WAKPPU: 'pearl' });
+  const [designs, setDesigns] = useState<Record<ToyType, Shape>>(DEFAULT_ARTWORK);
   useEffect(() => {
     const generation = ++lifetime.current;
     const stop = () => audio.stop();
@@ -45,7 +46,7 @@ export function SoundSettings() {
 export function ToyDesignPicker({ active, disabled = false }: { active: ToyType; disabled?: boolean }) {
   const { designs, choose } = useToyPreferences();
   return <fieldset className={styles.designPicker} disabled={disabled}><legend>모양</legend><div>{TOY_DESIGNS[active].map(design => <button type="button" key={design.id} aria-label={`${design.label} 모양`} aria-pressed={designs[active] === design.id} onClick={() => choose(active, design.id)}>
-    <svg viewBox="0 0 300 290" aria-hidden="true"><path d={outlinePath(outline(design.id))} fill={active === 'WAKPPU' ? design.wax : design.body} stroke={design.shade} strokeWidth="3" /><path d="M120 126q6 7 12 0M169 126q6 7 12 0M144 144q6 7 12 0" fill="none" stroke="#665d57" strokeWidth="3" strokeLinecap="round" /></svg>
+    {isArtwork(design.id) ? <img src={TOY_ARTWORK[design.id].src} alt="" /> : <svg viewBox="0 0 300 290" aria-hidden="true"><path d={outlinePath(outline(design.id))} fill={active === 'WAKPPU' ? design.wax : design.body} stroke={design.shade} strokeWidth="3" /><path d="M120 126q6 7 12 0M169 126q6 7 12 0M144 144q6 7 12 0" fill="none" stroke="#665d57" strokeWidth="3" strokeLinecap="round" /></svg>}
     <span>{design.label}</span>
   </button>)}</div></fieldset>;
 }

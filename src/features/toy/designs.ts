@@ -1,23 +1,13 @@
+import type { ArtworkId } from '../../lib/toyArtwork';
 import type { ToyType } from '../../lib/domain';
 
-export type Shape = 'drop' | 'pudding' | 'cloud' | 'mochi' | 'toast' | 'star' | 'pearl' | 'heart' | 'gem';
+export type Shape = ArtworkId | 'sheep' | 'drop' | 'pudding' | 'cloud' | 'mochi' | 'toast' | 'star' | 'pearl' | 'heart' | 'gem';
 export interface ToyDesign { id: Shape; label: string; light: string; body: string; shade: string; wax: string }
+const design = (id: Shape, label: string, body: string, shade: string): ToyDesign => ({ id, label, body, shade, light: '#fffaf5', wax: body });
 export const TOY_DESIGNS: Record<ToyType, readonly ToyDesign[]> = {
-  SLANGI: [
-    { id: 'drop', label: '물방울', light: '#fffefb', body: '#f3ede3', shade: '#c8c0b3', wax: '#e7dcca' },
-    { id: 'pudding', label: '푸딩', light: '#fff8d8', body: '#e9cb8b', shade: '#b39161', wax: '#e7dcca' },
-    { id: 'cloud', label: '구름', light: '#f6fcff', body: '#c9dce5', shade: '#8ba6b5', wax: '#e7dcca' },
-  ],
-  SQUISHY: [
-    { id: 'mochi', label: '모찌', light: '#f5f3ff', body: '#cbd1e1', shade: '#8c93ae', wax: '#e7dcca' },
-    { id: 'toast', label: '식빵', light: '#fff4d7', body: '#efdbb8', shade: '#bd936c', wax: '#e7dcca' },
-    { id: 'star', label: '별', light: '#fff4ef', body: '#e9bfb5', shade: '#bc8c85', wax: '#e7dcca' },
-  ],
-  WAKPPU: [
-    { id: 'pearl', label: '진주', light: '#f9f6ff', body: '#c7bfdb', shade: '#8b819f', wax: '#e8dfd2' },
-    { id: 'heart', label: '하트', light: '#fff2f0', body: '#e6acae', shade: '#ac727a', wax: '#e5c6c1' },
-    { id: 'gem', label: '조약돌', light: '#ecf9f6', body: '#aed0c5', shade: '#719c91', wax: '#ccd7d4' },
-  ],
+  SLANGI: [design('slime-lavender', '슬랑이 1', '#d4c4ed', '#9985bb'), design('slime-mint', '슬랑이 2', '#cce6d6', '#91b6a3'), design('slime-pink', '슬랑이 3', '#f4c5d5', '#c78eaa')],
+  SQUISHY: [design('sheep', '양', '#f3ede3', '#c8c0b3'), design('pudding-squishy', '푸딩', '#ffe3aa', '#c99851'), design('dumpling', '만두', '#f4e6d7', '#c8ac91')],
+  WAKPPU: [design('butter', '버터', '#ffe99b', '#c4a348'), design('heart', '하트', '#ffc5db', '#cc8ca6'), design('wax-cloud', '구름', '#c6dffd', '#86a7d0')],
 };
 export interface Point { x: number; y: number }
 export const TOY_SIZE = { width: 300, height: 290 };
