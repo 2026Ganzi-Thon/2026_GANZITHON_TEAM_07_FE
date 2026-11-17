@@ -1,3 +1,5 @@
+import { useToyPreferences } from '../toy/ToyPreferences';
+import { DEFAULT_ARTWORK, isArtwork } from '../../lib/toyArtwork';
 import { SettingsLink } from '../../components/SettingsLink';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
@@ -25,6 +27,7 @@ export function RecordBody({ record }: { record: DiaryRecord }) {
 
 }
 export function Result() {
+  const { designs } = useToyPreferences();
   const { id = '' } = useParams(); const user = useProfile(); const preview = usePreview(); const client = useQueryClient();
   const draft = useRef(preview.drafts.get(id));
   const [selected, setSelected] = useState<ToyType | null>(null);
@@ -41,7 +44,7 @@ export function Result() {
   if (query.data?.hidden || query.data?.partial) return <Page title="마음 기록"><p>{query.data.hidden ? '가려 둔 기록이에요.' : '중간에 보관한 이야기예요.'}</p><PrimaryLink to={`/records/${id}`}>기록 확인하기</PrimaryLink></Page>;
   return <Page title="오늘의 마음 정리" titlePlacement="hidden" className={styles.resultPage} action={<SettingsLink><Settings size={21} /></SettingsLink>}>{query.isPending ? <Pending>이야기를 정리하고 있어요.</Pending> : query.isError ? <><ErrorState message={query.error.message} retry={draft.current ? () => query.refetch() : undefined} /><p className={s.small}>{draft.current ? '저장 완료로 처리하지 않았어요. 다시 시도하면 입력 내용을 유지해요.' : '기록을 찾을 수 없어요. 새 대화를 시작할 수 있어요.'}</p></> : <div aria-label="상담 결과" role="region">
       <div className={styles.resultFirstView}>
-      <section className={styles.recommend}><h2>지금 마음에 맞는 말랑이</h2><span className={styles.toyPill} aria-live="polite">{TOYS[active].name}</span><button className={styles.recommendArtwork} aria-label="다른 말랑이 선택 보기" onClick={() => { options.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); options.current?.querySelector<HTMLButtonElement>('button[aria-pressed=true]')?.focus({ preventScroll: true }); }}><Malangi variant={TOYS[active].tint} /></button><p>{TOYS[active].instruction}</p></section>
+      <section className={styles.recommend}><h2>지금 마음에 맞는 말랑이</h2><span className={styles.toyPill} aria-live="polite">{TOYS[active].name}</span><button className={styles.recommendArtwork} aria-label="다른 말랑이 선택 보기" onClick={() => { options.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); options.current?.querySelector<HTMLButtonElement>('button[aria-pressed=true]')?.focus({ preventScroll: true }); }}><Malangi variant={TOYS[active].tint} artwork={isArtwork(designs[active]) ? designs[active] : DEFAULT_ARTWORK[active]} /></button><p>{TOYS[active].instruction}</p></section>
       <section className={styles.insight}><span>대화에서 남은 문장</span><blockquote>{query.data.summary}</blockquote>{advice && <p className={styles.smallAction}><img src={`/assets/design/advice-${advice.kind}.svg`} width={advice.kind === 'walk' ? 14 : 15} height={advice.kind === 'walk' ? 12 : 10} alt="" /><span>{advice.chosen ? '작은 실천' : '작은 조언'} · {advice.text}</span></p>}</section>
       <section className={styles.alternatives} aria-label="다른 말랑이"><header><h2>다른 말랑이도 있어요</h2><span>눌러서 바꿀 수 있어요</span></header><div ref={options} role="group" aria-label="체험할 말랑이 선택">{(Object.keys(TOYS) as ToyType[]).map(type => {
         const content = <><i className={styles[type]} /><strong>{TOYS[type].name}</strong><small>{({ SLANGI: '불안 · 우울', SQUISHY: '속상함 · 슬픔', WAKPPU: '분노 · 스트레스' })[type]}</small></>;
@@ -97,7 +100,7 @@ export function RecordDetail() {
           {record.context.slots.ACTION && <p className={styles.recordAction}><Check size={13} /><span>작은 실천 · {record.context.slots.ACTION}</span></p>}
           {cardActions}
         </section>
-        {record.recommended && <section className={styles.usedToy}><h2>당시 추천 말랑이 · {TOYS[record.recommended].name}</h2><Malangi variant={TOYS[record.recommended].tint} /><PrimaryLink to={`/malangi?type=${record.recommended}`}>말랑이 만나기</PrimaryLink></section>}
+        {record.recommended && <section className={styles.usedToy}><h2>당시 추천 말랑이 · {TOYS[record.recommended].name}</h2><Malangi variant={TOYS[record.recommended].tint} artwork={DEFAULT_ARTWORK[record.recommended]} /><PrimaryLink to={`/malangi?type=${record.recommended}`}>말랑이 만나기</PrimaryLink></section>}
       </>}<Link className={s.secondary} to={back}>{params.get('manage') === '1' ? '기록 관리로' : '마음 보관함으로'}</Link>
     </>}
     {confirm && <Modal title="이 기록을 지울까요?" dismissible={!remove.isPending} onClose={() => { if (!remove.isPending) setConfirm(false); }}><p>이 기록과 대화 내용을 지워요. 삭제한 기록은 되돌릴 수 없어요.</p>{remove.isError && <p className={s.error} role="alert">{remove.error.message}</p>}<div className={s.stack}><button className={`${s.primary} ${s.danger}`} onClick={() => remove.mutate()} disabled={remove.isPending}>{remove.isPending ? '지우고 있어요…' : remove.isError ? '다시 삭제하기' : '기록 지우기'}</button><button className={s.secondary} onClick={() => setConfirm(false)} disabled={remove.isPending}>기록 유지하기</button></div></Modal>}

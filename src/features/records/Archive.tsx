@@ -12,6 +12,7 @@ import { emotionPresentation, newestFirst, presentEmotion, weekDates, weeklySumm
 import s from '../../components/Page.module.css';
 import styles from './Archive.module.css';
 import { RecordManagement } from './RecordManagement';
+import { EmotionIcon } from './EmotionIcon';
 
 export function Archive() {
   const [params] = useSearchParams();
@@ -61,7 +62,7 @@ function ArchiveContent() {
       {view === 'week' && <section className={styles.week} aria-label="주간 기록 달력">
         <div className={styles.weekGrid}>{week.map((date, index) => { const entries = entriesFor(date); const key = localDate(date); return <button key={key} aria-label={`${key}, 기록 ${entries.length}개${entries.length ? `, 최근 감정 ${entries[0].context.primary ?? '미선택'}` : ''}`} aria-pressed={selected === key} aria-current={key === localDate(new Date()) ? 'date' : undefined} onClick={() => select(date)}>
           <span>{['월', '화', '수', '목', '금', '토', '일'][index]}</span>
-          <span className={styles.weekEmotion} data-empty={!entries.length} aria-hidden="true">{entries.length ? presentEmotion(entries[0].context.primary).emoji : ''}{entries.length > 1 && <small className={styles.badge}>{entries.length}</small>}</span>
+          <span className={styles.weekEmotion} data-empty={!entries.length} aria-hidden="true">{entries.length ? <EmotionIcon emotion={entries[0].context.primary} /> : null}{entries.length > 1 && <small className={styles.badge}>{entries.length > 99 ? '99+' : entries.length}</small>}</span>
           <span>{date.getDate()}</span>
         </button>; })}</div>
         <div className={styles.weekSummary} aria-label="주간 요약"><span>이번 주 <strong>{summary.count}회</strong> 기록</span><span title={`전후 점수를 모두 남긴 ${summary.pairedCount}개 기록 기준`}>평균 강도 <strong>{summary.pre?.toFixed(1) ?? '—'} → {summary.post?.toFixed(1) ?? '—'}</strong></span></div>
@@ -71,7 +72,7 @@ function ArchiveContent() {
         {visible.length ? <div className={styles.recordList}>{visible.map(record => {
           const date = new Date(record.createdAt);
           return <Link key={record.id} to={`/records/${record.id}`}>
-            <span className={styles.listEmoji} aria-hidden="true">{presentEmotion(record.context.primary).emoji}</span>
+            <span className={styles.listEmoji} aria-hidden="true"><EmotionIcon emotion={record.context.primary} /></span>
             <div className={styles.listContent}><div className={styles.meta}><strong>{record.context.primary ?? '마음 기록'}</strong><time dateTime={record.createdAt}>{date.getMonth() + 1}.{date.getDate()} {date.toLocaleDateString('ko-KR', { weekday: 'short' })} · {date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })}</time></div>
               <p className={styles.summary}>{record.summary}</p><p className={styles.score}>강도 {record.context.pre ?? '—'} → {record.context.post ?? '—'} · {record.recommended ? TOYS[record.recommended].name : '중간 보관'}</p></div>
             <ChevronRight size={16} aria-hidden="true" />

@@ -23,10 +23,10 @@
 .weekGrid { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); padding: 12px 8px; gap: 0; }
 .weekGrid button { display: flex; flex-direction: column; align-items: center; min-width: 0; gap: 10px; padding: 6px 0; border-radius: 12px; background: transparent; color: #767676; font-size: 12px; line-height: 16px; }
 .weekGrid button[aria-pressed=true] { color: #2b2734; font-weight: 600; }
-.weekEmotion { position: relative; display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid #fff; border-radius: 50%; background: #fff; font-size: 19px; }
+.weekEmotion { position: relative; display: grid; place-items: center; width: 36px; height: 36px; margin-top: 8px; border: 1px solid transparent; border-radius: 50%; }
 .weekEmotion[data-empty=true] { background: transparent; border: 1px dashed #e4e8ee; }
 .weekGrid button[aria-pressed=true] .weekEmotion { outline: 1px solid #868079; outline-offset: 2px; }
-.badge { position: absolute; right: -3px; top: -5px; display: grid; place-items: center; min-width: 17px; height: 17px; padding: 0 3px; border-radius: 10px; background: #393736; color: #fff; font-size: 10px; font-weight: 500; line-height: 17px; }
+.badge { position: absolute; z-index: 1; right: -2px; top: -17px; display: grid; place-items: center; min-width: 15px; height: 15px; padding: 0 3px; border-radius: 10px; background: #393736; color: #fff; box-shadow: 0 0 0 2px #f7f9fb; font-size: 9px; font-weight: 500; line-height: 15px; }
 .weekSummary { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; border-top: 1px solid #e2e6ed; padding: 12px; color: #767676; font-size: 11px; line-height: 17px; }
 .weekSummary strong { color: #393736; font-weight: 600; }
 .dayTitle { display: flex; align-items: center; gap: 8px; font-size: 14px; line-height: 20px; font-weight: 600; margin: 18px 0 4px; }.dayTitle > span { font-size: 11px; color: #777; }
