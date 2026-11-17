@@ -1,0 +1,13 @@
+.canvas { min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 32px; background: radial-gradient(ellipse at 20% 30%, #f6f1e9, transparent 60%), #e8e5e0; }
+.app { position: relative; width: 100%; max-width: 460px; height: min(900px, calc(100dvh - 64px)); min-height: 580px; background: var(--ivory); border-radius: 28px; overflow: hidden; box-shadow: 0 24px 90px #54504716, 0 0 0 1px #fff8; isolation: isolate; }
+.aside { position: fixed; left: max(36px, calc(50vw - 560px)); bottom: 100px; display: flex; flex-direction: column; gap: 20px; color: #79756e; }
+.aside > span:first-of-type { font-size: 18px; font-weight: 500; letter-spacing: -.6px; }
+.aside p { font-size: 13px; line-height: 2; margin: 0; color: #827e76; }
+.aside .edition { font-size: 8px; letter-spacing: 2px; margin-top: 40px; }
+.vertical { position: fixed; right: max(40px, calc(50vw - 400px)); top: 50%; writing-mode: vertical-rl; color: #908b83; letter-spacing: 5px; font-size: 11px; }
+@media (max-width: 1050px) { .aside, .vertical { display: none; } }
+@media (max-width: 600px) { .canvas { padding: 0; min-height: 100dvh; }.app { max-width: 480px; height: var(--visual-height, 100dvh); min-height: 0; border-radius: 0; box-shadow: none; } }
+@media (max-height: 650px) and (min-width: 601px) { .canvas { padding: 0; }.app { height: 100dvh; min-height: 0; border-radius: 0; } }
+
+.canvas { background: #e5e2de; }.app { max-width: 402px; }
+@media(max-width:600px) { .app { max-width: 600px; } }

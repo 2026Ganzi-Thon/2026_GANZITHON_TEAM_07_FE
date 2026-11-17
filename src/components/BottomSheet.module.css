@@ -1,0 +1,14 @@
+.sheet { position: fixed; top: auto; right: auto; left: var(--sheet-left, 0); bottom: var(--sheet-bottom, 0); width: var(--sheet-width, 100%); max-width: none; margin: 0; padding: 0; box-sizing: border-box; border: 1px solid #fff9; border-bottom: 0; border-radius: 28px 28px 0 0; background: var(--ivory); color: var(--text); overflow: auto; overscroll-behavior: contain; box-shadow: 0 -12px 60px #302c2620; animation: rise .28s cubic-bezier(.2,.8,.2,1); }
+.sheet::backdrop { background: #25283044; animation: fade .28s ease; }
+.inner { padding: 0 24px calc(24px + var(--safe-bottom)); }
+.header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 20px; }
+.header h2 { font-size: 19px; font-weight: 600; letter-spacing: -.5px; margin: 0; }
+.dragHandle { height: 32px; display: grid; place-items: center; touch-action: none; cursor: grab; }
+.dragHandle span { width: 34px; height: 4px; border-radius: 4px; background: #c5bdb3; }
+.closing { pointer-events: none; animation: lower .2s ease-in forwards; }
+.closing::backdrop { animation: fadeOut .2s ease-in forwards; }
+@keyframes rise { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes lower { from { transform: translateY(0); } to { transform: translateY(100%); } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeOut { to { opacity: 0; } }
+@media (max-height: 450px) { .header { margin-bottom: 8px; }.inner { padding-bottom: 16px; } }
