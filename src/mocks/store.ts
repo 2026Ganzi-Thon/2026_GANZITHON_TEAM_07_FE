@@ -12,7 +12,7 @@ export class PreviewStore {
   private owner() { if (!this.user) throw new Error('UNAUTHORIZED'); return this.user.id; }
   inventory() {
     const id = this.owner();
-    if (!this.inventories.has(id)) this.inventories.set(id, { selected: 'SLANGI', unlocked: Object.keys(TOYS) as ToyType[], name: TOYS.SLANGI.name });
+    if (!this.inventories.has(id)) this.inventories.set(id, { selected: 'SQUISHY', unlocked: Object.keys(TOYS) as ToyType[], name: TOYS.SQUISHY.name });
     return this.inventories.get(id)!;
   }
   select(type: ToyType) {

@@ -1,3 +1,4 @@
+import { SettingsLink } from '../../components/SettingsLink';
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -24,11 +25,11 @@ export function Toy() {
   const entry = useChatEntry();
   const { audio } = useToyPreferences();
   const requested = params.get('type') as ToyType | null;
-  const active = requested && Object.hasOwn(TOYS, requested) ? requested : inventory.data?.selected ?? 'SLANGI';
+  const active = requested && Object.hasOwn(TOYS, requested) ? requested : inventory.data?.selected ?? 'SQUISHY';
   const toy = TOYS[active];
   const interaction = useToyInteraction(active);
   const selection = useMutation({ mutationFn: previewApi.selectToy, onSuccess: data => { client.setQueryData(key, data); setParams({ type: data.selected }, { replace: true }); setOpen(false); } });
-  return <main className={styles.page}><header className={styles.header}><Link to="/" aria-label="메인으로"><ArrowLeft size={21} /></Link><span /><Link to="/settings" aria-label="MY 및 설정"><Settings size={21} /></Link></header>
+  return <main className={styles.page}><header className={styles.header}><Link to="/" aria-label="메인으로"><ArrowLeft size={21} /></Link><span /><SettingsLink><Settings size={21} /></SettingsLink></header>
     {inventory.isPending ? <Pending /> : inventory.isError ? <ErrorState message={inventory.error.message} retry={() => inventory.refetch()} /> : <>
     <div className={styles.interactionControls}><button className={styles.select} onClick={e => { e.currentTarget.focus(); setOpen(true); }}>{toy.name}<ChevronDown size={16} /></button><SoundButton /></div>
     <section className={styles.center}><h1 className="sr-only">{toy.name}{active === 'WAKPPU' ? '과' : '와'} 쉬어가요.</h1><p className="sr-only">{toy.instruction}</p>

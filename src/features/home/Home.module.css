@@ -20,7 +20,7 @@
 .footer { position: relative; flex-shrink: 0; padding: 0 24px calc(12px + var(--safe-bottom)); transition: opacity .3s ease, transform .4s ease; }
 .home[data-playing=true] .footer { opacity: 0; transform: translateY(10px); pointer-events: none; }
 .chatTrigger { width: 100%; min-height: 76px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; background: transparent; border-radius: 22px; color: var(--text); touch-action: none; }
-.chatTrigger > span:last-child { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; }
+.chatTrigger > span:last-child { display: flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 500; }
 .handle { width: 34px; height: 4px; border-radius: 4px; background: #9d968c; opacity: .65; }
 @media (max-width: 370px) { .characterButton { transform: scale(1); }.header { padding-left: 20px; padding-right: 20px; } }
 @media (max-height: 650px) { .characterButton { transform: scale(.85); }.content { padding-bottom: 12px; } }
@@ -74,3 +74,15 @@
 @media(max-height:650px) { .characterGroup { width: min(100%, 320px); } }
 @media(max-height:450px) { .characterGroup { width: min(100%, 210px); }.characterGroup .invitation { bottom: calc(77% + 20px); left: 9%; font-size: 11px; }.invitation > span { padding: 6px 12px; } }
 @media(prefers-reduced-motion:reduce) { .content[data-resting=true] .invitation > span { animation: none; }.characterGroup .invitation { transition: none; } }
+
+/* D54: one toolbar, at the existing type selector height; keep the canvas geometry stable. */
+.header { height: calc(62px + var(--safe-top)); flex-basis: calc(62px + var(--safe-top)); padding: 0; }
+.header > div { position: absolute; top: calc(80px + var(--safe-top)); right: 24px; }
+.header > div[data-subtle=true] > button { width: 44px; height: 44px; border: 1px solid #fff9f218; background: #fff9f226; box-shadow: none; }
+.header > div[data-subtle=true] > button[aria-expanded=true] { background: #fff9f240; border-color: #fff9f230; }
+.playControls { right: 78px; min-height: 44px; }
+.typeSelect { min-height: 44px; border: 1px solid #fff9f218; }
+.playActions button { width: 44px; height: 44px; border: 1px solid #fff9f218; background: #fff9f226; box-shadow: none; }
+.playReset { align-items: center; justify-content: center; }
+.playReset .finishPlay { font-size: 14px; font-weight: 500; }
+@media(max-height:450px) { .header > div { top: 58px; } .playReset { bottom: 8px; } .playReset button { padding-inline: 10px; } }
