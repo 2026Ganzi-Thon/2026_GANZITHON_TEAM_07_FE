@@ -7,6 +7,7 @@ import { Home } from './features/home/Home';
 import { Toy } from './features/toy/Toy';
 import { ToyPreferencesProvider } from './features/toy/ToyPreferences';
 import { Login, Settings, Help } from './features/account/Account';
+import { Chat } from './features/chat/Chat';
 
 export function App() {
   useEffect(() => {
@@ -19,6 +20,7 @@ export function App() {
     <Route path="/" element={<Home />} />
     <Route path="/login" element={<Login />} /><Route path="/settings" element={<Settings />} /><Route path="/help" element={<Help />} />
     <Route path="/malangi" element={<RequirePreview><Toy /></RequirePreview>} />
+    <Route path="/chat" element={<RequirePreview><Chat /></RequirePreview>} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes></div></div></ToyPreferencesProvider></PreviewProvider>;
 }
