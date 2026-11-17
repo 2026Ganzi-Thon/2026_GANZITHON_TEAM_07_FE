@@ -135,7 +135,7 @@ test('archive count waits for initial success and distinguishes error from empty
 
 test('wax background and heart notch do not break shell; sound controls align across screens', async ({ page }, info) => {
   await login(page); await page.getByTestId('toy-interaction').click();
-  const sound = page.getByRole('button', { name: '효과음 켜기', exact: true });
+  const sound = page.getByRole('button', { name: /효과음 (켜기|끄기)/, exact: true });
   await expect(sound).toBeVisible();
   await expect(sound.locator('..').locator('..')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)');
   const homeBox = (await sound.boundingBox())!;
@@ -145,7 +145,7 @@ test('wax background and heart notch do not break shell; sound controls align ac
   const toyBox = (await sound.boundingBox())!;
   expect(Math.abs(homeBox.x - toyBox.x)).toBeLessThan(2); expect(Math.abs(homeBox.y - toyBox.y)).toBeLessThan(2);
   const canvas = page.locator('canvas');
-  for (const shape of ['진주', '하트', '조약돌']) {
+  for (const shape of ['버터', '하트', '구름']) {
     await page.getByRole('button', { name: '왁뿌볼', exact: true }).click();
     await page.getByRole('button', { name: `${shape} 모양` }).click();
     await page.getByRole('button', { name: '닫기', exact: true }).click();

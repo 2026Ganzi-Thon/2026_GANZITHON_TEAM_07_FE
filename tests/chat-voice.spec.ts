@@ -85,6 +85,10 @@ test('speech interim updates one chat bubble, final sends once, cards remain acc
   await speech(page); await login(page); await enter(page);
   await page.getByRole('button', { name: '음성 대화 시작' }).click();
   await expect(page.getByRole('region', { name: '음성 대화', exact: true })).toBeVisible();
+  const portrait = page.getByRole('img', { name: '말랑이를 안고 있는 테스' });
+  await expect(portrait).toHaveAttribute('src', '/assets/design/socrates-sleeping-sheep.png');
+  await expect.poll(() => portrait.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth === 402 && el.naturalHeight === 682)).toBe(true);
+  await expect(page.getByRole('button', { name: '음성 대화 중 채팅 보기' }).last().locator('img')).toHaveAttribute('src', '/assets/design/voice-chat-icon.png');
   await emit(page, '출근길');
   await page.getByRole('button', { name: '음성 대화 중 채팅 보기' }).last().click();
   await expect(page.getByTestId('live-transcript')).toHaveText('출근길듣는 중');
@@ -182,14 +186,18 @@ test('network retry and hidden page release recognition without losing unfinishe
   await expect(page.getByRole('log')).not.toContainText('늦은 전사');
 });
 
-test('voice uses inspected Figma dimensions and keeps controls reachable at small sizes', async ({ page }, info) => {
+test('voice keeps Figma controls and the compact panel reachable at small sizes', async ({ page }, info) => {
   await speech(page); await page.setViewportSize({ width: 402, height: 874 });
   await login(page); await enter(page);
   await page.getByRole('button', { name: '음성 대화 시작' }).click();
   const view = page.getByRole('region', { name: '음성 대화', exact: true });
   const panel = view.locator('[class*="panel"]');
   await expect(panel).toHaveCSS('border-radius', '67px');
-  await expect(panel).toHaveCSS('min-height', '324px');
+  const panelBox = await panel.boundingBox();
+  const initialViewBox = await view.boundingBox();
+  expect(panelBox!.height).toBeGreaterThanOrEqual(250);
+  expect(panelBox!.height).toBeLessThanOrEqual(324);
+  expect(panelBox!.height / initialViewBox!.height).toBeLessThan(0.4);
   await expect(view.getByLabel('음성 대화 시간')).toHaveCSS('font-size', '32px');
   await expect(view.getByRole('button', { name: '마이크 음소거' })).toHaveCSS('width', '115px');
   await expect(view.getByRole('button', { name: '음성 대화 중단' })).toHaveCSS('width', '59px');
@@ -199,7 +207,7 @@ test('voice uses inspected Figma dimensions and keeps controls reachable at smal
     await page.setViewportSize(viewport);
     const statue = await view.getByRole('img', { name: '말랑이를 안고 있는 테스' }).boundingBox();
     const viewBox = await view.boundingBox();
-    expect(statue!.y - viewBox!.y).toBeGreaterThanOrEqual(64);
+    expect(statue!.y - viewBox!.y).toBeGreaterThanOrEqual(viewport.height <= 600 ? 54 : 64);
     await emit(page, '말하는 내용이 길어져도 화면 안에서 읽고 중단할 수 있어요. '.repeat(5));
     for (const button of await view.getByRole('button').all()) {
       await button.scrollIntoViewIfNeeded();
@@ -312,4 +320,88 @@ test('Korean words and particles remain together in chat and finish dialog', asy
   await page.getByRole('button', { name: '끝내기', exact: true }).click();
   await expectWholeKoreanWords(page, 'dialog p, dialog h2, dialog button');
   await page.screenshot({ path: `artifacts/d41-wrapping-${info.project.name}.png` });
+});
+
+
+test('voice input resumes after cards and shows replies without speaking', async ({ page }, info) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: class { text: string; constructor(text: string) { this.text = text; } } });
+  });
+  await speech(page); await login(page); await enter(page);
+  await page.getByRole('button', { name: '음성 대화 시작' }).click();
+  await emit(page, '출근길에 지하철을 놓쳤어', true);
+  await page.getByRole('group', { name: '대표 감정', exact: true }).getByRole('button', { name: '불안', exact: true }).click();
+  await page.getByRole('button', { name: '이 마음으로 이어가기' }).click();
+  await page.getByRole('button', { name: '5점', exact: true }).click();
+  await page.getByRole('button', { name: '천천히 이어가기' }).click();
+  await expect.poll(() => page.evaluate(() => (window as unknown as { speechQA: { instances: unknown[] } }).speechQA.instances.length), { timeout: 10000 }).toBeGreaterThan(1);
+  await expect(page.getByRole('status').filter({ hasText: '그대의 이야기를 듣고 있소' })).toBeVisible();
+  await page.getByRole('button', { name: '음성 화면', exact: true }).click();
+  await expect(page.getByLabel('테스의 답변')).toBeVisible();
+
+  expect(await page.evaluate(() => (window as unknown as { speechQA: { speaks: string[] } }).speechQA.speaks)).toEqual([]);
+  await page.screenshot({ path: `artifacts/d49-voice-input-${info.project.name}.png`, scale: 'css' });
+  await emit(page, '회의에서 내 의견을 충분히 설명하지 못해서 아쉬웠고 다음에는 차분하게 이야기하고 싶어요.');
+  for (const [width, height] of [[360, 640], [390, 844], [430, 932], [844, 390], [1280, 720]]) {
+    await page.setViewportSize({ width, height });
+    const mic = page.getByRole('button', { name: '마이크 음소거', exact: true });
+    await mic.scrollIntoViewIfNeeded();
+    const box = await mic.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.y).toBeGreaterThanOrEqual(0);
+    expect(box!.y + box!.height).toBeLessThanOrEqual(height);
+    expect(await page.getByLabel('음성 대화 시간').locator('../..').evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+    await expect(page.getByLabel('인식 중인 이야기')).toBeVisible();
+  }
+
+  await page.getByRole('button', { name: '음성 대화 중단' }).click();
+  await page.getByRole('button', { name: '대화 설정', exact: true }).click();
+  await expect(page.getByRole('dialog').getByRole('checkbox')).toHaveCount(0);
+  await expect(page.getByRole('dialog')).toContainText('테스의 답변은 글로 보여요.');
+
+});
+
+test('microphone check distinguishes denied permission and cancels late permission without capturing', async ({ page }) => {
+  await speech(page); await login(page); await enter(page);
+  await page.getByRole('button', { name: '음성 대화 시작' }).click();
+  await page.evaluate(() => (window as unknown as { speechQA: { instances: { onerror: (event: unknown) => void }[] } }).speechQA.instances.at(-1)!.onerror({ error: 'network' }));
+  await page.evaluate(() => Object.defineProperty(navigator, 'mediaDevices', { configurable: true, value: { getUserMedia: async () => { throw new DOMException('', 'NotAllowedError'); } } }));
+  await page.getByRole('button', { name: '마이크 확인하기' }).click();
+  await expect(page.getByRole('status').filter({ hasText: '마이크 권한이 꺼져' })).toBeVisible();
+  await page.evaluate(() => {
+    const qa = { resolve: undefined as unknown as (stream: unknown) => void, stops: 0 }; Object.assign(window, { micQA: qa });
+    Object.defineProperty(navigator, 'mediaDevices', { configurable: true, value: { getUserMedia: () => new Promise(resolve => { qa.resolve = resolve; }) } });
+  });
+  await page.getByRole('button', { name: '마이크 확인하기' }).click();
+  await page.getByRole('button', { name: '마이크 확인 중단' }).click();
+  await page.evaluate(() => {
+    const qa = (window as unknown as { micQA: { resolve: (stream: unknown) => void; stops: number } }).micQA;
+    qa.resolve({ getTracks: () => [{ stop: () => qa.stops++ }] });
+  });
+  await expect.poll(() => page.evaluate(() => (window as unknown as { micQA: { stops: number } }).micQA.stops)).toBe(1);
+  await expect(page.getByLabel('마이크 입력 크기')).toHaveCount(0);
+});
+
+
+test('invalid final utterance keeps draft and starts listening again', async ({ page }) => {
+  await speech(page); await login(page); await enter(page);
+  await page.getByRole('button', { name: '음성 대화 시작' }).click();
+  await emit(page, 'ㄴㄴ', true);
+  await expect.poll(() => page.evaluate(() => (window as unknown as { speechQA: { instances: unknown[] } }).speechQA.instances.length)).toBeGreaterThan(1);
+  await page.getByRole('button', { name: '음성 대화 중 채팅 보기' }).last().click();
+  await expect(page.getByRole('textbox')).toHaveValue('ㄴㄴ');
+  await emit(page, '친구가 약속을 취소해서 서운해', true);
+  await expect(page.getByRole('region', { name: '감정 선택' })).toBeVisible();
+});
+
+
+test('started recognition without any result times out rather than listening forever', async ({ page }) => {
+  await speech(page); await login(page); await enter(page);
+  await page.clock.install();
+  await page.getByRole('button', { name: '음성 대화 시작' }).click();
+  await page.clock.runFor(20100);
+  await expect(page.getByRole('alert')).toContainText('말을 글로 바꾸는 응답이 오지 않아요');
+  await expect(page.getByRole('status').filter({ hasText: '그대의 이야기를 듣고 있소' })).toHaveCount(0);
+  await page.getByRole('button', { name: '글로 계속하기', exact: true }).click();
+  await expect(page.getByRole('textbox')).toBeEnabled();
 });

@@ -115,6 +115,16 @@ test('recommendation candidates only select until the CTA is activated', async (
   await page.screenshot({ path: `artifacts/toy-selected-${info.project.name}.png`, fullPage: true });
   await page.getByRole('link', { name: '왁뿌볼 만지러 가기' }).click();
   await expect(page).toHaveURL(/\/malangi\?type=WAKPPU/);
+  await expect(page.getByTestId('toy-interaction')).toBeEnabled();
+  await page.getByRole('button', { name: '왁뿌볼', exact: true }).click();
+  await page.getByRole('button', { name: '하트 모양' }).click();
+  await page.getByRole('button', { name: '닫기', exact: true }).click();
+  await expect(page.locator('canvas')).toHaveAttribute('data-rendered-design', 'heart');
+  await page.goBack();
+  await page.getByRole('button', { name: '왁뿌볼 선택', exact: true }).click();
+  await expect(page.getByRole('button', { name: '다른 말랑이 선택 보기' }).locator('img')).toHaveAttribute('src', '/assets/design/heart.png');
+  await page.getByRole('link', { name: '왁뿌볼 만지러 가기' }).click();
+  await expect(page.locator('canvas')).toHaveAttribute('data-rendered-design', 'heart');
   const records = await page.evaluate(async () => (await fetch('/__preview__/records')).json());
   expect(records[0].recommended).toBe('SQUISHY');
 });
@@ -126,9 +136,12 @@ test('home invitation tracks the visible artwork at supported sizes and respects
     await page.setViewportSize(viewport);
     await expect(page.locator('canvas')).toHaveAttribute('data-artwork', 'lamb');
     // Read both bounds in one frame and wait for viewport layout to settle.
-    await expect.poll(() => page.locator('canvas').evaluate((canvas: HTMLCanvasElement) => {
+    await expect.poll(() => page.locator('canvas').evaluate(async (canvas: HTMLCanvasElement) => {
       const { width, height } = canvas;
-      const pixels = canvas.getContext('2d')!.getImageData(0, 0, width, height).data;
+      const image = new Image(); image.src = canvas.toDataURL(); await image.decode();
+      const copy = document.createElement('canvas'); copy.width = width; copy.height = height;
+      const context = copy.getContext('2d')!; context.drawImage(image, 0, 0);
+      const pixels = context.getImageData(0, 0, width, height).data;
       let firstRow = height;
       for (let y = 0; y < height; y++) {
         let opaque = 0;

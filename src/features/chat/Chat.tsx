@@ -1,3 +1,4 @@
+import { MicrophoneCheck } from './MicrophoneCheck';
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router';
@@ -81,10 +82,9 @@ export function Chat() {
   const failed = mutation.isError;
   const fresh = state.messages.length === 1;
   const voice = useVoice({ ready: canType && !pending && !failed && !confirmEnd && !infoOpen,
-    reply: state.messages.filter(message => message.role === 'assistant').at(-1),
     onFinal: text => send(text, false), onDraft: text => setDraft(current => current ? `${current} ${text}` : text),
   });
-  const voiceStatus = voice.error ? '음성 인식을 확인해 주세요' : voice.muted ? '마이크가 꺼져 있어요' : voice.speaking ? '테스가 이야기하고 있어요' : pending ? '테스가 생각하고 있어요' : !canType ? '채팅에서 마음을 골라주세요' : voice.listening ? '그대의 이야기를 듣고 있소…' : '마이크를 연결하고 있어요';
+  const voiceStatus = voice.error ? '음성 인식을 확인해 주세요' : voice.muted ? '마이크가 꺼져 있어요' : pending ? '테스가 생각하고 있어요' : !canType ? '채팅에서 마음을 골라주세요' : voice.listening ? '그대의 이야기를 듣고 있소…' : '마이크를 연결하고 있어요';
   const showVoice = voice.active && voiceScreen && canType;
   useEffect(() => { if (!canType || !voice.active) setVoiceScreen(false); }, [canType, voice.active]);
   useEffect(() => {
@@ -166,7 +166,7 @@ export function Chat() {
     {hasNew && <button className={styles.newMessages} inert={showVoice} aria-hidden={showVoice} onClick={() => toBottom()}><ArrowDown size={14} /> 새 내용 보기</button>}
     <footer className={styles.composerArea} inert={showVoice} aria-hidden={showVoice}>
       {voice.active && <div className={styles.voiceBar}><span role="status">{voiceStatus}</span><button onClick={() => setVoiceScreen(true)}>음성 화면</button><button onClick={voice.toggleMute}>{voice.muted ? '마이크 켜기' : '음소거'}</button><button onClick={voice.stop}>중단</button></div>}
-      {voice.error && !voiceScreen && <div role="alert" className={styles.voiceError}>{voice.error}{voice.active && <button onClick={voice.retry}>다시 시도하기</button>}<button onClick={() => { voice.stop(); voice.dismissError(); }}>글로 계속하기</button></div>}
+      {voice.error && !voiceScreen && <div role="alert" className={styles.voiceError}>{voice.error}<MicrophoneCheck />{voice.active && <button onClick={voice.retry}>다시 시도하기</button>}<button onClick={() => { voice.stop(); voice.dismissError(); }}>글로 계속하기</button></div>}
       {inputError && <p className={styles.inputError} role="alert">{inputError}</p>}
       {ended ? <Link className={styles.closedComposer} to="/"><MessageCircle size={17} />대화를 마쳤어요. 메인으로 돌아가기 <ArrowRight size={16} /></Link> : <form className={`${styles.composer} ${!canType ? styles.composerInactive : ''}`} onSubmit={e => { e.preventDefault(); if (!composing.current) send(draft); }}>
         <button type="button" className={styles.micButton} aria-label="음성 대화 시작" disabled={!canType || pending || failed} onClick={startVoice}><Mic size={20} strokeWidth={1.5} /></button>
@@ -175,7 +175,7 @@ export function Chat() {
       </form>}
       {draft.length > 1600 && <div className={styles.composerHint}>{draft.length}/2,000</div>}
     </footer>
-    {showVoice && <VoiceView voice={voice} status={voiceStatus} onChat={() => { setVoiceScreen(false); toBottom('instant'); }} />}
+    {showVoice && <VoiceView voice={voice} status={voiceStatus} reply={pending || fresh ? undefined : state.messages.filter(message => message.role === 'assistant').at(-1)?.text} onChat={() => { setVoiceScreen(false); toBottom('instant'); }} />}
     {confirmEnd && <Modal title="대화를 마무리할까요?" dismissible={!savePartial.isPending} onClose={() => { if (!savePartial.isPending) setConfirmEnd(false); }}><p>{state.messages.some(message => message.role === 'user') ? '보낸 이야기까지만 보관하거나, 대화를 더 이어갈 수 있어요. 아직 보내지 않은 글은 저장하지 않아요.' : '아직 나눈 이야기가 없어요. 저장 없이 메인으로 돌아갈 수 있어요.'}</p>
       {savePartial.isError && <p role="alert">{savePartial.error.message} 대화 내용은 그대로 있어요.</p>}
       {state.messages.some(message => message.role === 'user') && <button className={styles.cardSubmit} disabled={savePartial.isPending} onClick={saveAndLeave}>{savePartial.isPending ? '보관하고 있어요…' : savePartial.isError ? '다시 보관하기' : '여기까지 보관하고 나가기'}</button>}
@@ -183,7 +183,7 @@ export function Chat() {
       {failed && <p className={styles.settingNote}>답변을 받지 못했어요. 여기까지 중간 보관하거나, 대화로 돌아가 다시 시도해 주세요.</p>}
       {state.primary && <button className={styles.finishScore} disabled={failed || pending || savePartial.isPending} onClick={finish}>점수 남기고 마무리하기</button>}
       <div className={styles.discardArea}><button disabled={savePartial.isPending} onClick={() => { voice.stop(); navigate('/', { replace: true }); }}>저장 없이 나가기</button></div></Modal>}
-    {infoOpen && <Modal title="대화 설정" onClose={() => setInfoOpen(false)}><label className={styles.settingRow}><span>음성 대화에서 답변 읽어주기</span><input type="checkbox" checked={voice.readAloud} onChange={event => voice.setReadAloud(event.target.checked)} /></label><p className={styles.settingNote}>마이크 버튼으로 말하거나 글로 이야기를 나눌 수 있어요. 음성 인식에는 브라우저의 마이크 권한이 필요해요.</p></Modal>}
+    {infoOpen && <Modal title="대화 설정" onClose={() => setInfoOpen(false)}><p className={styles.settingNote}>말하는 내용이 글로 나타나고, 인식기가 문장을 확정하면 자동으로 보내요. 테스의 답변은 글로 보여요.</p><p className={styles.settingNote}>채팅 보기로 바꿔도 음성 입력은 계속돼요. 중단을 누르면 직접 글을 입력할 수 있어요. 음성 인식에는 브라우저의 마이크 권한이 필요해요.</p></Modal>}
 
   </main>;
 }

@@ -13,43 +13,35 @@ type SpeechWindow = Window & { SpeechRecognition?: new () => Recognition; webkit
 const recognitionConstructor = () => (window as SpeechWindow).SpeechRecognition ?? (window as SpeechWindow).webkitSpeechRecognition;
 
 /** Browser speech adapter. Interim text is UI-only; only a final utterance enters the conversation. */
-export function useVoice({ ready, reply, onFinal, onDraft }: {
-  ready: boolean; reply: { id: string; text: string } | undefined;
+export function useVoice({ ready, onFinal, onDraft }: {
+  ready: boolean;
   onFinal: (text: string) => void; onDraft: (text: string) => void;
 }) {
   const [active, setActive] = useState(false);
   const [muted, setMuted] = useState(false);
   const [listening, setListening] = useState(false);
-  const [speaking, setSpeaking] = useState(false);
   const [interim, setInterim] = useState('');
   const [error, setError] = useState('');
   const [elapsed, setElapsed] = useState(0);
-  const [readAloud, setReadAloud] = useState(true);
   const [cycle, setCycle] = useState(0);
   const engine = useRef<Recognition | null>(null);
   const live = useRef('');
   const callbacks = useRef({ onFinal, onDraft }); callbacks.current = { onFinal, onDraft };
-  const spoken = useRef<string | undefined>(undefined);
-  const generation = useRef(0);
   const emptyEnds = useRef(0);
   const startedAt = useRef<number | null>(null);
   const supported = !!recognitionConstructor();
-  // This render is about to start TTS; do not briefly start a microphone using stale speaking state.
-  const awaitingSpeech = active && readAloud && !!reply && spoken.current !== reply.id
-    && !!window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined';
   function cancelCapture(preserve = false) {
     const current = engine.current; engine.current = null;
     if (current) { current.onstart = null; current.onresult = null; current.onerror = null; current.onend = null; current.abort(); }
     if (preserve && live.current.trim()) callbacks.current.onDraft(live.current.trim());
     live.current = ''; setInterim(''); setListening(false);
   }
-  function cancelSpeech() { generation.current++; window.speechSynthesis?.cancel(); setSpeaking(false); }
-  function stop() { cancelCapture(true); cancelSpeech(); setActive(false); setMuted(false); }
+  function stop() { cancelCapture(true); setActive(false); setMuted(false); }
   function start() {
     setError('');
     if (!supported) { setError('이 브라우저에서는 음성 인식을 사용할 수 없어요. 글로 이야기를 이어가 주세요.'); return; }
     if (!window.isSecureContext) { setError('음성 대화는 보안 연결(HTTPS)에서 사용할 수 있어요.'); return; }
-    emptyEnds.current = 0; spoken.current = reply?.id; startedAt.current = null; setElapsed(0); setMuted(false); setActive(true);
+    emptyEnds.current = 0; startedAt.current = null; setElapsed(0); setMuted(false); setActive(true);
   }
   function toggleMute() { if (!muted) cancelCapture(true); setMuted(!muted); }
   useEffect(() => {
@@ -60,42 +52,38 @@ export function useVoice({ ready, reply, onFinal, onDraft }: {
     return () => { clearInterval(timer); document.removeEventListener('visibilitychange', hidden); };
   }, [active, error]);
   useEffect(() => {
-    if (!active || !readAloud || !reply || spoken.current === reply.id) return;
-    spoken.current = reply.id;
-    if (!window.speechSynthesis || typeof SpeechSynthesisUtterance === 'undefined') return;
-    cancelCapture(); cancelSpeech();
-    const token = generation.current;
-    const utterance = new SpeechSynthesisUtterance(reply.text);
-    utterance.lang = 'ko-KR'; utterance.rate = 0.94;
-    const voice = window.speechSynthesis.getVoices().find(item => item.lang.startsWith('ko'));
-    if (voice) utterance.voice = voice;
-    utterance.onend = utterance.onerror = () => { if (generation.current === token) setSpeaking(false); };
-    setSpeaking(true); window.speechSynthesis.speak(utterance);
-    return () => { generation.current++; window.speechSynthesis?.cancel(); };
-  }, [active, readAloud, reply?.id]);
-  useEffect(() => {
-    if (!active || muted || speaking || awaitingSpeech || !ready || error) return;
+    if (!active || muted || !ready || error) return;
     const Constructor = recognitionConstructor(); if (!Constructor) return;
     const recognition = new Constructor(); engine.current = recognition;
     let finished = false; let failed = false; let timer: ReturnType<typeof setTimeout> | undefined;
+    let resultTimer: ReturnType<typeof setTimeout> | undefined;
+    const waitForResult = () => {
+      clearTimeout(resultTimer);
+      resultTimer = setTimeout(() => {
+        if (engine.current !== recognition) return;
+        failed = true;
+        setError('말을 글로 바꾸는 응답이 오지 않아요. 마이크 입력을 확인하거나 글로 이어가 주세요.');
+        cancelCapture(true);
+      }, 20000);
+    };
     const connectionTimer = setTimeout(() => {
       if (engine.current !== recognition) return;
       failed = true; setError('음성 인식 서비스가 응답하지 않아요. 다시 시도하거나 채팅으로 이어가 주세요.'); cancelCapture(true);
     }, 10000);
     recognition.lang = 'ko-KR'; recognition.interimResults = true; recognition.continuous = false;
-    recognition.onstart = () => { if (engine.current === recognition) { clearTimeout(connectionTimer); startedAt.current ??= Date.now(); setListening(true); } };
+    recognition.onstart = () => { if (engine.current === recognition) { clearTimeout(connectionTimer); startedAt.current ??= Date.now(); setListening(true); waitForResult(); } };
     recognition.onresult = event => {
       if (finished || engine.current !== recognition) return;
       const results = Array.from(event.results);
       const text = results.map(item => item[0].transcript).join(' ').trim();
       if (text) emptyEnds.current = 0;
-      live.current = text; setInterim(text);
+      live.current = text; setInterim(text); if (text) waitForResult();
       if (text.length > 2000) {
         failed = true; setError('이야기가 길어졌어요. 채팅에서 내용을 나누어 보내 주세요.'); cancelCapture(true); return;
       }
       if (text && results.every(item => item.isFinal)) {
         finished = true;
-        cancelCapture(); callbacks.current.onFinal(text);
+        cancelCapture(); callbacks.current.onFinal(text); setCycle(value => value + 1);
       }
     };
     recognition.onerror = event => {
@@ -121,12 +109,11 @@ export function useVoice({ ready, reply, onFinal, onDraft }: {
       }
     };
     try { recognition.start(); } catch { setError('마이크를 시작하지 못했어요. 다시 시도해 주세요.'); cancelCapture(); }
-    return () => { clearTimeout(connectionTimer); clearTimeout(timer); if (engine.current === recognition) cancelCapture(true); };
-  }, [active, muted, speaking, awaitingSpeech, ready, error, cycle]);
-  useEffect(() => () => { cancelCapture(); generation.current++; window.speechSynthesis?.cancel(); }, []);
-  return { active, muted, listening, speaking, interim, error, elapsed, readAloud, supported, start, stop, toggleMute,
+    return () => { clearTimeout(connectionTimer); clearTimeout(resultTimer); clearTimeout(timer); if (engine.current === recognition) cancelCapture(true); };
+  }, [active, muted, ready, error, cycle]);
+  useEffect(() => () => cancelCapture(), []);
+  return { active, muted, listening, interim, error, elapsed, supported, start, stop, toggleMute,
     retry: () => { emptyEnds.current = 0; startedAt.current = null; setElapsed(0); setError(''); setCycle(value => value + 1); },
     dismissError: () => setError(''),
-    setReadAloud: (value: boolean) => { setReadAloud(value); if (!value) cancelSpeech(); },
   };
 }
