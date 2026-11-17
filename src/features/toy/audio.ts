@@ -1,19 +1,19 @@
 import type { ToyType } from '../../lib/domain';
 import { waxFracture } from './waxSound';
+import { SlimeDragSound } from './slimeDragSound';
 
 type SoundState = { enabled: boolean; volume: number; status: 'idle' | 'loading' | 'ready' | 'fallback' | 'unavailable' };
 const FILES: Record<ToyType, string[]> = {
-  SLANGI: ['slime-1', 'slime-2', 'slime-3'],
-  SQUISHY: ['foam-1', 'foam-2', 'foam-3'],
-  WAKPPU: [],
+  SLANGI: ['slime-original'],
+  SQUISHY: ['touch-foam-1', 'touch-foam-2', 'touch-foam-3'],
+  WAKPPU: ['touch-wax-1', 'touch-wax-2', 'touch-wax-3'],
 };
-const RELEASE = ['foam-release-1', 'foam-release-2', 'foam-release-3'];
-const BUBBLES = ['bubble-1', 'bubble-2', 'bubble-3'];
-const ALL_FILES = [...Object.values(FILES).flat(), ...RELEASE, ...BUBBLES];
-/** Local CC0 soft samples and original wax synthesis; bounded voices, no autoplay. */
+const RELEASE = ['touch-release-1', 'touch-release-2', 'touch-release-3'];
+const ALL_FILES = [...Object.values(FILES).flat(), ...RELEASE];
+const AUDIO_REVISION = 'material-20261118';
+/** Supplied material samples; synthesis only when decoding fails. No autoplay. */
 export class TactileAudio {
-  constructor(private readonly reference = import.meta.env.VITE_LOCAL_WAX_REFERENCE === 'true' && ['127.0.0.1', 'localhost', '[::1]'].includes(window.location?.hostname ?? '')) {}
-  private get files() { return this.reference ? [...ALL_FILES, 'local-wax-1', 'local-wax-2', 'local-wax-3'] : ALL_FILES; }
+  private get files() { return ALL_FILES; }
   private context: AudioContext | null = null;
   private master: GainNode | null = null;
   private buffers = new Map<string, AudioBuffer>();
@@ -22,26 +22,20 @@ export class TactileAudio {
   private state: SoundState = { enabled: true, volume: .35, status: 'idle' };
   private loading: Promise<void> | null = null;
   private controller: AbortController | null = null;
-  private sequence = 0;
   private lastSample = new Map<string, number>();
   private lastPlayed = -Infinity;
   private noise: AudioBuffer | null = null;
   private disposed = false;
-  private recoveryTimer: ReturnType<typeof setTimeout> | null = null;
-  private waxHoldTimer: ReturnType<typeof setTimeout> | null = null;
-  /** Called only after a real press. Samples overlap slightly rather than restarting every frame. */
-  startWaxHold(contact: () => boolean) {
-    this.stopWaxHold();
-    if (!this.state.enabled || !this.state.volume || document.hidden || this.disposed) return;
-    const tick = () => {
-      this.waxHoldTimer = null;
-      if (!this.state.enabled || !this.state.volume || document.hidden || this.disposed) return;
-      if (contact()) this.play('WAKPPU', .62, false, false, true);
-      this.waxHoldTimer = setTimeout(tick, 520);
-    };
-    this.waxHoldTimer = setTimeout(tick, 520);
+  private slimeDrag: SlimeDragSound | null = null;
+  moveSlime(speed: number, stretch: number) {
+    if (!this.state.enabled || !this.state.volume || document.hidden || this.disposed || this.context?.state !== 'running' || !this.master) return;
+    const original = this.buffers.get('slime-original');
+    if (!original) return;
+    this.slimeDrag ??= new SlimeDragSound(this.context, this.master, original);
+    this.slimeDrag.move(speed, stretch);
   }
-  private stopWaxHold() { if (this.waxHoldTimer !== null) clearTimeout(this.waxHoldTimer); this.waxHoldTimer = null; }
+  stopSlime() { this.slimeDrag?.stop(); }
+  private recoveryTimer: ReturnType<typeof setTimeout> | null = null;
   cancelRecovery() { if (this.recoveryTimer !== null) clearTimeout(this.recoveryTimer); this.recoveryTimer = null; }
   playRecovery(strength: number, delay: number) {
     this.cancelRecovery();
@@ -88,7 +82,8 @@ export class TactileAudio {
       await Promise.all(names.map(async name => {
         if (this.buffers.has(name)) return;
         try {
-          const response = await fetch(name.startsWith('local-wax-') ? `/__local-wax__/crunch-${name.at(-1)}.wav` : `/assets/audio/${name}.wav`, { signal: this.controller!.signal });
+          const extension = name === 'slime-original' ? 'mp3' : 'wav';
+          const response = await fetch(`/assets/audio/${name}.${extension}?v=${AUDIO_REVISION}`, { signal: this.controller!.signal });
           if (!response.ok) return;
           const buffer = await this.context!.decodeAudioData(await response.arrayBuffer());
           if (!this.disposed) this.buffers.set(name, buffer);
@@ -103,7 +98,7 @@ export class TactileAudio {
     if (this.master && this.context) this.master.gain.setTargetAtTime(safe * .65, this.context.currentTime, .015);
     if (!safe) this.stop();
   }
-  play(type: ToyType, strength = .7, drag = false, recovery = false, reference = false) {
+  play(type: ToyType, strength = .7, drag = false, recovery = false) {
     if (!recovery) this.cancelRecovery();
     if (!this.state.enabled || !this.state.volume || document.hidden || this.disposed) return;
     const first = !this.context;
@@ -117,19 +112,20 @@ export class TactileAudio {
     }
     if (!this.master) return;
     const now = context.currentTime;
-    if (!recovery && now - this.lastPlayed < (drag ? .14 : .045)) return;
+    if (!recovery && now - this.lastPlayed < (drag ? .24 : .065)) return;
     this.lastPlayed = now;
     if (this.voices.size >= 4) this.endVoice(this.voices.values().next().value!);
-    // Slow slime motion stays sticky; a fast pull occasionally produces one small bubble.
-    const useReference = this.reference && reference && type === 'WAKPPU';
-    const names = useReference ? ['local-wax-1', 'local-wax-2', 'local-wax-3'] : recovery ? RELEASE : type === 'SLANGI' && drag && strength > .65 && this.sequence % 3 === 0 ? BUBBLES : FILES[type];
+    const names = recovery ? RELEASE : FILES[type];
     const fracture = type === 'WAKPPU' && !recovery;
     const key = names[0] ?? 'wax-synthesis', previous = this.lastSample.get(key) ?? -1;
     const index = names.length ? (previous + 1 + Math.floor(Math.random() * (names.length - 1))) % names.length : 0;
-    this.lastSample.set(key, index); this.sequence++;
+    this.lastSample.set(key, index);
     const name = names[index];
     let sample = this.buffers.get(name);
-    const recorded = useReference && !!sample;
+    // Loading is not a decode failure. Do not substitute a different texture or
+    // replay this touch later after the user has already released the surface.
+    if (!sample && this.state.status === 'loading') return;
+    const recorded = !!sample;
     if (fracture && !recorded) {
       const pcm = waxFracture(context.sampleRate, strength);
       sample = context.createBuffer(1, pcm.length, context.sampleRate);
@@ -141,15 +137,22 @@ export class TactileAudio {
       for (let i = 0; i < data.length; i++) { previous = (previous + (Math.random() * 2 - 1) * .16) / 1.16; data[i] = previous; }
     }
     const source = context.createBufferSource(); source.buffer = sample ?? this.noise;
-    source.playbackRate.value = recorded || recovery ? 1 : drag ? .78 + Math.min(1, strength) * .28 : .94 + Math.random() * .09;
-    if (recovery) { source.playbackRate.setValueAtTime(1, now); source.playbackRate.exponentialRampToValueAtTime(1.18, now + .24); }
+    source.playbackRate.value = recorded ? 1 : .97 + Math.random() * .06;
+    const originalSlime = recorded && type === 'SLANGI' && !recovery;
     const gain = context.createGain(), filter = context.createBiquadFilter();
-    filter.type = 'lowpass'; filter.frequency.value = recorded ? 16000 : type === 'WAKPPU' ? 5400 : type === 'SQUISHY' ? (recovery ? 1900 : 2300) : 3800;
-    const duration = Math.min(source.buffer!.duration / (recovery ? 1.18 : source.playbackRate.value), recorded ? 1.2 : recovery ? .58 : drag ? .30 : .8);
+    filter.type = 'lowpass'; filter.frequency.value = recorded ? (type === 'SQUISHY' ? 10000 : 14000) : type === 'WAKPPU' ? 5400 : 7000;
+    const duration = originalSlime ? source.buffer!.duration : Math.min(source.buffer!.duration / source.playbackRate.value, recorded ? (fracture ? 1.1 : .85) : .35);
     const peak = Math.max(.03, Math.min(.75, strength * (recovery ? .38 : drag ? .28 : .66)));
-    gain.gain.setValueAtTime(.0001, now); gain.gain.exponentialRampToValueAtTime(peak, now + (fracture ? .001 : recovery ? Math.min(.06, duration / 3) : .012));
-    gain.gain.setValueAtTime(peak, now + Math.max(.015, duration - .06)); gain.gain.exponentialRampToValueAtTime(.0001, now + duration);
-    source.connect(filter); filter.connect(gain); gain.connect(this.master);
+    if (originalSlime) {
+      // Exact supplied MP3: no EQ, pitch change, slice, reconstruction or envelope.
+      // Normal interaction/master volume and explicit mute/stop still apply.
+      gain.gain.setValueAtTime(peak, now); source.connect(gain);
+    } else {
+      gain.gain.setValueAtTime(.0001, now); gain.gain.exponentialRampToValueAtTime(peak, now + (fracture ? .001 : recovery ? Math.min(.06, duration / 3) : .012));
+      gain.gain.setValueAtTime(peak, now + Math.max(.015, duration - .06)); gain.gain.exponentialRampToValueAtTime(.0001, now + duration);
+      source.connect(filter); filter.connect(gain);
+    }
+    gain.connect(this.master);
     const voice = { source, filter, gain }; this.voices.add(voice);
     source.onended = () => { source.disconnect(); filter.disconnect(); gain.disconnect(); this.voices.delete(voice); };
     source.start(now); source.stop(now + duration + .01);
@@ -165,6 +168,6 @@ export class TactileAudio {
     try { voice.source.stop(now + .025); } catch { /* An already-ended voice is harmless. */ }
     this.voices.delete(voice);
   }
-  stop() { this.stopWaxHold(); this.cancelRecovery(); [...this.voices].forEach(voice => this.endVoice(voice)); this.lastPlayed = -Infinity; }
+  stop() { this.stopSlime(); this.cancelRecovery(); [...this.voices].forEach(voice => this.endVoice(voice)); this.lastPlayed = -Infinity; }
   dispose() { this.disposed = true; this.controller?.abort(); this.stop(); void this.context?.close().catch(() => {}); this.buffers.clear(); this.listeners.clear(); }
 }

@@ -1,5 +1,13 @@
 # Audio sources
 
+## Current runtime assets · 2026-11-18
+
+- `slime-original.mp3`: byte-identical user-supplied 슬랑이.mp3. Press playback uses full duration/rate1 with application volume only. The drag layer derives an overlapping texture in runtime memory; it is processed sound, not a separate recording.
+- `touch-foam-1..3.wav`, `touch-release-1..3.wav`: user-supplied 스퀴시.mp3 excerpts. Release3 omits a tonal ending. See supplied-material-manifest.json for source hashes and processing.
+- `touch-wax-1..3.wav`: final excerpts from the supplied recording, byte-identical to the accepted local samples (0.66/0.70/0.62 seconds, stereo 44.1 kHz, 3 ms boundary fades). Included in the app assets for all environments; no local override is required. See supplied-material-manifest.json and scripts/extract_wax_reference.py.
+
+Older sources below record earlier iterations; the current runtime selection is described above.
+
 ## D52 로컬 녹화 음원 비교
 
 버터·하트 비교용 추출 WAV3개는 Git 제외 `artifacts/wax-reference/`에만 있다. `public`·`dist`에 포함하지 않으며 Vite loopback 미들웨어로만 제공한다. 원본 녹화의0.97~1.72초/2.42~3.29초/3.85~4.81초,44.1kHz 스테레오,3ms 끝단 페이드다. 공개 재사용 조건은 미확인이며 CC0 목록에 포함하지 않는다. 독립 합성음은 구름 및 표본 미준비/비교 기능 비활성 시 사용한다.

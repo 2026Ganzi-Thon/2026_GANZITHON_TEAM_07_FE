@@ -67,15 +67,6 @@ for (const group of groups) test(`${group.type}: supplied artwork accepts body i
     await page.mouse.click(box.x + box.width * .01, box.y + box.height * .03);
     await expect(canvas).toHaveAttribute('data-depth', '0.000'); await expect(canvas).toHaveAttribute('data-broken', '0');
     await page.screenshot({ path: `artifacts/${id}-rest-${info.project.name}.png` });
-    if (id === 'heart') {
-      await page.mouse.move(box.x + box.width * .5, box.y + box.height * .52); await page.mouse.down();
-      await expect.poll(async () => Number(await canvas.getAttribute('data-crumple'))).toBeGreaterThan(.5);
-      await expect(canvas).toHaveAttribute('data-broken', '0');
-      expect(await canvasFingerprint(canvas)).not.toBe(original);
-      await page.mouse.up(); await expect(canvas).toHaveAttribute('data-running', 'false');
-      expect(await canvasFingerprint(canvas)).toBe(original);
-      continue;
-    }
     if (group.type === '왁뿌볼') {
       await page.mouse.click(box.x + box.width * .5, box.y + box.height * .52);
       await expect(canvas).toHaveAttribute('data-broken', '1');

@@ -10,8 +10,11 @@ test('squishy recovery has one release voice, softer contact shading, and no voi
     window.AudioContext = class extends Original {
       createBufferSource() {
         const source = super.createBufferSource();
-        const ramp = source.playbackRate.exponentialRampToValueAtTime.bind(source.playbackRate);
-        source.playbackRate.exponentialRampToValueAtTime = (value, time) => { if (value === 1.18) meter.recoveries++; return ramp(value, time); };
+        const start = source.start.bind(source);
+        source.start = (...args: Parameters<typeof start>) => {
+          if (source.buffer && [.44, .62, .68].some(length => Math.abs(source.buffer!.duration - length) < .002)) meter.recoveries++;
+          start(...args);
+        };
         return source;
       }
     };
