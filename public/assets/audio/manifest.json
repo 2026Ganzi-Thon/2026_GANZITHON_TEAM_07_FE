@@ -1,0 +1,101 @@
+[
+  {
+    "file": "slime-1.wav",
+    "source": "slime.zip",
+    "member": "slime_01.ogg",
+    "start_seconds": 0.0,
+    "duration_seconds": 0.473,
+    "peak": 0.72,
+    "rms": 0.0187,
+    "source_sha256": "7cd39abb49d4362a37ba18dc0e454c7dc1d08029d4e5b683149046bc237b2eba",
+    "sha256": "b04295470e3cd429c31a264e0da3e29b2fee2fac0e87f97f4ce27a40978118d8"
+  },
+  {
+    "file": "slime-2.wav",
+    "source": "slime.zip",
+    "member": "slime_05.ogg",
+    "start_seconds": 0.001,
+    "duration_seconds": 0.455,
+    "peak": 0.72,
+    "rms": 0.0349,
+    "source_sha256": "7cd39abb49d4362a37ba18dc0e454c7dc1d08029d4e5b683149046bc237b2eba",
+    "sha256": "12b29d276e046cdbae5e07bafe1a745b2fc82d3963d0ea1d77f10f621b494c17"
+  },
+  {
+    "file": "slime-3.wav",
+    "source": "slime.zip",
+    "member": "slime_09.ogg",
+    "start_seconds": 0.02,
+    "duration_seconds": 0.634,
+    "peak": 0.72,
+    "rms": 0.0474,
+    "source_sha256": "7cd39abb49d4362a37ba18dc0e454c7dc1d08029d4e5b683149046bc237b2eba",
+    "sha256": "b00b6711ea2d615de6c0ed9f75d3df46f6eeacdd07e41f8fd1b529c157c86f70"
+  },
+  {
+    "file": "foam-1.wav",
+    "source": "sponge.mp3",
+    "member": null,
+    "start_seconds": 0.25,
+    "duration_seconds": 0.7,
+    "peak": 0.72,
+    "rms": 0.0437,
+    "source_sha256": "6e395d43c2a234b44e442a8e7ccc70fe4b52c9fe364e700b0856c3b12f10b806",
+    "sha256": "540d165c5c544bfae14e590feeb96945f8c9fe14ecd1a086550f7eb1b5c8eef7"
+  },
+  {
+    "file": "foam-2.wav",
+    "source": "sponge.mp3",
+    "member": null,
+    "start_seconds": 4.05,
+    "duration_seconds": 0.7,
+    "peak": 0.72,
+    "rms": 0.0265,
+    "source_sha256": "6e395d43c2a234b44e442a8e7ccc70fe4b52c9fe364e700b0856c3b12f10b806",
+    "sha256": "82406fff6523d6e876fa22b0c693e119dca7ab41370d0518d1689c58c6f33e63"
+  },
+  {
+    "file": "foam-3.wav",
+    "source": "sponge.mp3",
+    "member": null,
+    "start_seconds": 8.25,
+    "duration_seconds": 0.7,
+    "peak": 0.72,
+    "rms": 0.025,
+    "source_sha256": "6e395d43c2a234b44e442a8e7ccc70fe4b52c9fe364e700b0856c3b12f10b806",
+    "sha256": "8ef2f99702f0e0e5525a632ac3ad702bcbde97b9e68db7f08b3dbc9bdee78a9c"
+  },
+  {
+    "file": "crack-1.wav",
+    "source": "breaking.zip",
+    "member": "bfh1_wood_breaking_01.ogg",
+    "start_seconds": 0.004,
+    "duration_seconds": 0.294,
+    "peak": 0.72,
+    "rms": 0.022,
+    "source_sha256": "e6ee04d91c5f4d30cfda1260d2c9d1faf96fda36319287215fbd07bcb1a80451",
+    "sha256": "11214cee86ceb78c0ce48c2be8d981695fc366f97951aea2779e6c5cc7dad89d"
+  },
+  {
+    "file": "crack-2.wav",
+    "source": "breaking.zip",
+    "member": "bfh1_wood_breaking_02.ogg",
+    "start_seconds": 0.015,
+    "duration_seconds": 0.234,
+    "peak": 0.72,
+    "rms": 0.0499,
+    "source_sha256": "e6ee04d91c5f4d30cfda1260d2c9d1faf96fda36319287215fbd07bcb1a80451",
+    "sha256": "492c7a896adcbee243955a6a9ab6d1c223826a152bd2e93d293ae72c6d7091df"
+  },
+  {
+    "file": "crack-3.wav",
+    "source": "breaking.zip",
+    "member": "bfh1_wood_breaking_03.ogg",
+    "start_seconds": 0.0,
+    "duration_seconds": 0.487,
+    "peak": 0.72,
+    "rms": 0.0556,
+    "source_sha256": "e6ee04d91c5f4d30cfda1260d2c9d1faf96fda36319287215fbd07bcb1a80451",
+    "sha256": "7d132313aa9b010923a30a167e959fbabd003b79a0c5654b0778cbdb7e497490"
+  }
+]
