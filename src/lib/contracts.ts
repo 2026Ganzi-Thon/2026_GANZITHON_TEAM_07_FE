@@ -80,8 +80,11 @@ export function decodeRecord(value: unknown): DiaryRecord {
   const input = object(value); const createdAt = text(input.createdAt);
   if (!Number.isFinite(Date.parse(createdAt))) throw new ResponseShapeError();
   const decoded = context(input.context);
-  if (!decoded.primary) throw new ResponseShapeError();
-  return { id: text(input.id), createdAt, context: decoded, summary: text(input.summary, true), recommended: toy(input.recommended), ...(input.messages !== undefined ? { messages: messages(input.messages) } : {}) };
+  if (input.partial !== undefined && typeof input.partial !== 'boolean' || input.hidden !== undefined && typeof input.hidden !== 'boolean') throw new ResponseShapeError();
+  const partial = input.partial === true;
+  const transcript = input.messages !== undefined ? messages(input.messages) : undefined;
+  if (partial ? input.recommended !== null || decoded.stage === 'SAFETY' || !transcript?.some(message => message.role === 'user') : !decoded.primary) throw new ResponseShapeError();
+  return { id: text(input.id), createdAt, context: decoded, summary: text(input.summary, true), recommended: partial ? null : toy(input.recommended), partial, hidden: input.hidden === true, ...(transcript ? { messages: transcript } : {}) };
 }
 export function decodeRecords(value: unknown): DiaryRecord[] {
   if (!Array.isArray(value)) throw new ResponseShapeError();

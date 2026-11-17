@@ -23,14 +23,14 @@ export const handlers = [
   }),
   http.post('/__preview__/messages', async ({ request }) => {
     const owner = store.me()?.id; await delay(850); if (!owner || store.me()?.id !== owner) return unauthorized();
-    if (fail(request)) return HttpResponse.json({ message: '예시 응답 오류' }, { status: 503 });
+    if (fail(request)) return HttpResponse.json({ message: '답변을 불러오지 못했어요.' }, { status: 503 });
     return HttpResponse.json(previewReply(await request.json() as PreviewRequest));
   }),
   http.post('/__preview__/records', async ({ request }) => {
     const owner = store.me()?.id; await delay(550); if (!owner || store.me()?.id !== owner) return unauthorized();
-    if (fail(request)) return HttpResponse.json({ message: '예시 기록 생성에 실패했어요.' }, { status: 503 });
-    const { id, context, messages } = await request.json() as ResultDraft;
-    try { return HttpResponse.json(store.save(id, context, messages), { status: 201 }); }
+    if (fail(request)) return HttpResponse.json({ message: '기록을 저장하지 못했어요.' }, { status: 503 });
+    const { id, context, messages, partial } = await request.json() as ResultDraft;
+    try { return HttpResponse.json(store.save(id, context, messages, partial === true), { status: 201 }); }
     catch { return HttpResponse.json({ message: '기록할 대화가 충분하지 않아요.' }, { status: 400 }); }
   }),
   http.get('/__preview__/records', async ({ request }) => {
@@ -41,6 +41,13 @@ export const handlers = [
   http.get('/__preview__/records/:id', async ({ params }) => {
     const owner = store.me()?.id; await delay(150); if (!owner || store.me()?.id !== owner) return unauthorized();
     const record = store.get(String(params.id));
+    return record ? HttpResponse.json(record) : HttpResponse.json({ message: '이 기록을 찾을 수 없어요.' }, { status: 404 });
+  }),
+  http.patch('/__preview__/records/:id', async ({ request, params }) => {
+    const owner = store.me()?.id; await delay(200); if (!owner || store.me()?.id !== owner) return unauthorized();
+    const { hidden } = await request.json() as { hidden: unknown };
+    if (typeof hidden !== 'boolean') return HttpResponse.json({ message: '가리기 설정을 확인해 주세요.' }, { status: 400 });
+    const record = store.setHidden(String(params.id), hidden);
     return record ? HttpResponse.json(record) : HttpResponse.json({ message: '이 기록을 찾을 수 없어요.' }, { status: 404 });
   }),
   http.delete('/__preview__/records/:id', async ({ request, params }) => {

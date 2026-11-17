@@ -23,6 +23,11 @@ describe('response boundary', () => {
     expect(() => decodeInventory({ selected: 'SQUISHY', unlocked: ['SLANGI'], name: '말랑이' })).toThrow();
     expect(() => decodeInventory({ selected: 'OTHER', unlocked: ['OTHER'], name: '말랑이' })).toThrow();
   });
+  it('accepts an explicit partial record but rejects invented recommendations and invalid flags', () => {
+    const partial = { ...record, partial: true, hidden: true, recommended: null, context: newContext(), messages: [{ id: 'm', role: 'user', text: '힘들어요', time: '12:00' }] };
+    expect(decodeRecord(partial)).toMatchObject({ partial: true, hidden: true, recommended: null, context: { primary: null, pre: null } });
+    for (const invalid of [{ ...partial, recommended: 'SLANGI' }, { ...partial, messages: [] }, { ...partial, hidden: 'true' }, { ...partial, partial: 'true' }]) expect(() => decodeRecord(invalid)).toThrow();
+  });
   it('retries malformed message data once with exactly the same request id and payload', async () => {
     const fetcher = vi.fn().mockResolvedValueOnce(Response.json({ stage: 'bad' })).mockResolvedValueOnce(Response.json(reply)); vi.stubGlobal('fetch', fetcher);
     await expect(previewApi.reply(input)).resolves.toEqual(reply);

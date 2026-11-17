@@ -8,10 +8,11 @@ export type ToyType = keyof typeof TOYS;
 export interface Profile { id: string; nickname: string }
 export interface Inventory { selected: ToyType; unlocked: ToyType[]; name: string }
 export interface DiaryRecord {
-  id: string; createdAt: string; context: Context; summary: string; recommended: ToyType; messages?: Message[];
+  id: string; createdAt: string; context: Context; summary: string; recommended: ToyType | null; messages?: Message[];
+  partial?: boolean; hidden?: boolean;
 }
 // Preview-only completion payload. The production API adapter has not been agreed yet.
-export interface ResultDraft { id: string; context: Context; messages: Message[]; failOnce?: boolean }
+export interface ResultDraft { id: string; context: Context; messages: Message[]; partial?: boolean; failOnce?: boolean }
 export const SLOT_LABELS = { OPEN: '상황', THOUGHT: '떠올랐던 생각', REFRAME: '다른 관점', NEED: '바랐던 마음', COPING: '도움이 됐던 일', ACTION: '작은 실천' } as const;
 export function localDate(value: Date | string) {
   const date = typeof value === 'string' ? new Date(value) : value;

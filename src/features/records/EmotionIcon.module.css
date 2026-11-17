@@ -1,0 +1,4 @@
+.icon { position: relative; display: block; width: 100%; height: 100%; flex-shrink: 0; }
+/* Original PNGs have transparent margins. Fit visible artwork, not the 507px canvas. */
+.icon img { position: absolute; width: 135%; height: 135%; max-width: none; left: -17.5%; top: -17.5%; object-fit: contain; pointer-events: none; user-select: none; }
+.fallback { position: absolute; width: 52%; height: 52%; left: 24%; top: 24%; color: #868079; }
