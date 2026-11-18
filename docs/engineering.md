@@ -46,7 +46,7 @@
 | 개발·빌드 | Vite | 개발 서버, 번들, CSS Modules. TypeScript 검사는 별도 `tsc` 실행 |
 | 경로 | React Router | 기본 화면 9개. 경로는 implementation 문서. 새로고침 시 체험 초기화 |
 | 스타일 | CSS Modules + CSS 변수 | `src/styles/tokens.css`의 색상과 화면별 스타일 |
-| 통신 | fetch 공통 함수 | `src/lib/api.ts`. 현재는 `/__preview__/` 경로만 사용 |
+| 통신 | fetch 공통 함수 | `src/lib/transport.ts`(30초 제한·취소 공통), `api.ts`(예시 `/__preview__`), `backend.ts`(백엔드 `/api/v1` 응답 봉투·Bearer·401 갱신). `VITE_API_MODE=real`에서는 인증만 백엔드 |
 | 서버 데이터 상태 | TanStack Query | 프로필·인벤토리·결과·기록 조회, 메시지/삭제/종류 선택 mutation. Query/Mutation 자동 재시도 없음; 잘못된 대화 응답에만 어댑터가 1회 재요청 |
 | 화면 상태 | useReducer + Context + 지역 state | 대화 메시지·입력 단계·선택값. 결과 draft·오류 재현·말랑이 모양/오디오 실행 상태를 각각 분리 |
 | 말랑이·효과음 | WebGL + Canvas 2D + Web Audio API | 제공 PNG 국소 메시, 왁뿌볼 껍질/내부·파편, 지연 로딩 PCM WAV. 추가 npm 렌더러 의존성 없음 |
@@ -169,6 +169,13 @@ D34(2026-11-15): D34 적용 기준으로 세 종류를 처음부터 개방했다
 - 실제 BE의 abort/complete 상태와 partial 저장·hidden API는 지원 여부/DTO/권한/보관정책 확인 후 어댑터에서 맞춘다. 현재 서버 구현 완료로 전달하지 않는다.
 - 결과의 selected는 지역 상태이고 저장된 recommended는 불변이다. 후보 클릭은 mutation하지 않으며 CTA 이후 기존 말랑이 선택 API를 따른다.
 - 기본 mock 단계는 OPEN→EMOTIONS→PRE→THOUGHT→ACTION→POST→DONE. 서버 단계 enum은 축소하지 않는다.
+
+## 실제 API 모드·인증 — #13 (2026-11-18)
+
+- 모드: `src/lib/apiMode.ts`. mock은 전부 MSW, real은 `/api/v1/auth`만 백엔드이고 나머지 `/__preview__`는 MSW가 계속 응답한다. real에서는 로그인한 계정을 `/__preview__/bind`로 예시 저장소에 연결해 계정별로 나눈다.
+- 백엔드 응답 `{ success, data, error }`는 `contracts.ts`의 `decodeEnvelope`에서 풀고, 실패는 `ApiError(status, code, details)`로 바꾼다. 화면은 `code`(예: `INVALID_CREDENTIALS`, `EMAIL_ALREADY_REGISTERED`)로 문구를 고른다.
+- 토큰: `authSession.ts`(Access 메모리, Refresh `sessionStorage`). 저장 정책을 바꿀 때는 이 파일만 수정한다. refresh 거절 시 `expired` 이벤트로 프로필 외 캐시를 지우고 프로필을 null로 만든다. 진행 중인 프로필 조회를 지우면 화면이 대기 상태에 멈추므로 프로필 쿼리는 지우지 않는다.
+- 테스트: `npm run test:e2e`는 real 전용 개발 서버(5184)와 가짜 인증 서버(`tests/support/fake-auth-backend.mjs`, 8099)도 띄운다. `tests/auth.spec.ts`는 real-chromium/real-webkit 프로젝트에서만 실행된다. 가짜 서버는 백엔드 문서의 응답 형태만 흉내 낸 것으로 실제 백엔드 검증이 아니다.
 
 ## D39 연동 시 주의
 
