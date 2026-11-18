@@ -38,6 +38,15 @@ npm run test:e2e
 **실제 API 모드(#13):** `VITE_API_MODE=real npm run dev`로 실행하면 이메일 가입·로그인·로그아웃·프로필만 백엔드 `/api/v1/auth`를 호출한다. 상담·기록·말랑이는 아직 연결 전이라 MSW 예시 데이터를 쓰되, 실제 계정 ID별로 나눠 보관한다.
 - 개발/preview 서버는 `/api`를 `VITE_API_PROXY_TARGET`(기본 `http://127.0.0.1:8080`)으로 프록시한다. 백엔드 CORS 기본값에 `127.0.0.1:5173`이 없어서 프록시가 브라우저 Origin 헤더를 지운다.
 - 배포할 때는 `VITE_API_BASE_URL`에 백엔드 주소를 넣고, 백엔드 `CORS_ALLOWED_ORIGINS`에 프론트 주소를 추가해야 한다.
+- **로그인 화면(SC09)**은 Figma 151:11030을 따르며, 결정(2026-11-18)에 따라 버튼을 **카카오와 이메일 2개**로 구성했다.
+  - Apple, 전화번호 가입, 비밀번호 찾기/변경은 백엔드 API가 없어 숨긴다.
+  - 이메일 로그인·가입 폼은 `BottomSheet` 안에 넣었다.
+  - mock 모드는 같은 배치에서 체험 계정 A/B와 "체험 계정으로 계속하기"를 보여준다.
+- **카카오 로그인**은 카카오디벨로퍼스 공식 버튼으로, mock·real 모두 **항상 보인다**(2026-11-18 사용자 요청).
+  - `VITE_KAKAO_CLIENT_ID`가 없으면 시작할 수 없다는 안내를 보여준다. mock 모드는 백엔드가 없어 콜백에서 "real 모드에서만 완료" 안내로 끝난다.
+  - 백엔드 `/auth/oauth/kakao`는 구현돼 있지만 `KAKAO_CLIENT_ID`·`KAKAO_CLIENT_SECRET`·`KAKAO_REDIRECT_URI`가 비어 있으면 동작하지 않는다. 카카오 앱 등록과 키 발급 담당을 정해야 한다.
+  - 흐름: 카카오 인증 → `/oauth/callback/kakao` → 백엔드 `/auth/oauth/kakao`로 코드 교환. 위조 방지 `state`와 원래 목적지는 `sessionStorage`에 잠시 둔다.
+  - 실제 동작 확인에는 카카오 앱 키, 리다이렉트 주소 등록, 백엔드 `KAKAO_*` 환경변수가 필요하다. 지금은 가짜 인증 서버로만 확인했다.
 - 토큰 정책: Access 토큰은 메모리, Refresh 토큰은 `sessionStorage`(`teslang:refresh-token`)에 둔다. 같은 탭 새로고침은 로그인을 유지하고, 탭을 닫으면 끝난다. 로그·화면에 토큰을 남기지 않는다.
 - 인증이 필요한 요청이 401이면 refresh를 한 번 하고 같은 요청을 딱 한 번 다시 보낸다. 동시 401은 refresh 하나를 공유한다. refresh가 거절되면 세션을 지우고 로그인 화면으로 보낸다. 이것이 백엔드 HTTP 실패에 대한 유일한 자동 재전송이다(401은 서버가 처리하지 않은 요청이라 저장·삭제가 중복되지 않는다). Playwright 결과 경로는 `QA_OUTPUT_DIR`, 브라우저 위치는 `PLAYWRIGHT_BROWSERS_PATH`로 별도 지정할 수 있다.
 
