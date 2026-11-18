@@ -208,5 +208,18 @@
     "sha256": "67072dee38f5401622df22a6ed0a94ab1d0b4379c26ddff340a00436ce092891",
     "source": "team-provided PNG, 2026-11-17",
     "modified": false
+  },
+  {
+    "file": "teslang-wordmark.svg",
+    "sha256": "9d1736772e817fcd0f9b718ac6df3a8af356195d8aa6c59585d0d6935d8ad378",
+    "source": "team Figma SVG export via MCP, login screen 151:11030 group 326:1314 (170x55.73), 2026-11-18",
+    "modified": false
+  },
+  {
+    "file": "kakao-login-complete-ko.svg",
+    "sha256": "ab90ab44616f14a671844cd991b3fbb33277f42c5bb2cc5a9422344a854c9398",
+    "source": "Kakao Developers official login button resource (standard, complete Korean label), https://developers.kakao.com/tool/images/resource/preview/login-complete-ko.svg, downloaded 2026-11-18",
+    "modified": false,
+    "note": "224x46. Used as-is per the Kakao login design guide; the container is widened with the same #FEE500 around it."
   }
 ]

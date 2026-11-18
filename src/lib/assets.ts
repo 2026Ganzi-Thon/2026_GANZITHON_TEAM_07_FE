@@ -9,4 +9,6 @@ export const DESIGN_ASSETS = {
   menuBubble: '/assets/design/menu-bubble.png',
   sleepingLamb: '/assets/design/lamb-sleep.png',
   logo: '/assets/design/teslang-logo.png',
+  wordmark: '/assets/design/teslang-wordmark.svg',
+  kakaoLogin: '/assets/design/kakao-login-complete-ko.svg',
 } as const;
