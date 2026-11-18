@@ -36,8 +36,11 @@ npm run test:e2e
 기본 주소는 http://127.0.0.1:5173 이다. `.env.example`은 mock 모드이며 환경 파일 없이도 동작한다.
 
 **실제 API 모드(#13):** `VITE_API_MODE=real npm run dev`로 실행하면 이메일 가입·로그인·로그아웃·프로필만 백엔드 `/api/v1/auth`를 호출한다. 상담·기록·말랑이는 아직 연결 전이라 MSW 예시 데이터를 쓰되, 실제 계정 ID별로 나눠 보관한다.
-- 개발/preview 서버는 `/api`를 `VITE_API_PROXY_TARGET`(기본 `http://127.0.0.1:8080`)으로 프록시한다. 백엔드 CORS 기본값에 `127.0.0.1:5173`이 없어서 프록시가 브라우저 Origin 헤더를 지운다.
-- 배포할 때는 `VITE_API_BASE_URL`에 백엔드 주소를 넣고, 백엔드 `CORS_ALLOWED_ORIGINS`에 프론트 주소를 추가해야 한다.
+- **백엔드 배포 주소:** `https://malangi.up.railway.app` (Swagger: `/swagger-ui/index.html`). 2026-11-18 기준 헬스체크가 `UP`이고, API 목록이 백엔드 docs/api.md와 일치한다.
+- 개발/preview 서버는 `/api`를 `VITE_API_PROXY_TARGET`(기본: 위 배포 주소)으로 프록시한다. 로컬 백엔드를 쓰려면 `VITE_API_PROXY_TARGET=http://127.0.0.1:8080`으로 바꾼다.
+- **CORS:** 배포 서버는 `localhost:5173`만 허용하고 우리 개발 주소인 `127.0.0.1:5173`은 403으로 막는다. 그래서 프록시가 브라우저 Origin 헤더를 지운다.
+- **프론트를 배포할 때:** `VITE_API_BASE_URL=https://malangi.up.railway.app`을 넣고, 백엔드 `CORS_ALLOWED_ORIGINS`에 프론트 배포 주소를 추가해 달라고 요청해야 한다.
+- **배포 서버 카카오 설정:** 가짜 코드로 `/auth/oauth/kakao`를 호출하면 바로 `502 SOCIAL_PROVIDER_UNAVAILABLE`이 온다. 백엔드 코드상 `KAKAO_CLIENT_ID`·`KAKAO_CLIENT_SECRET`·`KAKAO_REDIRECT_URI` 중 하나가 비어 있을 때의 응답이므로, 배포 서버에 카카오 설정이 아직 없는 것으로 보인다(2026-11-18).
 - **로그인 화면(SC09)**은 Figma 151:11030을 따르며, 결정(2026-11-18)에 따라 버튼을 **카카오와 이메일 2개**로 구성했다.
   - Apple, 전화번호 가입, 비밀번호 찾기/변경은 백엔드 API가 없어 숨긴다.
   - 이메일 로그인·가입 폼은 `BottomSheet` 안에 넣었다.
