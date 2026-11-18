@@ -27,6 +27,6 @@ export default defineConfig({
   webServer: [
     { command: `npm run ${preview ? 'preview' : 'dev'} -- --port ${port} --strictPort`, url: baseURL, reuseExistingServer: !process.env.CI },
     { command: 'node tests/support/fake-auth-backend.mjs', url: `${fakeAuth}/__test__/origin`, reuseExistingServer: !process.env.CI },
-    { command: 'npm run dev -- --port 5184 --strictPort', url: realURL, env: { VITE_API_MODE: 'real', VITE_API_BASE_URL: '', VITE_API_PROXY_TARGET: fakeAuth }, reuseExistingServer: !process.env.CI },
+    { command: 'npm run dev -- --port 5184 --strictPort', url: realURL, env: { VITE_API_MODE: 'real', VITE_API_BASE_URL: '', VITE_API_PROXY_TARGET: fakeAuth, VITE_KAKAO_CLIENT_ID: 'test-kakao-client', VITE_KAKAO_REDIRECT_URI: `${realURL}/oauth/callback/kakao` }, reuseExistingServer: !process.env.CI },
   ],
 });

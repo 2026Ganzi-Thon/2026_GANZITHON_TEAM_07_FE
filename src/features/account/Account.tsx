@@ -1,39 +1,16 @@
 import { readSettingsReturn } from '../../components/SettingsLink';
 import { useState } from 'react';
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Check, ChevronRight, HeartHandshake, LogOut, UserRound } from 'lucide-react';
+import { ChevronRight, HeartHandshake, LogOut } from 'lucide-react';
 import { Modal } from '../../components/ui';
-import { DemoNotice, Page } from '../../components/Page';
-import { accountApi, previewApi } from '../../lib/api';
-import { API_MODE } from '../../lib/apiMode';
-import { EmailAuth } from './EmailAuth';
+import { Page } from '../../components/Page';
+import { accountApi } from '../../lib/api';
 import { usePreview, useProfile } from '../../lib/PreviewContext';
 import s from '../../components/Page.module.css';
 import styles from './Account.module.css';
 import { DESIGN_ASSETS } from '../../lib/assets';
-const profiles = [{ id: 'demo-a', nickname: '마음 산책자' }, { id: 'demo-b', nickname: '느긋한 오후' }];
-export function Login() {
-  const [chosen, setChosen] = useState('demo-a'); const [params] = useSearchParams(); const navigate = useNavigate(); const client = useQueryClient();
-  const preview = usePreview();
-  const next = params.get('next') ?? '/';
-  const destination = /^\/(chat|archive|malangi|settings|results\/[^/?]+|records\/[^/?]+)(\?.*)?$/.test(next) ? next : '/';
-  const login = useMutation({ mutationFn: () => previewApi.login(chosen), onSuccess: user => {
-    client.removeQueries({ queryKey: ['preview'] }); preview.drafts.clear(); client.setQueryData(['preview', 'me'], user); navigate(destination, { replace: true });
-  } });
-  if (API_MODE === 'real') return <Page title="로그인"><div className={`${styles.intro} ${styles.loginIntro} ${styles.emailIntro}`}><h2>테슬랑</h2><img className={styles.loginArtwork} src={DESIGN_ASSETS.socrates} width={471} height={707} alt="소크라테스 석상" /><p>이메일로 로그인하거나 가입해 주세요.</p></div>
-    <EmailAuth destination={destination} />
-    <p className={s.small}>로그인은 실제 계정으로 연결돼요. 상담·기록·말랑이는 아직 예시 데이터라 새로고침하면 초기화돼요.</p>
-    <p className={s.small}>테슬랑은 전문 상담이나 치료를 대신하지 않아요.</p>
-  </Page>;
-  return <Page title="로그인 연결"><div className={`${styles.intro} ${styles.loginIntro}`}><h2>테슬랑</h2><img className={styles.loginArtwork} src={DESIGN_ASSETS.socrates} width={471} height={707} alt="소크라테스 석상" /><p>사용할 체험 계정을 선택해 주세요.</p></div><DemoNotice />
-    <div className={styles.accounts} role="group" aria-label="체험 계정">{profiles.map(profile => <button key={profile.id} aria-pressed={chosen === profile.id} disabled={login.isPending} onClick={() => setChosen(profile.id)}><UserRound size={21} /><span>{profile.nickname}<small>예시 계정 · {profile.id === 'demo-a' ? 'A' : 'B'}</small></span>{chosen === profile.id && <Check size={18} />}</button>)}</div>
-    {login.isError && <p className={s.error} role="alert">{login.error.message}</p>}
-    <button className={s.primary} disabled={login.isPending} onClick={() => login.mutate()}>{login.isPending ? '연결하고 있어요…' : '체험 계정으로 계속하기'}</button>
-    <p className={s.small}>실제 로그인·회원가입이 아닌 화면 체험이에요. 로그인 방식은 팀 협의 후 연결하며, 지금은 개인정보나 비밀번호를 입력하지 않아요.</p>
-    <p className={s.small}>테슬랑은 전문 상담이나 치료를 대신하지 않아요.</p>
-  </Page>;
-}
+export { Login } from './Login';
 export function Settings() {
   const location = useLocation();
   const settingsReturn = readSettingsReturn(location.state?.settingsReturn);
