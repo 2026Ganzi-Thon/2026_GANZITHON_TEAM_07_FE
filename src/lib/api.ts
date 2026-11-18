@@ -1,37 +1,20 @@
 import type { PreviewReply, PreviewRequest } from '../features/chat/model';
-import type { ResultDraft, ToyType } from './domain';
+import type { Profile, ResultDraft, ToyType } from './domain';
 import { ApiError, ResponseShapeError } from './errors';
 import { decodeInventory, decodeOk, decodeProfile, decodeRecord, decodeRecords, decodeReply } from './contracts';
+import { send } from './transport';
+import { API_MODE } from './apiMode';
+import { authApi } from './authApi';
 export { ApiError } from './errors';
-export const REQUEST_TIMEOUT_MS = 30_000;
+export { REQUEST_TIMEOUT_MS } from './transport';
+/** Preview (MSW) transport: plain JSON bodies, `{ message }` on failure. */
 export async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const controller = new AbortController();
-  let timedOut = false;
-  const cancel = () => controller.abort(options.signal?.reason);
-  if (options.signal?.aborted) cancel();
-  else options.signal?.addEventListener('abort', cancel, { once: true });
-  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, REQUEST_TIMEOUT_MS);
-  try {
-    const response = await fetch(`/__preview__/${path}`, { ...options, signal: controller.signal });
-    // Keep the deadline active while the response body is still downloading.
-    const body: unknown = await response.json().catch(error => {
-      if (controller.signal.aborted) throw error;
-      if (!response.ok) return null;
-      throw new ResponseShapeError();
-    });
-    if (!response.ok) {
-      const message = body && typeof body === 'object' && 'message' in body && typeof body.message === 'string' ? body.message : `요청에 실패했습니다 (${response.status})`;
-      throw new ApiError(message, response.status);
-    }
-    return body as T;
-  } catch (error) {
-    if (timedOut) throw new ApiError('응답이 지연되고 있어요. 연결을 확인한 뒤 다시 시도해 주세요.', 408);
-    if (controller.signal.aborted || error instanceof ApiError) throw error;
-    throw new ApiError('연결하지 못했어요. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.', 0);
-  } finally {
-    clearTimeout(timer);
-    options.signal?.removeEventListener('abort', cancel);
+  const { ok, status, body } = await send(`/__preview__/${path}`, options);
+  if (!ok) {
+    const message = body && typeof body === 'object' && 'message' in body && typeof body.message === 'string' ? body.message : `요청에 실패했습니다 (${status})`;
+    throw new ApiError(message, status);
   }
+  return body as T;
 }
 function json(body: unknown, method = 'POST', fail = false): RequestInit {
   return { method, headers: { 'Content-Type': 'application/json', ...(fail ? { 'X-Preview-Failure': 'once' } : {}) }, body: JSON.stringify(body) };
@@ -40,6 +23,8 @@ export const previewApi = {
   me: async () => { const value = await request<unknown>('me'); return value === null ? null : decodeProfile(value); },
   login: async (id: string) => decodeProfile(await request('login', json({ id }))),
   logout: async () => decodeOk(await request('logout', json({}))),
+  /** real mode: keep not-yet-connected example features separated per backend account. */
+  bind: async (profile: Profile) => decodeProfile(await request('bind', json({ id: profile.id, nickname: profile.nickname }))),
   inventory: async () => decodeInventory(await request('inventory')),
   selectToy: async (type: ToyType) => decodeInventory(await request('inventory', json({ type }, 'PATCH'))),
   reply: async (input: PreviewRequest, fail = false, signal?: AbortSignal): Promise<PreviewReply> => {
@@ -55,4 +40,26 @@ export const previewApi = {
   record: async (id: string) => decodeRecord(await request(`records/${encodeURIComponent(id)}`)),
   setRecordHidden: async (id: string, hidden: boolean) => decodeRecord(await request(`records/${encodeURIComponent(id)}`, json({ hidden }, 'PATCH'))),
   deleteRecord: async (id: string, fail = false) => decodeOk(await request(`records/${encodeURIComponent(id)}`, { method: 'DELETE', headers: fail ? { 'X-Preview-Failure': 'once' } : {} })),
+};
+/**
+ * Account entry points used by screens. mock: preview demo accounts. real: backend auth, then the profile is
+ * bound to the preview store so counseling/records/malangi examples keep working per real account.
+ */
+export const accountApi = {
+  me: async (): Promise<Profile | null> => {
+    if (API_MODE === 'mock') return previewApi.me();
+    const profile = await authApi.me();
+    if (profile) await previewApi.bind(profile); else await previewApi.logout();
+    return profile;
+  },
+  loginWithEmail: async (email: string, password: string) => {
+    const profile = await authApi.login(email, password);
+    await previewApi.bind(profile);
+    return profile;
+  },
+  signupWithEmail: (email: string, password: string, nickname: string) => authApi.signup(email, password, nickname),
+  logout: async () => {
+    if (API_MODE === 'real') await authApi.logout();
+    return previewApi.logout();
+  },
 };

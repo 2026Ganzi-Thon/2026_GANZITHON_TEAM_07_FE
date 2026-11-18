@@ -5,7 +5,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Check, ChevronRight, HeartHandshake, LogOut, UserRound } from 'lucide-react';
 import { Modal } from '../../components/ui';
 import { DemoNotice, Page } from '../../components/Page';
-import { previewApi } from '../../lib/api';
+import { accountApi, previewApi } from '../../lib/api';
+import { API_MODE } from '../../lib/apiMode';
+import { EmailAuth } from './EmailAuth';
 import { usePreview, useProfile } from '../../lib/PreviewContext';
 import s from '../../components/Page.module.css';
 import styles from './Account.module.css';
@@ -19,6 +21,11 @@ export function Login() {
   const login = useMutation({ mutationFn: () => previewApi.login(chosen), onSuccess: user => {
     client.removeQueries({ queryKey: ['preview'] }); preview.drafts.clear(); client.setQueryData(['preview', 'me'], user); navigate(destination, { replace: true });
   } });
+  if (API_MODE === 'real') return <Page title="로그인"><div className={`${styles.intro} ${styles.loginIntro} ${styles.emailIntro}`}><h2>테슬랑</h2><img className={styles.loginArtwork} src={DESIGN_ASSETS.socrates} width={471} height={707} alt="소크라테스 석상" /><p>이메일로 로그인하거나 가입해 주세요.</p></div>
+    <EmailAuth destination={destination} />
+    <p className={s.small}>로그인은 실제 계정으로 연결돼요. 상담·기록·말랑이는 아직 예시 데이터라 새로고침하면 초기화돼요.</p>
+    <p className={s.small}>테슬랑은 전문 상담이나 치료를 대신하지 않아요.</p>
+  </Page>;
   return <Page title="로그인 연결"><div className={`${styles.intro} ${styles.loginIntro}`}><h2>테슬랑</h2><img className={styles.loginArtwork} src={DESIGN_ASSETS.socrates} width={471} height={707} alt="소크라테스 석상" /><p>사용할 체험 계정을 선택해 주세요.</p></div><DemoNotice />
     <div className={styles.accounts} role="group" aria-label="체험 계정">{profiles.map(profile => <button key={profile.id} aria-pressed={chosen === profile.id} disabled={login.isPending} onClick={() => setChosen(profile.id)}><UserRound size={21} /><span>{profile.nickname}<small>예시 계정 · {profile.id === 'demo-a' ? 'A' : 'B'}</small></span>{chosen === profile.id && <Check size={18} />}</button>)}</div>
     {login.isError && <p className={s.error} role="alert">{login.error.message}</p>}
@@ -32,7 +39,7 @@ export function Settings() {
   const settingsReturn = readSettingsReturn(location.state?.settingsReturn);
   const user = useProfile(); const preview = usePreview(); const client = useQueryClient(); const navigate = useNavigate();
   const [sheet, setSheet] = useState<'about' | null>(null);
-  const logout = useMutation({ mutationFn: previewApi.logout, onSuccess: () => { preview.drafts.clear(); client.removeQueries({ queryKey: ['preview'] }); client.setQueryData(['preview', 'me'], null); navigate('/', { replace: true }); } });
+  const logout = useMutation({ mutationFn: accountApi.logout, onSuccess: () => { preview.drafts.clear(); client.removeQueries({ queryKey: ['preview'] }); client.setQueryData(['preview', 'me'], null); navigate('/', { replace: true }); } });
   return <Page title="MY" back={settingsReturn.to} backState={settingsReturn.state} className={styles.settingsPage}><div className={styles.profileCard}><div className={styles.profile}><span className={styles.userIcon}><img src={DESIGN_ASSETS.myProfile} width={71} height={71} alt="프로필 이미지" /></span><div><strong>{user.data?.nickname ?? '테슬랑에 오신 걸 환영해요'}</strong>{!user.data && <p>계정을 연결하고 마음을 남겨보세요</p>}</div></div>{!user.data && <Link className={s.secondary} to="/login?next=/settings">로그인하기</Link>}</div>
     <div className={styles.links}><Link to="/archive?manage=1" state={{ settingsReturn }}><span className={styles.menuDot} />기록 관리 / 삭제 / 가리기</Link><Link to="/help" state={{ from: 'settings', settingsReturn }}><span className={styles.menuDot} />도움 연결</Link><button disabled title="계정 연결 후 제공"><span className={styles.menuDot} />회원정보 수정</button><button disabled title="계정 연결 후 제공"><span className={styles.menuDot} />비밀번호 찾기/변경</button><button onClick={e => { e.currentTarget.focus(); setSheet('about'); }}><span className={styles.menuDot} />서비스 이용 안내<ChevronRight size={17} /></button></div>
 

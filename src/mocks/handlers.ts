@@ -13,6 +13,11 @@ export const handlers = [
     const user = store.login(id); return user ? HttpResponse.json(user) : unauthorized();
   }),
   http.post('/__preview__/logout', () => { store.logout(); return HttpResponse.json({ ok: true }); }),
+  http.post('/__preview__/bind', async ({ request }) => {
+    const { id, nickname } = await request.json() as { id: unknown; nickname: unknown };
+    if (typeof id !== 'string' || !id || typeof nickname !== 'string' || !nickname) return HttpResponse.json({ message: '계정 정보를 확인해 주세요.' }, { status: 400 });
+    return HttpResponse.json(store.bind({ id, nickname }));
+  }),
   http.get('/__preview__/inventory', async () => {
     const owner = store.me()?.id; await delay(150); if (!owner || store.me()?.id !== owner) return unauthorized(); return HttpResponse.json(store.inventory());
   }),

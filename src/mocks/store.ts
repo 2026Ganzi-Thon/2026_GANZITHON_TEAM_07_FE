@@ -9,6 +9,8 @@ export class PreviewStore {
   me() { return this.user; }
   login(id: string) { this.user = this.profiles.find(p => p.id === id) ?? null; return this.user; }
   logout() { this.user = null; }
+  /** real mode: a backend-authenticated account keeps its own example records/inventory until those APIs are connected. */
+  bind(profile: Profile) { this.user = { id: `account-${profile.id}`, nickname: profile.nickname }; return { id: profile.id, nickname: profile.nickname }; }
   private owner() { if (!this.user) throw new Error('UNAUTHORIZED'); return this.user.id; }
   inventory() {
     const id = this.owner();
