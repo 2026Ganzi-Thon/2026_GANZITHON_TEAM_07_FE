@@ -1,6 +1,6 @@
 import { authSession } from './authSession';
 import { backend, SESSION_EXPIRED } from './backend';
-import { decodeBackendProfile, decodeLogin } from './contracts';
+import { decodeBackendProfile, decodeLogin, decodeSocialLogin } from './contracts';
 import type { Profile } from './domain';
 import { ApiError } from './errors';
 
@@ -11,6 +11,12 @@ export const authApi = {
     decodeBackendProfile(await backend('auth/signup', { method: 'POST', body: { email, password, nickname } })),
   login: async (email: string, password: string): Promise<Profile> => {
     const { tokens, profile } = decodeLogin(await backend('auth/login', { method: 'POST', body: { email, password } }));
+    authSession.set(tokens);
+    return profile;
+  },
+  /** Exchanges an OAuth authorization code; redirectUri must equal the one sent to the provider. */
+  oauth: async (provider: 'kakao', authorizationCode: string, redirectUri: string): Promise<Profile> => {
+    const { tokens, profile } = decodeSocialLogin(await backend(`auth/oauth/${provider}`, { method: 'POST', body: { authorizationCode, redirectUri } }));
     authSession.set(tokens);
     return profile;
   },
