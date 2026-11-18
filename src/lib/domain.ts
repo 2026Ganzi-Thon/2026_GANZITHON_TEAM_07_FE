@@ -5,7 +5,7 @@ export const TOYS = {
   WAKPPU: { name: '왁뿌볼', instruction: '톡톡, 껍질을 깨고 안의 말랑이를 만나보세요.', tint: 'warm' },
 } as const;
 export type ToyType = keyof typeof TOYS;
-export interface Profile { id: string; nickname: string }
+export interface Profile { id: string; nickname: string; email?: string }
 export interface Inventory { selected: ToyType; unlocked: ToyType[]; name: string }
 export interface DiaryRecord {
   id: string; createdAt: string; context: Context; summary: string; recommended: ToyType | null; messages?: Message[];
