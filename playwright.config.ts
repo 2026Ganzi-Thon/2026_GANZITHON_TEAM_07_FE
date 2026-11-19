@@ -1,7 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const preview = process.env.QA_SERVER_MODE === 'preview';
-const port = preview ? 5183 : 5173;
+// Own ports so E2E never reuses a developer's `npm run dev` (real mode by default) on 5173.
+const port = preview ? 5183 : 5185;
 const baseURL = `http://127.0.0.1:${port}`;
 // real mode (auth.spec.ts): its own dev server whose /api proxy points at the test-only fake auth backend.
 const realURL = 'http://127.0.0.1:5184';
@@ -25,7 +26,8 @@ export default defineConfig({
     { name: 'real-webkit', testMatch: real, timeout: 90000, use: { ...devices['iPhone 13'], viewport: { width: 390, height: 844 }, browserName: 'webkit', baseURL: realURL } },
   ],
   webServer: [
-    { command: `npm run ${preview ? 'preview' : 'dev'} -- --port ${port} --strictPort`, url: baseURL, reuseExistingServer: !process.env.CI },
+    // Example-data projects. Default `npm run dev` is real mode, so pin mock here; preview QA serves `npm run build:mock`.
+    { command: `npm run ${preview ? 'preview' : 'dev:mock'} -- --port ${port} --strictPort`, url: baseURL, env: { VITE_API_MODE: 'mock' }, reuseExistingServer: !process.env.CI },
     { command: 'node tests/support/fake-auth-backend.mjs', url: `${fakeAuth}/__test__/origin`, reuseExistingServer: !process.env.CI },
     { command: 'npm run dev -- --port 5184 --strictPort', url: realURL, env: { VITE_API_MODE: 'real', VITE_API_BASE_URL: '', VITE_API_PROXY_TARGET: fakeAuth, VITE_KAKAO_CLIENT_ID: 'test-kakao-client', VITE_KAKAO_REDIRECT_URI: `${realURL}/oauth/callback/kakao` }, reuseExistingServer: !process.env.CI },
   ],

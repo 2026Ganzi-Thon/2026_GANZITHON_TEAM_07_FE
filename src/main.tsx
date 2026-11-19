@@ -10,7 +10,7 @@ import { readApiMode } from './lib/apiMode';
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false, networkMode: 'always' }, mutations: { retry: false, networkMode: 'always' } } });
 
 async function start() {
-  readApiMode(import.meta.env.VITE_API_MODE);
+  readApiMode(import.meta.env.VITE_API_MODE, import.meta.env.MODE);
   // Both modes start MSW: in real mode it only answers /__preview__ features that are not connected yet;
   // backend /api requests are never matched and pass straight through.
   const { worker } = await import('./mocks/browser');
