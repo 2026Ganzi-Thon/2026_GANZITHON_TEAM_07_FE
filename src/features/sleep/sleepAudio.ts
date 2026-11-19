@@ -1,12 +1,21 @@
 import type { SleepSound } from './model';
 
 export type SleepAudioStatus = 'idle' | 'playing' | 'unavailable';
-export interface SleepAudioState { status: SleepAudioStatus; asmrFailed: boolean }
+export interface SleepAudioState { status: SleepAudioStatus; asmrFailed: boolean; trackFailed: boolean }
 
 type Noise = 'white' | 'pink' | 'brown';
 interface Layer { gain: GainNode; nodes: AudioNode[]; sources: AudioScheduledSourceNode[]; timer?: ReturnType<typeof setTimeout> }
 
-/** Ambient recipes generated in the browser. RAIN/NATURE are approximations until supplied tracks arrive. */
+/**
+ * Team-supplied ambient tracks (2026-11-19, see public/assets/audio/LICENSES.md), looped from a random offset.
+ * WHITE plays the supplied wave recording (user decision: "파도 소리" goes in the 백색소음 slot).
+ */
+const AMBIENT_TRACKS: Record<Exclude<SleepSound, 'MALANGI' | 'MUSIC'>, { file: string; level: number }> = {
+  WHITE: { file: 'sleep/waves.mp3', level: .8 },
+  RAIN: { file: 'sleep/rain.mp3', level: .8 },
+  NATURE: { file: 'sleep/nature.mp3', level: .8 },
+};
+/** Fallback only, used when a supplied track cannot be loaded or decoded. */
 const NOISE_RECIPES: Record<Exclude<SleepSound, 'MALANGI' | 'MUSIC'>, { noise: Noise; level: number; highpass?: number; lowpass: number; swell?: { rate: number; depth: number } }> = {
   WHITE: { noise: 'white', level: .12, lowpass: 8000 },
   RAIN: { noise: 'pink', level: .26, highpass: 450, lowpass: 7000, swell: { rate: .23, depth: .05 } },
@@ -40,7 +49,8 @@ export class SleepAudio {
   private loading: Promise<void> | null = null;
   private stopTimer: ReturnType<typeof setTimeout> | null = null;
   private listeners = new Set<() => void>();
-  private state: SleepAudioState = { status: 'idle', asmrFailed: false };
+  private state: SleepAudioState = { status: 'idle', asmrFailed: false, trackFailed: false };
+  private tracks = new Map<SleepSound, Promise<AudioBuffer | null>>();
   private disposed = false;
   private generation = 0;
 
@@ -92,6 +102,38 @@ export class SleepAudio {
       return;
     }
     if (id === 'MUSIC') return;
+    this.layers.set(id, layer);
+    void this.loadTrack(id).then(buffer => {
+      if (this.layers.get(id) !== layer || !this.context) return; // deselected or stopped while loading
+      if (buffer) this.startTrack(layer, buffer, AMBIENT_TRACKS[id].level);
+      else { this.update({ trackFailed: true }); this.startNoise(layer, id); }
+    });
+  }
+
+  private loadTrack(id: Exclude<SleepSound, 'MALANGI' | 'MUSIC'>) {
+    let pending = this.tracks.get(id);
+    if (!pending) {
+      const context = this.context!;
+      pending = fetch(`/assets/audio/${AMBIENT_TRACKS[id].file}`)
+        .then(response => response.ok ? response.arrayBuffer() : Promise.reject(new Error(String(response.status))))
+        .then(bytes => context.decodeAudioData(bytes))
+        .catch(() => { this.tracks.delete(id); return null; }); // a later run may retry the download
+      this.tracks.set(id, pending);
+    }
+    return pending;
+  }
+
+  private startTrack(layer: Layer, buffer: AudioBuffer, level: number) {
+    const context = this.context!, now = context.currentTime;
+    const source = context.createBufferSource(); source.buffer = buffer; source.loop = true;
+    const gain = context.createGain(); gain.gain.value = level;
+    source.connect(gain); gain.connect(layer.gain); layer.nodes.push(gain);
+    source.start(now, Math.random() * Math.max(0, buffer.duration - 1)); layer.sources.push(source);
+    layer.gain.gain.cancelScheduledValues(now); layer.gain.gain.setValueAtTime(0, now); layer.gain.gain.linearRampToValueAtTime(1, now + 1.5);
+  }
+
+  private startNoise(layer: Layer, id: Exclude<SleepSound, 'MALANGI' | 'MUSIC'>) {
+    const context = this.context!, now = context.currentTime, gain = layer.gain;
     const recipe = NOISE_RECIPES[id];
     const source = context.createBufferSource(); source.buffer = this.noiseBuffer(recipe.noise); source.loop = true;
     let tail: AudioNode = source;
@@ -104,8 +146,7 @@ export class SleepAudio {
       lfo.connect(depth); depth.connect(level.gain); lfo.start(now); layer.sources.push(lfo); layer.nodes.push(depth);
     }
     source.start(now, Math.random() * (source.buffer!.duration - .1)); layer.sources.push(source);
-    gain.gain.linearRampToValueAtTime(1, now + 1.5);
-    this.layers.set(id, layer);
+    gain.gain.cancelScheduledValues(now); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(1, now + 1.5);
   }
 
   private noiseBuffer(kind: Noise) {
@@ -179,6 +220,6 @@ export class SleepAudio {
   dispose() {
     this.stop(); this.disposed = true;
     void this.context?.close().catch(() => {});
-    this.context = null; this.master = null; this.noise.clear(); this.samples = []; this.listeners.clear();
+    this.context = null; this.master = null; this.noise.clear(); this.tracks.clear(); this.samples = []; this.listeners.clear();
   }
 }

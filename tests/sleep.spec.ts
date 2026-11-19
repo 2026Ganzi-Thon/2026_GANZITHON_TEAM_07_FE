@@ -166,3 +166,18 @@ for (const [width, height] of [[360, 740], [390, 844], [430, 932], [844, 390]] a
     await page.screenshot({ path: shot(`panel-${width}x${height}`) });
   });
 }
+
+test('running sleep mode loads the supplied rain/wave tracks instead of generated noise', async ({ page }) => {
+  await page.goto('/sleep');
+  const panel = await openSettings(page);
+  await panel.getByRole('button', { name: /^백색소음/ }).click(); // WHITE plays the supplied wave recording
+  await panel.getByRole('button', { name: '수면 설정 닫기' }).click();
+  const rain = page.waitForResponse(response => response.url().endsWith('/assets/audio/sleep/rain.mp3'));
+  const waves = page.waitForResponse(response => response.url().endsWith('/assets/audio/sleep/waves.mp3'));
+  await page.getByRole('button', { name: '수면 모드 실행' }).click();
+  if (!(await hasWebAudio(page))) return; // no Web Audio: nothing is fetched (covered by the unavailable notice test)
+  expect((await rain).status()).toBe(200); expect((await waves).status()).toBe(200);
+  await page.waitForTimeout(1500); // decode
+  await expect(page.getByText('일부 수면 음원을 불러오지 못해')).toHaveCount(0);
+  await page.getByRole('button', { name: '수면 모드 종료' }).click();
+});

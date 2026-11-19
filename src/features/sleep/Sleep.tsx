@@ -92,6 +92,7 @@ export function Sleep() {
       {running && <p className={styles.srOnly} data-testid="sleep-remaining">남은 시간 {formatRemaining(left)}</p>}
       {running && sound.status === 'unavailable' && <p className={styles.message} role="alert">이 브라우저에서는 소리를 재생할 수 없어요. 무드등과 타이머만 동작해요.</p>}
       {running && sound.asmrFailed && settings.sounds.includes('MALANGI') && <p className={styles.message} role="alert">말랑이 ASMR 소리를 불러오지 못했어요. 다른 사운드는 계속 재생돼요.</p>}
+      {running && sound.trackFailed && <p className={styles.message} role="alert">일부 수면 음원을 불러오지 못해 대체 소리로 재생하고 있어요.</p>}
     </div>
     {/* Pull-up handle: the sheet follows the finger and opens only after a real upward drag.
         A plain tap does nothing; keyboard activation (detail 0) still opens it, and the header gear is the tap alternative. */}

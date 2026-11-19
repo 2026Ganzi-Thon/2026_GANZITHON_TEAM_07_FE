@@ -6,6 +6,13 @@
 - `touch-foam-1..3.wav`, `touch-release-1..3.wav`: user-supplied 스퀴시.mp3 excerpts. Release3 omits a tonal ending. See supplied-material-manifest.json for source hashes and processing.
 - `touch-wax-1..3.wav`: final excerpts from the supplied recording, byte-identical to the accepted local samples (0.66/0.70/0.62 seconds, stereo 44.1 kHz, 3 ms boundary fades). Included in the app assets for all environments; no local override is required. See supplied-material-manifest.json and scripts/extract_wax_reference.py.
 
+## Sleep ambience · 2026-11-19
+
+Team-supplied recordings, copied byte-for-byte into `sleep/` (no processing; looped at runtime). External licensing not separately confirmed.
+- `sleep/waves.mp3` ← 파도 소리.mp3, sha256 a9214a707344d15af2734444f495ca0ab5be54adc57aa754530497a853e1a1ec (plays in the 백색소음 slot)
+- `sleep/rain.mp3` ← 빗소리.mp3, sha256 ca25c3c85f4fd56abf29ec7a59fc75d243bfbe12160f4f0870fc4f18c5e2c63e
+- `sleep/nature.mp3` ← 자연소리.mp3, sha256 9f8a7fedfb9faaf1cee8dcc80d9cdc3e00a2e7a59459fe9e494c62f315f08b95
+
 Older sources below record earlier iterations; the current runtime selection is described above.
 
 ## D52 로컬 녹화 음원 비교
