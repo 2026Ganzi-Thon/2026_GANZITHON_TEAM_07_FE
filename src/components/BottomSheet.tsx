@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 import { IconButton } from './ui';
 import styles from './BottomSheet.module.css';
 
-export function BottomSheet({ id, title, children, onClose }: { id: string; title: string; children: ReactNode; onClose: () => void }) {
+export function BottomSheet({ id, title, children, onClose, closeLabel = '대화창 닫기', className = '' }: { id: string; title: string; children: ReactNode; onClose: () => void; closeLabel?: string; className?: string }) {
   const ref = useRef<HTMLDialogElement>(null);
   const gesture = useRef<{ id: number; y: number } | null>(null);
   const closingRef = useRef(false);
@@ -39,7 +39,7 @@ export function BottomSheet({ id, title, children, onClose }: { id: string; titl
     return () => clearTimeout(timer);
   }, [closing, onClose]);
   const close = () => { closingRef.current = true; setClosing(true); };
-  return <dialog id={id} ref={ref} aria-labelledby={`${id}-title`} className={`${styles.sheet} ${closing ? styles.closing : ''}`} style={{ translate: `0 ${offset}px` }}
+  return <dialog id={id} ref={ref} aria-labelledby={`${id}-title`} className={`${styles.sheet} ${closing ? styles.closing : ''} ${className}`} style={{ translate: `0 ${offset}px` }}
     onKeyDown={event => {
       if (event.key !== 'Tab') return;
       const items = [...event.currentTarget.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], textarea:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])')].filter(el => el.getClientRects().length > 0);
@@ -54,7 +54,7 @@ export function BottomSheet({ id, title, children, onClose }: { id: string; titl
         onPointerMove={event => { if (gesture.current?.id === event.pointerId) setOffset(Math.max(0, event.clientY - gesture.current.y)); }}
         onPointerUp={event => { if (gesture.current?.id !== event.pointerId) return; const distance = event.clientY - gesture.current.y; gesture.current = null; if (distance > 64) close(); else setOffset(0); }}
         onPointerCancel={() => { gesture.current = null; setOffset(0); }} onLostPointerCapture={() => { gesture.current = null; if (!closingRef.current) setOffset(0); }}><span /></div>
-      <header className={styles.header}><h2 id={`${id}-title`}>{title}</h2><IconButton label="대화창 닫기" onClick={close}><X size={20} /></IconButton></header>
+      <header className={styles.header}><h2 id={`${id}-title`}>{title}</h2><IconButton label={closeLabel} onClick={close}><X size={20} /></IconButton></header>
       {children}
     </div>
   </dialog>;

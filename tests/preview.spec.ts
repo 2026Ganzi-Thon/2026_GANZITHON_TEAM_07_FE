@@ -37,9 +37,10 @@ test('main, accessible menu, unavailable features and settings', async ({ page }
   await page.getByRole('button', { name: '메뉴 열기' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.getByRole('button', { name: /수면 모드/ }).click();
-  await expect(page.getByText('수면 모드는 아직 준비 중이에요.')).toBeVisible();
-  await page.keyboard.press('Escape');
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page).toHaveURL(/\/sleep$/);
+  await expect(page.getByRole('heading', { name: '수면모드', exact: true })).toBeVisible();
+  await page.getByRole('link', { name: '뒤로가기', exact: true }).click();
+  await expect(page.getByRole('main', { name: '테슬랑 메인' })).toBeVisible();
   await page.getByRole('button', { name: '메뉴 열기' }).click();
   await page.getByRole('button', { name: '설정/MY' }).click();
   await expect(page.getByRole('heading', { name: 'MY' })).toBeVisible();
