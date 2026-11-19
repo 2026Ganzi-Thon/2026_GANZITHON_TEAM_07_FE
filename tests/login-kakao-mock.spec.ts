@@ -11,7 +11,7 @@ test('mock login always shows the Kakao button and explains what it still needs'
   await expect(page).toHaveURL(/\/login\?next=%2Farchive$/);
   await expect(page.getByRole('alert')).toHaveText('카카오 로그인 설정이 아직 준비되지 않았어요. 잠시 후 다시 시도해 주세요.');
 
-  await page.evaluate(() => sessionStorage.setItem('teslang:oauth-pending', JSON.stringify({ provider: 'kakao', state: 's1', next: '/archive', redirectUri: 'x' })));
+  await page.evaluate(() => sessionStorage.setItem('teslang:oauth-pending', JSON.stringify({ provider: 'kakao', state: 's1', next: '/archive', redirectUri: 'x', createdAt: Date.now() })));
   await page.goto('/oauth/callback/kakao?code=c&state=s1');
   await expect(page.getByRole('alert')).toHaveText('카카오 로그인은 실제 서버에 연결된 상태(real 모드)에서만 완료할 수 있어요.');
   await page.getByRole('link', { name: '로그인 화면으로 돌아가기' }).click();

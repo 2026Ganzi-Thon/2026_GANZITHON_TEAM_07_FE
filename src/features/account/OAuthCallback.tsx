@@ -19,7 +19,9 @@ export function OAuthCallback() {
   useEffect(() => {
     if (started.current) return; // StrictMode replay / re-render must not spend the one-time code twice
     started.current = true;
-    const pending = provider === 'kakao' ? takePendingOAuth('kakao', params.get('state')) : null;
+    const { pending, entry } = provider === 'kakao' ? takePendingOAuth('kakao', params.get('state')) : { pending: null };
+    // Restore the unsent first message (PR #14 review) whatever the outcome; Chat sends it after login.
+    if (entry && !preview.entry) preview.entry = { text: entry };
     if (pending) setRetry(`/login?next=${encodeURIComponent(pending.next)}`);
     if (provider !== 'kakao') { setError('지원하지 않는 로그인 방식이에요.'); return; }
     const denied = params.get('error');
@@ -29,7 +31,7 @@ export function OAuthCallback() {
     // mock mode has no backend to exchange the code with; say so instead of failing on a missing /api.
     if (API_MODE !== 'real') { setError('카카오 로그인은 실제 서버에 연결된 상태(real 모드)에서만 완료할 수 있어요.'); return; }
     accountApi.loginWithOAuth('kakao', code, pending.redirectUri).then(profile => {
-      client.removeQueries({ queryKey: ['preview'] }); preview.drafts.clear();
+      client.removeQueries({ queryKey: ['preview'] }); preview.drafts.clear(); // entry is kept on purpose
       client.setQueryData(['preview', 'me'], profile);
       navigate(loginDestination(pending.next), { replace: true });
     }, failure => setError(describeOAuthError(failure)));

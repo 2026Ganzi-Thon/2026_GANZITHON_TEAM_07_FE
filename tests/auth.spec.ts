@@ -141,6 +141,43 @@ test('Kakao login exchanges the code once and returns to the original page', asy
   await expect(page.getByText('카카오친구')).toBeVisible();
 });
 
+test('the first message typed before Kakao login is sent after coming back (PR #14 review)', async ({ page }) => {
+  const message = '발표 준비가 계속 마음에 걸려요';
+  await fakeKakao(page, { code: 'good-code' });
+  await page.goto('/');
+  await page.getByRole('button', { name: /테스와 이야기하기/ }).click();
+  await page.getByRole('textbox', { name: '첫 이야기' }).fill(message);
+  await page.getByRole('button', { name: '대화 시작하기' }).click();
+  await expect(page).toHaveURL(/\/login\?next=%2Fchat$/);
+  await page.getByRole('button', { name: '카카오 로그인' }).click();
+  await expect(page).toHaveURL(/\/chat$/);
+  await expect(page.getByText(message, { exact: true })).toBeVisible();
+  // The round-trip copy is removed as soon as it has been read.
+  expect(await page.evaluate(() => sessionStorage.getItem('teslang:oauth-pending'))).toBeNull();
+});
+
+test('abandoning the Kakao page keeps the first message for the next login', async ({ page }) => {
+  await createUser('back@example.com');
+  const message = '오늘 친구랑 다퉜어요';
+  await page.goto('/');
+  await page.getByRole('button', { name: /테스와 이야기하기/ }).click();
+  await page.getByRole('textbox', { name: '첫 이야기' }).fill(message);
+  await page.getByRole('button', { name: '대화 시작하기' }).click();
+  await page.route('https://kauth.kakao.com/**', route => route.fulfill({ status: 200, contentType: 'text/html', body: '<p>kakao</p>' }));
+  await page.getByRole('button', { name: '카카오 로그인' }).click();
+  await expect(page).toHaveURL(/kauth\.kakao\.com/);
+  await page.goBack();
+  await expect(page).toHaveURL(/\/login\?next=%2Fchat$/);
+  // Wait for the app to boot again (MSW start) before checking that the abandoned request was dropped.
+  await expect(page.getByRole('button', { name: '이메일로 시작하기' })).toBeVisible();
+  await expect.poll(() => page.evaluate(() => sessionStorage.getItem('teslang:oauth-pending'))).toBeNull();
+  const sheet = await openEmail(page);
+  await fill(sheet, { email: 'back@example.com', password: 'Password1!' });
+  await submitLogin(sheet);
+  await expect(page).toHaveURL(/\/chat$/);
+  await expect(page.getByText(message, { exact: true })).toBeVisible();
+});
+
 test('Kakao callback explains cancel, an existing email account and a forged state', async ({ page }) => {
   await fakeKakao(page, { error: 'access_denied' });
   await page.goto('/login?next=%2Farchive');

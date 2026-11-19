@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Mail, UserRound } from 'lucide-react';
@@ -6,7 +6,7 @@ import { BottomSheet } from '../../components/BottomSheet';
 import { previewApi } from '../../lib/api';
 import { API_MODE } from '../../lib/apiMode';
 import { DESIGN_ASSETS } from '../../lib/assets';
-import { startKakaoLogin } from '../../lib/oauth';
+import { discardPendingOAuth, startKakaoLogin } from '../../lib/oauth';
 import { usePreview } from '../../lib/PreviewContext';
 import { EmailAuth } from './EmailAuth';
 import s from '../../components/Page.module.css';
@@ -31,6 +31,16 @@ export function Login() {
   const destination = loginDestination(params.get('next'));
   const [sheet, setSheet] = useState(false);
   const [kakaoError, setKakaoError] = useState('');
+  const preview = usePreview();
+  // Returning here without a callback (e.g. back from the Kakao page) abandons that request; keep its message.
+  // A back navigation can restore this page from the bfcache without remounting, so also listen to pageshow.
+  useEffect(() => {
+    const abandon = () => { const entry = discardPendingOAuth(); if (entry && !preview.entry) preview.entry = { text: entry }; };
+    abandon();
+    const restored = (event: PageTransitionEvent) => { if (event.persisted) abandon(); };
+    window.addEventListener('pageshow', restored);
+    return () => window.removeEventListener('pageshow', restored);
+  }, [preview]);
   return <main className={styles.page} aria-labelledby="login-title">
     <Link to="/" className={styles.back} aria-label="메인으로 돌아가기"><ArrowLeft size={22} /></Link>
     <div className={styles.backdrop} aria-hidden="true"><img className={styles.statue} src={DESIGN_ASSETS.socrates} width={471} height={707} alt="" /></div>
@@ -40,7 +50,7 @@ export function Login() {
     </div>
     <div className={styles.actions}>
       {/* Kakao Developers standard button (224x46, used as-is); the container widens with the same #FEE500. */}
-      <button type="button" className={styles.kakao} onClick={() => { if (!startKakaoLogin(destination)) setKakaoError('카카오 로그인 설정이 아직 준비되지 않았어요. 잠시 후 다시 시도해 주세요.'); }}>
+      <button type="button" className={styles.kakao} onClick={() => { if (!startKakaoLogin(destination, preview.entry?.text)) setKakaoError('카카오 로그인 설정이 아직 준비되지 않았어요. 잠시 후 다시 시도해 주세요.'); }}>
         <img src={DESIGN_ASSETS.kakaoLogin} width={224} height={46} alt="카카오 로그인" />
       </button>
       {kakaoError && <p className={styles.note} role="alert">{kakaoError}</p>}
