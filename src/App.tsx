@@ -9,6 +9,7 @@ import { OAuthCallback } from './features/account/OAuthCallback';
 import { Archive, RecordDetail, Result } from './features/records/Records';
 import { Toy } from './features/toy/Toy';
 import { ToyPreferencesProvider } from './features/toy/ToyPreferences';
+import { Sleep } from './features/sleep/Sleep';
 
 export function App() {
   useEffect(() => {
@@ -21,6 +22,7 @@ export function App() {
     <div className={styles.app}><Routes><Route path="/" element={<Home />} /><Route path="/chat" element={<RequirePreview><Chat /></RequirePreview>} />
       <Route path="/login" element={<Login />} /><Route path="/oauth/callback/:provider" element={<OAuthCallback />} /><Route path="/settings" element={<Settings />} /><Route path="/help" element={<Help />} />
       <Route path="/malangi" element={<RequirePreview><Toy /></RequirePreview>} />
+      <Route path="/sleep" element={<Sleep />} />
       <Route path="/results/:id" element={<RequirePreview><Result /></RequirePreview>} />
       <Route path="/archive" element={<RequirePreview><Archive /></RequirePreview>} />
       <Route path="/records/:id" element={<RequirePreview><RecordDetail /></RequirePreview>} /><Route path="*" element={<Navigate to="/" replace />} /></Routes></div>

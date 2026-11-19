@@ -1,4 +1,4 @@
-// Team-provided originals. Sleep artwork is reserved; the other assets are used by current screens.
+// Team-provided originals. sleepingLamb (older PNG) stays reserved; the sleep screen uses sleepSticker.
 export const DESIGN_ASSETS = {
   lamb: '/assets/design/sheep-squishy.png',
   socrates: '/assets/design/socrates.png',
@@ -8,6 +8,7 @@ export const DESIGN_ASSETS = {
   myProfile: '/assets/design/my-profile-icon.png',
   menuBubble: '/assets/design/menu-bubble.png',
   sleepingLamb: '/assets/design/lamb-sleep.png',
+  sleepSticker: '/assets/design/lamb-sleep-sticker.png',
   logo: '/assets/design/teslang-logo.png',
   wordmark: '/assets/design/teslang-wordmark.svg',
   kakaoLogin: '/assets/design/kakao-login-complete-ko.svg',

@@ -113,7 +113,7 @@ npm run test:e2e
 
 기본 주소는 `http://127.0.0.1:5173`이다. MSW의 Service Worker는 localhost 또는 HTTPS에서 동작한다. 휴대폰 실기기에서는 localhost가 개발 PC를 가리키지 않으므로 HTTPS 미리보기 배포 등 접속 구성을 별도로 준비한다.
 
-현재 빌드도 화면 검토용 예시 모드다. `VITE_API_MODE=mock`이 기본이며 다른 모드는 아직 지원하지 않는다. 앱 공개 운영 전 실제 API 어댑터·인증·데이터 정책을 구현하고 예시 handler와 안내의 배포 방식을 결정해야 한다. SPA 배포 시 `/chat` 직접 접근을 위한 index.html fallback도 필요하다.
+기본 빌드는 real 모드로 인증만 백엔드 API를 호출한다. 대화·기록·말랑이는 MSW 예시 데이터이며 `npm run build:mock`은 인증까지 예시 모드로 빌드한다. 앱 공개 운영 전 나머지 API 어댑터·데이터 정책을 구현하고 예시 handler의 배포 방식을 결정해야 한다. SPA 배포 시 `/chat` 직접 접근을 위한 index.html fallback도 필요하다.
 
 패키지 설치·코드 작성과 검증은 승인된 범위에 포함한다. 외부 배포·새 서비스 계정 연결·Git 커밋과 푸시는 별도 요청이 있을 때 진행한다.
 
