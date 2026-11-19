@@ -121,7 +121,7 @@ npm run test:e2e
 
 브라우저·추적 파일을 별도 디스크에 두는 경우 `scripts/qa.ps1 -RuntimeRoot <로컬 도구 폴더>`를 사용한다. 해당 프로세스의 브라우저/임시/추적 경로만 바꾸며 종료 후 복원한다. 특정 드라이브는 필수 조건이 아니다.
 
-빌드 검사는 `npm run build` 후 `QA_SERVER_MODE=preview` 환경변수로 Playwright를 실행한다. preview는 5183 포트, 기본 개발 검사는 5173 포트를 사용한다. 실행 방법과 실제 검사 결과는 [QA 기록](qa.md)을 따른다.
+빌드 검사는 `npm run build:mock` 후 `QA_SERVER_MODE=preview` 환경변수로 Playwright를 실행한다. preview는 5183 포트, mock 개발 검사는 5185 포트(`npm run dev:mock`)를 쓴다. 개발자가 띄운 `npm run dev`(5173, real 기본)를 재사용하지 않게 포트를 분리했다. 실행 방법과 실제 검사 결과는 [QA 기록](qa.md)을 따른다.
 
 ## 요청 복구와 완료 payload — 2026-11-14 보완
 
@@ -172,8 +172,9 @@ D34(2026-11-15): D34 적용 기준으로 세 종류를 처음부터 개방했다
 
 ## 실제 API 모드·인증 — #13 (2026-11-18)
 
-- 모드: `src/lib/apiMode.ts`. mock은 전부 MSW, real은 `/api/v1/auth`만 백엔드이고 나머지 `/__preview__`는 MSW가 계속 응답한다. real에서는 로그인한 계정을 `/__preview__/bind`로 예시 저장소에 연결해 계정별로 나눈다.
+- 모드: `src/lib/apiMode.ts`. 기본은 real이고(2026-11-19), Vite `--mode mock`(`dev:mock`/`build:mock`) 또는 `VITE_API_MODE=mock`이면 mock이다. mock은 전부 MSW, real은 `/api/v1/auth`만 백엔드이고 나머지 `/__preview__`는 MSW가 계속 응답한다. real에서는 로그인한 계정을 `/__preview__/bind`로 예시 저장소에 연결해 계정별로 나눈다.
 - 백엔드 응답 `{ success, data, error }`는 `contracts.ts`의 `decodeEnvelope`에서 풀고, 실패는 `ApiError(status, code, details)`로 바꾼다. 화면은 `code`(예: `INVALID_CREDENTIALS`, `EMAIL_ALREADY_REGISTERED`)로 문구를 고른다.
+- 로그아웃(PR #14 리뷰): 진행 중인 토큰 갱신이 끝날 때까지 기다리고, 요청 본문은 보낼 때 읽는다(`body` 함수). 그래서 401 → 갱신 → 재전송에서도 최신 Refresh 토큰을 폐기한다. 로그아웃 뒤 끝난 갱신은 `authSession.generation()`이 달라 저장하지 않는다.
 - 토큰: `authSession.ts`(Access 메모리, Refresh `sessionStorage`). 저장 정책을 바꿀 때는 이 파일만 수정한다. refresh 거절 시 `expired` 이벤트로 프로필 외 캐시를 지우고 프로필을 null로 만든다. 진행 중인 프로필 조회를 지우면 화면이 대기 상태에 멈추므로 프로필 쿼리는 지우지 않는다.
 - 로그인 화면: `features/account/Login.tsx`(시안 151:11030)와 `OAuthCallback.tsx`(`/oauth/callback/:provider`). 콜백은 독립 화면이 아니라 처리 경로다. 일회용 코드는 ref로 한 번만 교환해서 StrictMode 재실행에서도 중복 교환하지 않는다. Safari는 클릭한 버튼에 초점을 주지 않으므로, 시트를 여는 버튼에서 직접 `focus()`를 호출해 시트를 닫은 뒤 초점이 돌아오게 했다.
 - 테스트: `npm run test:e2e`는 real 전용 개발 서버(5184)와 가짜 인증 서버(`tests/support/fake-auth-backend.mjs`, 8099)도 띄운다. `tests/auth.spec.ts`는 real-chromium/real-webkit 프로젝트에서만 실행된다. 가짜 서버는 백엔드 문서의 응답 형태만 흉내 낸 것으로 실제 백엔드 검증이 아니다.

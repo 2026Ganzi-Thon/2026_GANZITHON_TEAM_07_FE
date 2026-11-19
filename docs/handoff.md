@@ -26,16 +26,17 @@ Node >=22.12.0, npm 잠금 파일을 사용한다.
 
 ```sh
 npm ci
-npm run dev
-npm run build
+npm run dev        # real 모드(기본, 2026-11-19~): 배포 백엔드로 로그인·카카오 로그인
+npm run dev:mock   # 예시 데이터만 쓰는 mock 모드(백엔드 없이 체험 계정)
+npm run build      # real 모드 빌드 (build:mock은 mock 모드 빌드)
 npm test
 npx playwright install chromium webkit
 npm run test:e2e
 ```
 
-기본 주소는 http://127.0.0.1:5173 이다. `.env.example`은 mock 모드이며 환경 파일 없이도 동작한다.
+기본 주소는 http://127.0.0.1:5173 이다. 환경 파일 없이도 동작한다.
 
-**실제 API 모드(#13):** `VITE_API_MODE=real npm run dev`로 실행하면 이메일 가입·로그인·로그아웃·프로필만 백엔드 `/api/v1/auth`를 호출한다. 상담·기록·말랑이는 아직 연결 전이라 MSW 예시 데이터를 쓰되, 실제 계정 ID별로 나눠 보관한다.
+**실행 모드(#13):** 기본 `npm run dev`는 **real 모드**다. 이메일 가입·로그인·로그아웃·프로필과 카카오 로그인이 백엔드 `/api/v1/auth`를 호출한다. 상담·기록·말랑이는 아직 연결 전이라 MSW 예시 데이터를 쓰되, 실제 계정 ID별로 나눠 보관한다. 백엔드 없이 예시만 쓰려면 `npm run dev:mock`(Vite `--mode mock`)을 쓴다. `VITE_API_MODE`를 직접 지정하면 그 값이 우선한다. Windows에서도 동작하도록 환경변수 접두 대신 `--mode`를 쓴다.
 - **백엔드 배포 주소:** `https://malangi.up.railway.app` (Swagger: `/swagger-ui/index.html`). 2026-11-18 기준 헬스체크가 `UP`이고, API 목록이 백엔드 docs/api.md와 일치한다.
 - 개발/preview 서버는 `/api`를 `VITE_API_PROXY_TARGET`(기본: 위 배포 주소)으로 프록시한다. 로컬 백엔드를 쓰려면 `VITE_API_PROXY_TARGET=http://127.0.0.1:8080`으로 바꾼다.
 - **CORS:** 배포 서버는 `localhost:5173`만 허용하고 우리 개발 주소인 `127.0.0.1:5173`은 403으로 막는다. 그래서 프록시가 브라우저 Origin 헤더를 지운다.
@@ -47,6 +48,12 @@ npm run test:e2e
   - mock 모드는 같은 배치에서 체험 계정 A/B와 "체험 계정으로 계속하기"를 보여준다.
 - **카카오 로그인**은 카카오디벨로퍼스 공식 버튼으로, mock·real 모두 **항상 보인다**(2026-11-18 사용자 요청).
   - `VITE_KAKAO_CLIENT_ID`가 없으면 시작할 수 없다는 안내를 보여준다. mock 모드는 백엔드가 없어 콜백에서 "real 모드에서만 완료" 안내로 끝난다.
+  - 홈에서 쓴 첫 이야기는 카카오로 이동하는 동안만 `sessionStorage`에 `state`와 함께 둔다. 돌아오면 바로 지우고 메모리로 복원한다. 10분이 지나면 무시하고 탭을 닫으면 사라진다(PR #14 리뷰). AGENTS.md의 "상담 내용을 브라우저 저장소에 남기지 않는다"에 대한 유일한 예외다.
+  - **백엔드 팀 요청 사항(키 등록은 백엔드 팀 담당, 2026-11-19 결정):**
+    1. 카카오 개발자 콘솔에 앱을 등록하고 카카오 로그인을 활성화한다. 이메일 제공 동의는 필수로 둔다(백엔드는 검증된 이메일만 허용).
+    2. Redirect URI를 등록한다. 로컬은 `http://127.0.0.1:5173/oauth/callback/kakao`이다. 시작한 페이지와 출처(origin)가 같아야 로그인 상태가 이어지므로 `localhost`가 아니라 `127.0.0.1`로 등록한다. 프론트를 배포하면 그 주소도 추가한다.
+    3. Railway 백엔드에 `KAKAO_CLIENT_ID`·`KAKAO_CLIENT_SECRET`·`KAKAO_REDIRECT_URI`를 넣는다. `KAKAO_REDIRECT_URI`는 2번 값과 같아야 한다. 백엔드는 등록된 하나의 URI만 받으므로 로컬과 배포 중 무엇을 쓸지 정해야 한다.
+    4. 같은 앱의 REST API 키를 프론트 `.env`의 `VITE_KAKAO_CLIENT_ID`에 넣는다.
   - 백엔드 `/auth/oauth/kakao`는 구현돼 있지만 `KAKAO_CLIENT_ID`·`KAKAO_CLIENT_SECRET`·`KAKAO_REDIRECT_URI`가 비어 있으면 동작하지 않는다. 카카오 앱 등록과 키 발급 담당을 정해야 한다.
   - 흐름: 카카오 인증 → `/oauth/callback/kakao` → 백엔드 `/auth/oauth/kakao`로 코드 교환. 위조 방지 `state`와 원래 목적지는 `sessionStorage`에 잠시 둔다.
   - 실제 동작 확인에는 카카오 앱 키, 리다이렉트 주소 등록, 백엔드 `KAKAO_*` 환경변수가 필요하다. 지금은 가짜 인증 서버로만 확인했다.
