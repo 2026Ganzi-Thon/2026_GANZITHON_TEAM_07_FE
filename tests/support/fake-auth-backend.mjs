@@ -44,16 +44,6 @@ createServer(async (req, res) => {
       const user = [...users.values()].find(item => item.email === String(body.email ?? '').trim().toLowerCase() && item.password === body.password);
       return user ? ok(res, { ...issue(user.userId), userId: user.userId, nickname: user.nickname }) : fail(res, 401, 'INVALID_CREDENTIALS', '이메일 또는 비밀번호가 올바르지 않습니다.');
     }
-    case 'POST /api/v1/auth/oauth/kakao': {
-      // good-code: Kakao account (JIT signup on first use). dup-code: email already used by a LOCAL account.
-      if (body.redirectUri !== 'http://127.0.0.1:5184/oauth/callback/kakao') return fail(res, 401, 'INVALID_SOCIAL_CREDENTIALS', '소셜 인증 정보를 확인할 수 없습니다.');
-      if (body.authorizationCode === 'dup-code') return fail(res, 409, 'EMAIL_ALREADY_REGISTERED', '이미 해당 이메일로 가입된 계정이 있습니다.', { existingProvider: 'LOCAL', registeredEmail: 'kakao@example.com' });
-      if (body.authorizationCode !== 'good-code') return fail(res, 401, 'INVALID_SOCIAL_CREDENTIALS', '소셜 인증 정보를 확인할 수 없습니다.');
-      let user = [...users.values()].find(item => item.email === 'kakao@example.com');
-      const isNewUser = !user;
-      if (!user) { user = { userId: users.size + 1, email: 'kakao@example.com', nickname: '카카오친구', password: null }; users.set(user.userId, user); }
-      return ok(res, { ...issue(user.userId), userId: user.userId, email: user.email, nickname: user.nickname, provider: 'KAKAO', isNewUser });
-    }
     case 'POST /api/v1/auth/refresh': {
       const userId = refresh.get(body.refreshToken);
       if (!userId) return fail(res, 401, 'INVALID_REFRESH_TOKEN', '유효하지 않은 토큰입니다.');

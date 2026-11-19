@@ -1,22 +1,16 @@
 import { authSession } from './authSession';
 import { backend, SESSION_EXPIRED, settleRefresh } from './backend';
-import { decodeBackendProfile, decodeLogin, decodeSocialLogin } from './contracts';
+import { decodeBackendProfile, decodeLogin } from './contracts';
 import type { Profile } from './domain';
 import { ApiError } from './errors';
 
-/** Backend email auth (/api/v1/auth). Social login is out of scope until OAuth clients are registered. */
+/** Backend email auth (/api/v1/auth). */
 export const authApi = {
   /** Creates the account only; the caller logs in afterwards. */
   signup: async (email: string, password: string, nickname: string): Promise<Profile> =>
     decodeBackendProfile(await backend('auth/signup', { method: 'POST', body: { email, password, nickname } })),
   login: async (email: string, password: string): Promise<Profile> => {
     const { tokens, profile } = decodeLogin(await backend('auth/login', { method: 'POST', body: { email, password } }));
-    authSession.set(tokens);
-    return profile;
-  },
-  /** Exchanges an OAuth authorization code; redirectUri must equal the one sent to the provider. */
-  oauth: async (provider: 'kakao', authorizationCode: string, redirectUri: string): Promise<Profile> => {
-    const { tokens, profile } = decodeSocialLogin(await backend(`auth/oauth/${provider}`, { method: 'POST', body: { authorizationCode, redirectUri } }));
     authSession.set(tokens);
     return profile;
   },

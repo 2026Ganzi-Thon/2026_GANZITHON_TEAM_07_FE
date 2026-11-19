@@ -1,5 +1,9 @@
 # 프론트엔드 인수인계
 
+## 로그인 방식 변경 · 2026-11-20
+
+#13은 이메일 가입·로그인만 제공한다. 카카오 로그인 버튼·콜백·코드 교환·설정값·전용 자산을 제거했다. 첫 이야기는 이메일 로그인 전후로 탭 메모리에 유지한다.
+
 ## 수면 설정 피드백 조정 · 2026-11-20
 
 #11 수면 모드를 #13 인증 브랜치에 통합했다. 사운드 두 개를 선택한 상태에서 세 번째를 누르면 설정 패널이 좌우 최대 4px·240ms만 움직이며 제한 문구를 표시한다. 줄인 모션 설정에서는 문구만 표시한다.
@@ -19,7 +23,7 @@
 | 텍스트 대화 | 첫 입력·직접 입력·시작 문구 공통 전송, 감정·강도·실천, 정상 완료/중간 보관 구분 | 실제 AI 응답·단계·오류 계약 연결 |
 | 결과·보관함 | 추천 후보 선택 후 CTA 이동, 월/주/목록, 감정 이미지, 상세·가리기·복원·삭제 | 실제 기록 API·시간대·페이지네이션·영속 저장 |
 | MY | 제공 프로필 이미지, 이름, 기록 관리, 설정에서 출발 화면으로 복귀 | 실제 프로필 필드·회원정보·비밀번호·탈퇴 |
-| 로그인 | mock: 고정 체험 계정 A/B. real(2026-11-18, #13): 백엔드 이메일 가입·로그인·로그아웃·`/auth/me`, 토큰 갱신, 원래 목적지 복귀 | 소셜 로그인(OAuth 클라이언트 등록 필요), 회원정보·비밀번호·탈퇴, 실제 백엔드 대상 수동 확인 |
+| 로그인 | mock: 고정 체험 계정 A/B. real(#13): 백엔드 이메일 가입·로그인·로그아웃·`/auth/me`, 토큰 갱신, 원래 목적지 복귀 | 회원정보·비밀번호·탈퇴, 실제 백엔드 대상 수동 확인 |
 | 수면 | `/sleep` 준비·설정 패널·실행·타이머 종료/화면 덮기. 사운드: 백색소음(파도)·빗소리·자연음은 팀 제공 음원(2026-11-19), 말랑이 ASMR은 조작 효과음 재사용(임시), 수면 유도 음악은 없음 | 수면 유도 음악·수면용 ASMR 음원, 잠금 화면 재생 정책, 실기기 청취 |
 | 음성 입력 | 중간 전사 UI, 최종 문장1회 전송, 음소거·채팅 보기·중단·오류 진단 | 실제 인식 서비스 연결 및 한국어 전사 검증, 필요 시 서버 STT |
 | 누적 분석 | 미구현 | 후순위 |
@@ -30,7 +34,7 @@ Node >=22.12.0, npm 잠금 파일을 사용한다.
 
 ```sh
 npm ci
-npm run dev        # real 모드(기본, 2026-11-19~): 배포 백엔드로 로그인·카카오 로그인
+npm run dev        # real 모드(기본, 2026-11-19~): 배포 백엔드로 이메일 로그인
 npm run dev:mock   # 예시 데이터만 쓰는 mock 모드(백엔드 없이 체험 계정)
 npm run build      # real 모드 빌드 (build:mock은 mock 모드 빌드)
 npm test
@@ -40,27 +44,15 @@ npm run test:e2e
 
 기본 주소는 http://127.0.0.1:5173 이다. 환경 파일 없이도 동작한다.
 
-**실행 모드(#13):** 기본 `npm run dev`는 **real 모드**다. 이메일 가입·로그인·로그아웃·프로필과 카카오 로그인이 백엔드 `/api/v1/auth`를 호출한다. 상담·기록·말랑이는 아직 연결 전이라 MSW 예시 데이터를 쓰되, 실제 계정 ID별로 나눠 보관한다. 백엔드 없이 예시만 쓰려면 `npm run dev:mock`(Vite `--mode mock`)을 쓴다. `VITE_API_MODE`를 직접 지정하면 그 값이 우선한다. Windows에서도 동작하도록 환경변수 접두 대신 `--mode`를 쓴다.
+**실행 모드(#13):** 기본 `npm run dev`는 **real 모드**다. 이메일 가입·로그인·로그아웃·프로필이 백엔드 `/api/v1/auth`를 호출한다. 상담·기록·말랑이는 아직 연결 전이라 MSW 예시 데이터를 쓰되, 실제 계정 ID별로 나눠 보관한다. 백엔드 없이 예시만 쓰려면 `npm run dev:mock`(Vite `--mode mock`)을 쓴다. `VITE_API_MODE`를 직접 지정하면 그 값이 우선한다. Windows에서도 동작하도록 환경변수 접두 대신 `--mode`를 쓴다.
 - **백엔드 배포 주소:** `https://malangi.up.railway.app` (Swagger: `/swagger-ui/index.html`). 2026-11-18 기준 헬스체크가 `UP`이고, API 목록이 백엔드 docs/api.md와 일치한다.
 - 개발/preview 서버는 `/api`를 `VITE_API_PROXY_TARGET`(기본: 위 배포 주소)으로 프록시한다. 로컬 백엔드를 쓰려면 `VITE_API_PROXY_TARGET=http://127.0.0.1:8080`으로 바꾼다.
 - **CORS:** 배포 서버는 `localhost:5173`만 허용하고 우리 개발 주소인 `127.0.0.1:5173`은 403으로 막는다. 그래서 프록시가 브라우저 Origin 헤더를 지운다.
 - **프론트를 배포할 때:** `VITE_API_BASE_URL=https://malangi.up.railway.app`을 넣고, 백엔드 `CORS_ALLOWED_ORIGINS`에 프론트 배포 주소를 추가해 달라고 요청해야 한다.
-- **배포 서버 카카오 설정:** 가짜 코드로 `/auth/oauth/kakao`를 호출하면 바로 `502 SOCIAL_PROVIDER_UNAVAILABLE`이 온다. 백엔드 코드상 `KAKAO_CLIENT_ID`·`KAKAO_CLIENT_SECRET`·`KAKAO_REDIRECT_URI` 중 하나가 비어 있을 때의 응답이므로, 배포 서버에 카카오 설정이 아직 없는 것으로 보인다(2026-11-18).
-- **로그인 화면(SC09)**은 Figma 151:11030을 따르며, 결정(2026-11-18)에 따라 버튼을 **카카오와 이메일 2개**로 구성했다.
+- **로그인 화면(SC09)**은 Figma 151:11030의 워드마크·석상·배치를 사용하며, 현재 진입 버튼은 **이메일 하나**다.
   - Apple, 전화번호 가입, 비밀번호 찾기/변경은 백엔드 API가 없어 숨긴다.
   - 이메일 로그인·가입 폼은 `BottomSheet` 안에 넣었다.
   - mock 모드는 같은 배치에서 체험 계정 A/B와 "체험 계정으로 계속하기"를 보여준다.
-- **카카오 로그인**은 카카오디벨로퍼스 공식 버튼으로, mock·real 모두 **항상 보인다**(2026-11-18 사용자 요청).
-  - `VITE_KAKAO_CLIENT_ID`가 없으면 시작할 수 없다는 안내를 보여준다. mock 모드는 백엔드가 없어 콜백에서 "real 모드에서만 완료" 안내로 끝난다.
-  - 홈에서 쓴 첫 이야기는 카카오로 이동하는 동안만 `sessionStorage`에 `state`와 함께 둔다. 돌아오면 바로 지우고 메모리로 복원한다. 10분이 지나면 무시하고 탭을 닫으면 사라진다(PR #14 리뷰). AGENTS.md의 "상담 내용을 브라우저 저장소에 남기지 않는다"에 대한 유일한 예외다.
-  - **백엔드 팀 요청 사항(키 등록은 백엔드 팀 담당, 2026-11-19 결정):**
-    1. 카카오 개발자 콘솔에 앱을 등록하고 카카오 로그인을 활성화한다. 이메일 제공 동의는 필수로 둔다(백엔드는 검증된 이메일만 허용).
-    2. Redirect URI를 등록한다. 로컬은 `http://127.0.0.1:5173/oauth/callback/kakao`이다. 시작한 페이지와 출처(origin)가 같아야 로그인 상태가 이어지므로 `localhost`가 아니라 `127.0.0.1`로 등록한다. 프론트를 배포하면 그 주소도 추가한다.
-    3. Railway 백엔드에 `KAKAO_CLIENT_ID`·`KAKAO_CLIENT_SECRET`·`KAKAO_REDIRECT_URI`를 넣는다. `KAKAO_REDIRECT_URI`는 2번 값과 같아야 한다. 백엔드는 등록된 하나의 URI만 받으므로 로컬과 배포 중 무엇을 쓸지 정해야 한다.
-    4. 같은 앱의 REST API 키를 프론트 `.env`의 `VITE_KAKAO_CLIENT_ID`에 넣는다.
-  - 백엔드 `/auth/oauth/kakao`는 구현돼 있지만 `KAKAO_CLIENT_ID`·`KAKAO_CLIENT_SECRET`·`KAKAO_REDIRECT_URI`가 비어 있으면 동작하지 않는다. 카카오 앱 등록과 키 발급 담당을 정해야 한다.
-  - 흐름: 카카오 인증 → `/oauth/callback/kakao` → 백엔드 `/auth/oauth/kakao`로 코드 교환. 위조 방지 `state`와 원래 목적지는 `sessionStorage`에 잠시 둔다.
-  - 실제 동작 확인에는 카카오 앱 키, 리다이렉트 주소 등록, 백엔드 `KAKAO_*` 환경변수가 필요하다. 지금은 가짜 인증 서버로만 확인했다.
 - 토큰 정책: Access 토큰은 메모리, Refresh 토큰은 `sessionStorage`(`teslang:refresh-token`)에 둔다. 같은 탭 새로고침은 로그인을 유지하고, 탭을 닫으면 끝난다. 로그·화면에 토큰을 남기지 않는다.
 - 인증이 필요한 요청이 401이면 refresh를 한 번 하고 같은 요청을 딱 한 번 다시 보낸다. 동시 401은 refresh 하나를 공유한다. refresh가 거절되면 세션을 지우고 로그인 화면으로 보낸다. 이것이 백엔드 HTTP 실패에 대한 유일한 자동 재전송이다(401은 서버가 처리하지 않은 요청이라 저장·삭제가 중복되지 않는다). Playwright 결과 경로는 `QA_OUTPUT_DIR`, 브라우저 위치는 `PLAYWRIGHT_BROWSERS_PATH`로 별도 지정할 수 있다.
 
@@ -96,7 +88,7 @@ npm run test:e2e
 | `src/features/home/` | 메인·인라인 말랑이 상태(시트는 chat의 공유 컴포넌트) |
 | `src/features/chat/` | 대화 reducer·타입·입력 카드·Chat·VoiceView·useVoice |
 | `src/features/records/Records.tsx`, `Archive.tsx` | 결과·상세, 별도 Archive 구현을 Records에서 재수출 |
-| `src/features/account/Account.tsx` | Login·Settings·Help. 실제 인증이 아닌 체험 계정 UI |
+| `src/features/account/Account.tsx`, `Login.tsx`, `EmailAuth.tsx` | Login·Settings·Help와 이메일 가입·로그인 시트. mock 모드는 체험 계정 UI |
 | `src/features/toy/` | 조작·Canvas 렌더러·물성·모양·오디오 |
 | `src/features/sleep/` | 수면 화면·설정 패널·reducer(`model.ts`)·생성음/ASMR 오디오(`sleepAudio.ts`). [명세](design/sleep-mode-2026-11-18.md) |
 | `src/lib/api.ts`, `contracts.ts` | fetch·제한 시간·응답 타입 검사·API 어댑터 |
@@ -117,7 +109,7 @@ npm run test:e2e
 
 | 프론트 호출 | mock 요청 | 연동 시 확인 |
 |---|---|---|
-| me/login/logout | mock: `/__preview__/me`, `/login`, `/logout`. real: `/api/v1/auth/*` 연결 완료(#13) | 소셜 로그인, 토큰 저장 정책 팀 확정 |
+| me/login/logout | mock: `/__preview__/me`, `/login`, `/logout`. real: 이메일 `/api/v1/auth/*` 연결 완료(#13) | 토큰 저장 정책 팀 확정 |
 | reply | `/__preview__/messages` | 서버 stage와 프론트 Stage 변환, 중간 입력, 종료·위험 상태, 중복 요청 처리 |
 | save | `POST /__preview__/records` | 완료/중단 API 순서, 전체 대화·사후 null·결과 ID, 저장 멱등성 |
 | records/record/deleteRecord | `/__preview__/records[/:id]` | 조회 DTO·날짜/시간대·페이지네이션·삭제 범위·소유권 |

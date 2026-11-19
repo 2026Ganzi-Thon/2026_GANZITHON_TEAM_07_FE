@@ -15,8 +15,8 @@ describe('backend envelope', () => {
   it('returns data, maps error code/details and tolerates 204', () => {
     expect(decodeEnvelope({ status: 200, ok: true, body: { success: true, data: { a: 1 }, error: null } })).toEqual({ a: 1 });
     expect(decodeEnvelope({ status: 204, ok: true, body: undefined })).toBeUndefined();
-    expect(() => decodeEnvelope({ status: 409, ok: false, body: { success: false, data: { existingProvider: 'KAKAO' }, error: { code: 'EMAIL_ALREADY_REGISTERED', message: '이미 가입됨' } } }))
-      .toThrow(expect.objectContaining({ status: 409, code: 'EMAIL_ALREADY_REGISTERED', details: { existingProvider: 'KAKAO' }, message: '이미 가입됨' }));
+    expect(() => decodeEnvelope({ status: 409, ok: false, body: { success: false, data: { existingProvider: 'LOCAL' }, error: { code: 'EMAIL_ALREADY_REGISTERED', message: '이미 가입됨' } } }))
+      .toThrow(expect.objectContaining({ status: 409, code: 'EMAIL_ALREADY_REGISTERED', details: { existingProvider: 'LOCAL' }, message: '이미 가입됨' }));
     expect(() => decodeEnvelope({ status: 502, ok: false, body: null })).toThrow(expect.objectContaining({ status: 502 }));
     expect(() => decodeEnvelope({ status: 200, ok: true, body: { id: 1 } })).toThrow(expect.objectContaining({ status: 502 }));
   });

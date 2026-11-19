@@ -135,11 +135,6 @@ export function decodeLogin(value: unknown): { tokens: TokenPair; profile: Profi
   const input = object(value);
   return { tokens: decodeTokenPair(input), profile: { id: userId(input.userId), nickname: text(input.nickname) } };
 }
-/** POST /auth/oauth/{provider} data: token pair + userId, email, nickname (provider/isNewUser ignored). */
-export function decodeSocialLogin(value: unknown): { tokens: TokenPair; profile: Profile } {
-  const input = object(value);
-  return { tokens: decodeTokenPair(input), profile: { id: userId(input.userId), nickname: text(input.nickname), email: text(input.email) } };
-}
 /** GET /auth/me and POST /auth/signup data. Extra fields (provider) are ignored. */
 export function decodeBackendProfile(value: unknown): Profile {
   const input = object(value);

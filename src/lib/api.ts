@@ -58,11 +58,6 @@ export const accountApi = {
     return profile;
   },
   signupWithEmail: (email: string, password: string, nickname: string) => authApi.signup(email, password, nickname),
-  loginWithOAuth: async (provider: 'kakao', code: string, redirectUri: string) => {
-    const profile = await authApi.oauth(provider, code, redirectUri);
-    await previewApi.bind(profile);
-    return profile;
-  },
   logout: async () => {
     if (API_MODE === 'real') await authApi.logout();
     return previewApi.logout();

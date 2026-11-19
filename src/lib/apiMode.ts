@@ -1,7 +1,7 @@
 export type ApiMode = 'mock' | 'real';
 
 /**
- * real (default since 2026-11-19): auth/social login use the backend; features not yet connected stay on
+ * real (default since 2026-11-19): email auth uses the backend; features not yet connected stay on
  * MSW examples. mock: every request is a local MSW example (`npm run dev:mock` / `build:mock`, i.e. Vite
  * `--mode mock`). An explicit VITE_API_MODE wins over the Vite mode. Unknown values fail at boot.
  */

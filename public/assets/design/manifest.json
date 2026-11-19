@@ -216,13 +216,6 @@
     "modified": false
   },
   {
-    "file": "kakao-login-complete-ko.svg",
-    "sha256": "ab90ab44616f14a671844cd991b3fbb33277f42c5bb2cc5a9422344a854c9398",
-    "source": "Kakao Developers official login button resource (standard, complete Korean label), https://developers.kakao.com/tool/images/resource/preview/login-complete-ko.svg, downloaded 2026-11-18",
-    "modified": false,
-    "note": "224x46. Used as-is per the Kakao login design guide; the container is widened with the same #FEE500 around it."
-  },
-  {
     "file": "lamb-sleep-sticker.png",
     "sha256": "f95ba0fad2842f5f8c5edc697a64a98baf738a85fce646cb555530d120aa7b05",
     "source": "PNG embedded in team-provided SVG export '포근한 잠꾸러기 양 스티커 3.svg' (sha256 402a95411171843efdfc4f897ffe240f577a2524299ced0ae3878b3797a25c17, Figma sleep sheep 371x247), 2026-11-18",

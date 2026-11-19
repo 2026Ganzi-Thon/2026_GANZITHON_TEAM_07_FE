@@ -1,8 +1,7 @@
 import { test, expect } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
-// Runs only in the real-* projects: VITE_API_MODE=real, /api proxied to tests/support/fake-auth-backend.mjs,
-// VITE_KAKAO_CLIENT_ID set so the Kakao button is shown. Kakao itself is replaced by a page.route redirect.
+// Runs only in the real-* projects: VITE_API_MODE=real, /api proxied to tests/support/fake-auth-backend.mjs.
 const backend = 'http://127.0.0.1:8099';
 const control = (action: string) => fetch(`${backend}/__test__/${action}`, { method: 'POST' });
 const createUser = (email: string, password = 'Password1!', nickname = '먼저온친구') =>
@@ -21,36 +20,18 @@ async function fill(sheet: Locator, { email, password, nickname }: { email: stri
   await sheet.getByLabel('비밀번호', { exact: true }).fill(password);
 }
 const submitLogin = (sheet: Locator) => sheet.getByRole('button', { name: '로그인', exact: true }).last().click();
-/** Stands in for kauth.kakao.com: sends the browser back to the callback with the given code or error. */
-async function fakeKakao(page: Page, result: { code?: string; error?: string }) {
-  await page.route('https://kauth.kakao.com/**', route => {
-    const url = new URL(route.request().url());
-    expect(url.searchParams.get('client_id')).toBe('test-kakao-client');
-    const back = new URL(url.searchParams.get('redirect_uri')!);
-    back.searchParams.set('state', url.searchParams.get('state')!);
-    if (result.code) back.searchParams.set('code', result.code);
-    if (result.error) back.searchParams.set('error', result.error);
-    // WebKit cannot fulfill a 30x here, so the stand-in page redirects itself.
-    return route.fulfill({ status: 200, contentType: 'text/html', body: `<script>location.replace(${JSON.stringify(back.toString())})</script>` });
-  });
-}
-
 test.beforeEach(async () => { await control('reset'); });
 
-test('landing follows the Figma login frame with the official Kakao button and email only', async ({ page }) => {
+test('landing offers email login in the Figma login frame', async ({ page }) => {
   await page.goto('/login');
   await expect(page.getByRole('heading', { name: '테슬랑' })).toBeVisible();
   await expect(page.getByText('마음에도 말랑한 쉼표가 필요하니까,')).toBeVisible();
-  await expect(page.getByRole('button', { name: '카카오 로그인' })).toBeInViewport();
   await expect(page.getByRole('button', { name: '이메일로 시작하기' })).toBeInViewport();
+  await expect(page.getByRole('main').getByRole('button')).toHaveCount(1);
   for (const hidden of [/APPLE|APLLE/i, '전화번호로 회원가입', '비밀번호 찾기']) await expect(page.getByText(hidden)).toHaveCount(0);
-  // Official Kakao Developers button (224x46) centered in a #FEE500 container widened to the 315px column.
-  const kakao = page.getByRole('button', { name: '카카오 로그인' });
-  const box = (await kakao.boundingBox())!;
-  expect(Math.round(box.width)).toBe(315); expect(Math.round(box.height)).toBe(46);
-  await expect(kakao).toHaveCSS('background-color', 'rgb(254, 229, 0)');
-  await expect(kakao).toHaveCSS('border-radius', '12px');
-  expect(await kakao.locator('img').evaluate((img: HTMLImageElement) => [img.complete && img.naturalWidth > 0, img.getAttribute('src')])).toEqual([true, '/assets/design/kakao-login-complete-ko.svg']);
+  const button = page.getByRole('button', { name: '이메일로 시작하기' });
+  const box = (await button.boundingBox())!;
+  expect(Math.round(box.width)).toBe(315); expect(Math.round(box.height)).toBeGreaterThanOrEqual(44);
   expect(await page.getByRole('heading', { name: '테슬랑' }).locator('img').evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
 });
 
@@ -129,73 +110,19 @@ test('renews an expired access token silently and returns to login when the sess
   expect(await storedRefresh(page)).toBeNull();
 });
 
-test('Kakao login exchanges the code once and returns to the original page', async ({ page }) => {
-  await fakeKakao(page, { code: 'good-code' });
-  await page.goto('/login?next=%2Farchive');
-  await page.getByRole('button', { name: '카카오 로그인' }).click();
-  await expect(page).toHaveURL(/\/archive$/);
-  await expect(page.getByRole('button', { name: '월간', exact: true })).toBeVisible();
-  expect(await storedRefresh(page)).toMatch(/^refresh-/);
-  expect(await page.evaluate(() => sessionStorage.getItem('teslang:oauth-pending'))).toBeNull();
-  await page.goto('/settings');
-  await expect(page.getByText('카카오친구')).toBeVisible();
-});
-
-test('the first message typed before Kakao login is sent after coming back (PR #14 review)', async ({ page }) => {
+test('the first message typed before email login is sent after signing in', async ({ page }) => {
+  await createUser('entry@example.com');
   const message = '발표 준비가 계속 마음에 걸려요';
-  await fakeKakao(page, { code: 'good-code' });
   await page.goto('/');
   await page.getByRole('button', { name: /테스와 이야기하기/ }).click();
   await page.getByRole('textbox', { name: '첫 이야기' }).fill(message);
   await page.getByRole('button', { name: '대화 시작하기' }).click();
   await expect(page).toHaveURL(/\/login\?next=%2Fchat$/);
-  await page.getByRole('button', { name: '카카오 로그인' }).click();
-  await expect(page).toHaveURL(/\/chat$/);
-  await expect(page.getByText(message, { exact: true })).toBeVisible();
-  // The round-trip copy is removed as soon as it has been read.
-  expect(await page.evaluate(() => sessionStorage.getItem('teslang:oauth-pending'))).toBeNull();
-});
-
-test('abandoning the Kakao page keeps the first message for the next login', async ({ page }) => {
-  await createUser('back@example.com');
-  const message = '오늘 친구랑 다퉜어요';
-  await page.goto('/');
-  await page.getByRole('button', { name: /테스와 이야기하기/ }).click();
-  await page.getByRole('textbox', { name: '첫 이야기' }).fill(message);
-  await page.getByRole('button', { name: '대화 시작하기' }).click();
-  await page.route('https://kauth.kakao.com/**', route => route.fulfill({ status: 200, contentType: 'text/html', body: '<p>kakao</p>' }));
-  await page.getByRole('button', { name: '카카오 로그인' }).click();
-  await expect(page).toHaveURL(/kauth\.kakao\.com/);
-  await page.goBack();
-  await expect(page).toHaveURL(/\/login\?next=%2Fchat$/);
-  // Wait for the app to boot again (MSW start) before checking that the abandoned request was dropped.
-  await expect(page.getByRole('button', { name: '이메일로 시작하기' })).toBeVisible();
-  await expect.poll(() => page.evaluate(() => sessionStorage.getItem('teslang:oauth-pending'))).toBeNull();
   const sheet = await openEmail(page);
-  await fill(sheet, { email: 'back@example.com', password: 'Password1!' });
+  await fill(sheet, { email: 'entry@example.com', password: 'Password1!' });
   await submitLogin(sheet);
   await expect(page).toHaveURL(/\/chat$/);
   await expect(page.getByText(message, { exact: true })).toBeVisible();
-});
-
-test('Kakao callback explains cancel, an existing email account and a forged state', async ({ page }) => {
-  await fakeKakao(page, { error: 'access_denied' });
-  await page.goto('/login?next=%2Farchive');
-  await page.getByRole('button', { name: '카카오 로그인' }).click();
-  await expect(page.getByRole('alert')).toHaveText('카카오 로그인을 취소했어요.');
-  await page.getByRole('link', { name: '로그인 화면으로 돌아가기' }).click();
-  await expect(page).toHaveURL(/\/login\?next=%2Farchive$/);
-
-  await page.unrouteAll();
-  await fakeKakao(page, { code: 'dup-code' });
-  await page.getByRole('button', { name: '카카오 로그인' }).click();
-  await expect(page.getByRole('alert')).toHaveText('이미 가입된 이메일이에요. 이메일 계정으로 로그인해 주세요.');
-  expect(await storedRefresh(page)).toBeNull();
-
-  // A callback that this tab did not start must not reach the backend.
-  await page.goto('/oauth/callback/kakao?code=good-code&state=forged');
-  await expect(page.getByRole('alert')).toHaveText('로그인 요청을 확인하지 못했어요. 처음부터 다시 시도해 주세요.');
-  expect(await storedRefresh(page)).toBeNull();
 });
 
 test('the dev proxy forwards /api without the browser Origin header', async ({ page }) => {
