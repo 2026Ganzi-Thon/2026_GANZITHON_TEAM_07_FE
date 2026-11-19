@@ -1,5 +1,4 @@
 .intro { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 18px 0 25px; gap: 16px; }.intro h2 { font-weight: 400; font-size: 26px; line-height: 1.5; margin: 0; }.intro p { margin: 0; color: var(--secondary); font-size: 13px; line-height: 1.9; }
-.accounts { display: grid; gap: 10px; margin: 0 0 24px; }.accounts button { min-height: 78px; display: flex; align-items: center; gap: 14px; text-align: left; background: #fffcf7; border: 1px solid var(--line); border-radius: 16px; padding: 16px; }.accounts button[aria-pressed=true] { background: #e8ebf1; border-color: var(--accent); }.accounts span { flex: 1; font-size: 15px; }.accounts small { display: block; font-size: 11px; margin-top: 8px; color: var(--secondary); }
 .profile { display: flex; align-items: center; gap: 13px; margin-bottom: 14px; }.profile strong { font-size: 15px; }.profile p { font-size: 12px; margin: 7px 0 0; }
 .links { display: grid; margin-bottom: 24px; }.links a, .links button { display: flex; align-items: center; gap: 12px; background: transparent; border-bottom: 1px solid var(--line); padding: 18px 4px; font-size: 14px; text-align: left; min-height: 56px; }.links svg:last-child { margin-left: auto; }
 .qa { padding: 16px; border: 1px solid var(--line); border-radius: 16px; margin-bottom: 24px; }.qa summary { cursor: pointer; font-size: 13px; min-height: 30px; }.qa label { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 13px; }.qa input { width: 18px; height: 18px; accent-color: #6a7281; }
@@ -13,7 +12,6 @@
 .links a, .links button { border: 1px solid #dfdad5; border-radius: 11px; background: #fff; min-height: 48px; padding: 10px 12px; font-size: 16px; line-height: 20px; }
 .links a > svg:first-child { width: 14px; height: 14px; }
 .qa { margin-top: 30px; background: #f6f0e8; font-size: 11px; }.qa summary { font-size: 11px; }
-.accounts button { min-height: 64px; border-radius: 10px; }
 .intro h2 { font-size: 30px; font-weight: 600; }
 
 /* MY 71:267: profile 334×147, radius36; menu 334×48, gap5. */
@@ -26,11 +24,21 @@
 /* Figma text nodes measured on 2026-11-15. Body text remains Pretendard. */
 .links a, .links button { font-family: var(--font-display); font-weight: 400; font-synthesis: none; }
 
-.loginIntro { gap: 12px; padding-top: 0; }
-.loginIntro h2 { align-self: flex-start; }
-.loginArtwork { width: min(250px, 100%); height: auto; display: block; }
-@media(max-height:650px) { .loginArtwork { width: 160px; } }
 .menuDot { width: 8px; height: 8px; border-radius: 50%; background: #5e5a53; flex-shrink: 0; }.links button:disabled { opacity: .55; cursor: default; }.profile strong { overflow-wrap: anywhere; }
 
 .userIcon { background: transparent; box-shadow: none; overflow: hidden; }
 .userIcon img { display: block; width: 100%; height: 100%; object-fit: contain; }
+
+/* Email auth (real mode, D26 single login). Reuses the login card palette; controls stay ≥44px. */
+.emailForm { display: grid; gap: 14px; margin: 0 0 18px; }
+.authTabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 12px; background: #eee8df; }
+.authTabs button { min-height: 44px; border-radius: 9px; background: transparent; color: var(--secondary); font-size: 14px; font-weight: 500; }
+.authTabs button[aria-pressed=true] { background: #fff; color: var(--text); font-weight: 600; box-shadow: 0 1px 3px #2d2d2d1f; }
+.field { display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var(--secondary); }
+.field input { width: 100%; min-height: 48px; padding: 0 14px; border: 1px solid #dfdad5; border-radius: 10px; background: #fff; color: var(--text); font-size: 16px; font-weight: 400; }
+.field input:focus-visible { outline: 3px solid #5b6b83; outline-offset: 1px; }
+.field input:disabled { opacity: .6; }
+.passwordRow { position: relative; display: block; }
+.passwordRow input { padding-right: 52px; }
+.reveal { position: absolute; top: 2px; right: 2px; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 8px; background: transparent; color: var(--secondary); }
+.fieldHint { margin: -6px 0 0; font-size: 11px; line-height: 1.6; color: var(--secondary); }

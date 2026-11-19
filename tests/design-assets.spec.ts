@@ -29,14 +29,14 @@ test('supplied artwork stays on the interactive canvas and display font stays sc
   await expect(page.getByRole('heading', { name: 'MY', exact: true })).toHaveCSS('font-family', /^Pretendard/);
   await expect(page.getByRole('button', { name: '회원정보 수정' })).toHaveCSS('font-family', /MemomentKkukkukk/);
   await page.goto('/login');
-  await page.getByRole('img', { name: '소크라테스 석상' }).evaluate((image: HTMLImageElement) => image.decode());
+  await page.locator('main img[src="/assets/design/socrates.png"]').evaluate((image: HTMLImageElement) => image.decode());
   for (const width of [360, 430]) {
     await page.setViewportSize({ width, height: 780 });
     expect(await page.getByRole('main').evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
     await page.getByRole('button', { name: '체험 계정으로 계속하기' }).scrollIntoViewIfNeeded();
     await expect(page.getByRole('button', { name: '체험 계정으로 계속하기' })).toBeInViewport();
   }
-  await page.getByRole('img', { name: '소크라테스 석상' }).scrollIntoViewIfNeeded();
+  await page.locator('main img[src="/assets/design/socrates.png"]').scrollIntoViewIfNeeded();
   await page.screenshot({ path: `artifacts/assets-login-${info.project.name}.png` });
   expect(errors).toEqual([]);
 });

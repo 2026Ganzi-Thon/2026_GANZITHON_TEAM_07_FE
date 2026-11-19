@@ -2,7 +2,8 @@ import { TEXT_STAGES, stageLabels } from '../features/chat/model';
 import type { Context, Message, PreviewReply, Slots, Stage, TextStage } from '../features/chat/model';
 import { TOYS } from './domain';
 import type { DiaryRecord, Inventory, Profile, ToyType } from './domain';
-import { ResponseShapeError } from './errors';
+import { ApiError, ResponseShapeError } from './errors';
+import type { Sent } from './transport';
 
 // Boundary decoders for the current adapter, not an assertion about the production DTO.
 function object(value: unknown): Record<string, unknown> {
@@ -95,4 +96,47 @@ export function decodeRecords(value: unknown): DiaryRecord[] {
 export function decodeOk(value: unknown): { ok: true } {
   if (object(value).ok !== true) throw new ResponseShapeError();
   return { ok: true };
+}
+
+// ---- Backend (/api/v1) boundary. Shapes follow the backend docs/api.md as of 2026-11-17 (PR #23). ----
+function fallbackMessage(status: number) {
+  if (status === 401) return '로그인이 필요해요.';
+  if (status === 403) return '접근할 수 없어요.';
+  if (status === 404) return '찾을 수 없어요.';
+  if (status >= 500) return '서버에 문제가 생겼어요. 잠시 후 다시 시도해 주세요.';
+  return `요청에 실패했습니다 (${status})`;
+}
+/** Unwraps `{ success, data, error }`. Failures become ApiError with the backend `error.code` and failure `data`. */
+export function decodeEnvelope({ status, ok, body }: Sent): unknown {
+  if (body === undefined && ok) return undefined; // 204 No Content
+  if (body && typeof body === 'object' && !Array.isArray(body) && typeof (body as Record<string, unknown>).success === 'boolean') {
+    const envelope = body as Record<string, unknown>;
+    if (envelope.success === true && ok) return envelope.data;
+    const error = envelope.error && typeof envelope.error === 'object' ? envelope.error as Record<string, unknown> : {};
+    const code = typeof error.code === 'string' ? error.code : undefined;
+    const message = typeof error.message === 'string' && error.message.trim() ? error.message : fallbackMessage(status);
+    throw new ApiError(message, ok ? 502 : status, code, envelope.data ?? undefined);
+  }
+  if (!ok) throw new ApiError(fallbackMessage(status), status);
+  throw new ResponseShapeError();
+}
+function userId(value: unknown): string {
+  if (typeof value !== 'number' || !Number.isSafeInteger(value) || value <= 0) throw new ResponseShapeError();
+  return String(value);
+}
+export interface TokenPair { accessToken: string; refreshToken: string; expiresIn: number }
+export function decodeTokenPair(value: unknown): TokenPair {
+  const input = object(value);
+  if (typeof input.expiresIn !== 'number' || !Number.isFinite(input.expiresIn) || input.expiresIn <= 0) throw new ResponseShapeError();
+  return { accessToken: text(input.accessToken), refreshToken: text(input.refreshToken), expiresIn: input.expiresIn };
+}
+/** POST /auth/login data: token pair + userId + nickname. */
+export function decodeLogin(value: unknown): { tokens: TokenPair; profile: Profile } {
+  const input = object(value);
+  return { tokens: decodeTokenPair(input), profile: { id: userId(input.userId), nickname: text(input.nickname) } };
+}
+/** GET /auth/me and POST /auth/signup data. Extra fields (provider) are ignored. */
+export function decodeBackendProfile(value: unknown): Profile {
+  const input = object(value);
+  return { id: userId(input.userId), nickname: text(input.nickname), email: text(input.email) };
 }

@@ -1,38 +1,22 @@
 import { readSettingsReturn } from '../../components/SettingsLink';
 import { useState } from 'react';
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Check, ChevronRight, HeartHandshake, LogOut, UserRound } from 'lucide-react';
+import { ChevronRight, HeartHandshake, LogOut } from 'lucide-react';
 import { Modal } from '../../components/ui';
-import { DemoNotice, Page } from '../../components/Page';
-import { previewApi } from '../../lib/api';
+import { Page } from '../../components/Page';
+import { accountApi } from '../../lib/api';
 import { usePreview, useProfile } from '../../lib/PreviewContext';
 import s from '../../components/Page.module.css';
 import styles from './Account.module.css';
 import { DESIGN_ASSETS } from '../../lib/assets';
-const profiles = [{ id: 'demo-a', nickname: '마음 산책자' }, { id: 'demo-b', nickname: '느긋한 오후' }];
-export function Login() {
-  const [chosen, setChosen] = useState('demo-a'); const [params] = useSearchParams(); const navigate = useNavigate(); const client = useQueryClient();
-  const preview = usePreview();
-  const next = params.get('next') ?? '/';
-  const destination = /^\/(chat|archive|malangi|settings|results\/[^/?]+|records\/[^/?]+)(\?.*)?$/.test(next) ? next : '/';
-  const login = useMutation({ mutationFn: () => previewApi.login(chosen), onSuccess: user => {
-    client.removeQueries({ queryKey: ['preview'] }); preview.drafts.clear(); client.setQueryData(['preview', 'me'], user); navigate(destination, { replace: true });
-  } });
-  return <Page title="로그인 연결"><div className={`${styles.intro} ${styles.loginIntro}`}><h2>테슬랑</h2><img className={styles.loginArtwork} src={DESIGN_ASSETS.socrates} width={471} height={707} alt="소크라테스 석상" /><p>사용할 체험 계정을 선택해 주세요.</p></div><DemoNotice />
-    <div className={styles.accounts} role="group" aria-label="체험 계정">{profiles.map(profile => <button key={profile.id} aria-pressed={chosen === profile.id} disabled={login.isPending} onClick={() => setChosen(profile.id)}><UserRound size={21} /><span>{profile.nickname}<small>예시 계정 · {profile.id === 'demo-a' ? 'A' : 'B'}</small></span>{chosen === profile.id && <Check size={18} />}</button>)}</div>
-    {login.isError && <p className={s.error} role="alert">{login.error.message}</p>}
-    <button className={s.primary} disabled={login.isPending} onClick={() => login.mutate()}>{login.isPending ? '연결하고 있어요…' : '체험 계정으로 계속하기'}</button>
-    <p className={s.small}>실제 로그인·회원가입이 아닌 화면 체험이에요. 로그인 방식은 팀 협의 후 연결하며, 지금은 개인정보나 비밀번호를 입력하지 않아요.</p>
-    <p className={s.small}>테슬랑은 전문 상담이나 치료를 대신하지 않아요.</p>
-  </Page>;
-}
+export { Login } from './Login';
 export function Settings() {
   const location = useLocation();
   const settingsReturn = readSettingsReturn(location.state?.settingsReturn);
   const user = useProfile(); const preview = usePreview(); const client = useQueryClient(); const navigate = useNavigate();
   const [sheet, setSheet] = useState<'about' | null>(null);
-  const logout = useMutation({ mutationFn: previewApi.logout, onSuccess: () => { preview.drafts.clear(); client.removeQueries({ queryKey: ['preview'] }); client.setQueryData(['preview', 'me'], null); navigate('/', { replace: true }); } });
+  const logout = useMutation({ mutationFn: accountApi.logout, onSuccess: () => { preview.drafts.clear(); client.removeQueries({ queryKey: ['preview'] }); client.setQueryData(['preview', 'me'], null); navigate('/', { replace: true }); } });
   return <Page title="MY" back={settingsReturn.to} backState={settingsReturn.state} className={styles.settingsPage}><div className={styles.profileCard}><div className={styles.profile}><span className={styles.userIcon}><img src={DESIGN_ASSETS.myProfile} width={71} height={71} alt="프로필 이미지" /></span><div><strong>{user.data?.nickname ?? '테슬랑에 오신 걸 환영해요'}</strong>{!user.data && <p>계정을 연결하고 마음을 남겨보세요</p>}</div></div>{!user.data && <Link className={s.secondary} to="/login?next=/settings">로그인하기</Link>}</div>
     <div className={styles.links}><Link to="/archive?manage=1" state={{ settingsReturn }}><span className={styles.menuDot} />기록 관리 / 삭제 / 가리기</Link><Link to="/help" state={{ from: 'settings', settingsReturn }}><span className={styles.menuDot} />도움 연결</Link><button disabled title="계정 연결 후 제공"><span className={styles.menuDot} />회원정보 수정</button><button disabled title="계정 연결 후 제공"><span className={styles.menuDot} />비밀번호 찾기/변경</button><button onClick={e => { e.currentTarget.focus(); setSheet('about'); }}><span className={styles.menuDot} />서비스 이용 안내<ChevronRight size={17} /></button></div>
 

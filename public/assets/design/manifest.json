@@ -210,6 +210,12 @@
     "modified": false
   },
   {
+    "file": "teslang-wordmark.svg",
+    "sha256": "9d1736772e817fcd0f9b718ac6df3a8af356195d8aa6c59585d0d6935d8ad378",
+    "source": "team Figma SVG export via MCP, login screen 151:11030 group 326:1314 (170x55.73), 2026-11-18",
+    "modified": false
+  },
+  {
     "file": "lamb-sleep-sticker.png",
     "sha256": "f95ba0fad2842f5f8c5edc697a64a98baf738a85fce646cb555530d120aa7b05",
     "source": "PNG embedded in team-provided SVG export '포근한 잠꾸러기 양 스티커 3.svg' (sha256 402a95411171843efdfc4f897ffe240f577a2524299ced0ae3878b3797a25c17, Figma sleep sheep 371x247), 2026-11-18",

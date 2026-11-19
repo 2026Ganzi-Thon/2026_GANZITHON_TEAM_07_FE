@@ -10,4 +10,5 @@ export const DESIGN_ASSETS = {
   sleepingLamb: '/assets/design/lamb-sleep.png',
   sleepSticker: '/assets/design/lamb-sleep-sticker.png',
   logo: '/assets/design/teslang-logo.png',
+  wordmark: '/assets/design/teslang-wordmark.svg',
 } as const;

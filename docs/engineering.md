@@ -46,7 +46,7 @@
 | 개발·빌드 | Vite | 개발 서버, 번들, CSS Modules. TypeScript 검사는 별도 `tsc` 실행 |
 | 경로 | React Router | 기본 화면 9개. 경로는 implementation 문서. 새로고침 시 체험 초기화 |
 | 스타일 | CSS Modules + CSS 변수 | `src/styles/tokens.css`의 색상과 화면별 스타일 |
-| 통신 | fetch 공통 함수 | `src/lib/api.ts`. 현재는 `/__preview__/` 경로만 사용 |
+| 통신 | fetch 공통 함수 | `src/lib/transport.ts`(30초 제한·취소 공통), `api.ts`(예시 `/__preview__`), `backend.ts`(백엔드 `/api/v1` 응답 봉투·Bearer·401 갱신). `VITE_API_MODE=real`에서는 인증만 백엔드 |
 | 서버 데이터 상태 | TanStack Query | 프로필·인벤토리·결과·기록 조회, 메시지/삭제/종류 선택 mutation. Query/Mutation 자동 재시도 없음; 잘못된 대화 응답에만 어댑터가 1회 재요청 |
 | 화면 상태 | useReducer + Context + 지역 state | 대화 메시지·입력 단계·선택값. 결과 draft·오류 재현·말랑이 모양/오디오 실행 상태를 각각 분리 |
 | 말랑이·효과음 | WebGL + Canvas 2D + Web Audio API | 제공 PNG 국소 메시, 왁뿌볼 껍질/내부·파편, 지연 로딩 PCM WAV. 추가 npm 렌더러 의존성 없음 |
@@ -113,7 +113,7 @@ npm run test:e2e
 
 기본 주소는 `http://127.0.0.1:5173`이다. MSW의 Service Worker는 localhost 또는 HTTPS에서 동작한다. 휴대폰 실기기에서는 localhost가 개발 PC를 가리키지 않으므로 HTTPS 미리보기 배포 등 접속 구성을 별도로 준비한다.
 
-현재 빌드도 화면 검토용 예시 모드다. `VITE_API_MODE=mock`이 기본이며 다른 모드는 아직 지원하지 않는다. 앱 공개 운영 전 실제 API 어댑터·인증·데이터 정책을 구현하고 예시 handler와 안내의 배포 방식을 결정해야 한다. SPA 배포 시 `/chat` 직접 접근을 위한 index.html fallback도 필요하다.
+기본 빌드는 real 모드로 인증만 백엔드 API를 호출한다. 대화·기록·말랑이는 MSW 예시 데이터이며 `npm run build:mock`은 인증까지 예시 모드로 빌드한다. 앱 공개 운영 전 나머지 API 어댑터·데이터 정책을 구현하고 예시 handler의 배포 방식을 결정해야 한다. SPA 배포 시 `/chat` 직접 접근을 위한 index.html fallback도 필요하다.
 
 패키지 설치·코드 작성과 검증은 승인된 범위에 포함한다. 외부 배포·새 서비스 계정 연결·Git 커밋과 푸시는 별도 요청이 있을 때 진행한다.
 
@@ -121,7 +121,7 @@ npm run test:e2e
 
 브라우저·추적 파일을 별도 디스크에 두는 경우 `scripts/qa.ps1 -RuntimeRoot <로컬 도구 폴더>`를 사용한다. 해당 프로세스의 브라우저/임시/추적 경로만 바꾸며 종료 후 복원한다. 특정 드라이브는 필수 조건이 아니다.
 
-빌드 검사는 `npm run build` 후 `QA_SERVER_MODE=preview` 환경변수로 Playwright를 실행한다. preview는 5183 포트, 기본 개발 검사는 5173 포트를 사용한다. 실행 방법과 실제 검사 결과는 [QA 기록](qa.md)을 따른다.
+빌드 검사는 `npm run build:mock` 후 `QA_SERVER_MODE=preview` 환경변수로 Playwright를 실행한다. preview는 5183 포트, mock 개발 검사는 5185 포트(`npm run dev:mock`)를 쓴다. 개발자가 띄운 `npm run dev`(5173, real 기본)를 재사용하지 않게 포트를 분리했다. 실행 방법과 실제 검사 결과는 [QA 기록](qa.md)을 따른다.
 
 ## 요청 복구와 완료 payload — 2026-11-14 보완
 
@@ -169,6 +169,15 @@ D34(2026-11-15): D34 적용 기준으로 세 종류를 처음부터 개방했다
 - 실제 BE의 abort/complete 상태와 partial 저장·hidden API는 지원 여부/DTO/권한/보관정책 확인 후 어댑터에서 맞춘다. 현재 서버 구현 완료로 전달하지 않는다.
 - 결과의 selected는 지역 상태이고 저장된 recommended는 불변이다. 후보 클릭은 mutation하지 않으며 CTA 이후 기존 말랑이 선택 API를 따른다.
 - 기본 mock 단계는 OPEN→EMOTIONS→PRE→THOUGHT→ACTION→POST→DONE. 서버 단계 enum은 축소하지 않는다.
+
+## 실제 API 모드·인증 — #13 (2026-11-18)
+
+- 모드: `src/lib/apiMode.ts`. 기본은 real이고(2026-11-19), Vite `--mode mock`(`dev:mock`/`build:mock`) 또는 `VITE_API_MODE=mock`이면 mock이다. mock은 전부 MSW, real은 `/api/v1/auth`만 백엔드이고 나머지 `/__preview__`는 MSW가 계속 응답한다. real에서는 로그인한 계정을 `/__preview__/bind`로 예시 저장소에 연결해 계정별로 나눈다.
+- 백엔드 응답 `{ success, data, error }`는 `contracts.ts`의 `decodeEnvelope`에서 풀고, 실패는 `ApiError(status, code, details)`로 바꾼다. 화면은 `code`(예: `INVALID_CREDENTIALS`, `EMAIL_ALREADY_REGISTERED`)로 문구를 고른다.
+- 로그아웃(PR #14 리뷰): 진행 중인 토큰 갱신이 끝날 때까지 기다리고, 요청 본문은 보낼 때 읽는다(`body` 함수). 그래서 401 → 갱신 → 재전송에서도 최신 Refresh 토큰을 폐기한다. 로그아웃 뒤 끝난 갱신은 `authSession.generation()`이 달라 저장하지 않는다.
+- 토큰: `authSession.ts`(Access 메모리, Refresh `sessionStorage`). 저장 정책을 바꿀 때는 이 파일만 수정한다. refresh 거절 시 `expired` 이벤트로 프로필 외 캐시를 지우고 프로필을 null로 만든다. 진행 중인 프로필 조회를 지우면 화면이 대기 상태에 멈추므로 프로필 쿼리는 지우지 않는다.
+- 로그인 화면: `features/account/Login.tsx`(시안 151:11030)의 이메일 진입과 `EmailAuth.tsx`의 가입·로그인 폼. Safari는 클릭한 버튼에 초점을 주지 않으므로, 시트를 여는 버튼에서 직접 `focus()`를 호출해 시트를 닫은 뒤 초점이 돌아오게 했다.
+- 테스트: `npm run test:e2e`는 real 전용 개발 서버(5184)와 가짜 인증 서버(`tests/support/fake-auth-backend.mjs`, 8099)도 띄운다. `tests/auth.spec.ts`는 real-chromium/real-webkit 프로젝트에서만 실행된다. 가짜 서버는 백엔드 문서의 응답 형태만 흉내 낸 것으로 실제 백엔드 검증이 아니다.
 
 ## D39 연동 시 주의
 

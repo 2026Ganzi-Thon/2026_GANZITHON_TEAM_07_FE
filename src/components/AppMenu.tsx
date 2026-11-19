@@ -23,5 +23,6 @@ export function AppMenu({ onChat, placement = 'bottom', subtle = false }: { onCh
       <button onClick={() => { close(); navigate('/archive'); }}><Notebook size={20} strokeWidth={2} aria-hidden="true" />마음 보관함</button>
       <button className={styles.settingsItem} onClick={() => { close(); navigate('/settings', { state: { settingsReturn: settingsReturnFor(location) } }); }}><Settings size={20} strokeWidth={2} aria-hidden="true" />설정/MY</button>
     </div>
-    <button ref={trigger} className={`${styles.trigger} ${open ? styles.active : ''}`} aria-label={open ? '메뉴 닫기' : '메뉴 열기'} aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? id : undefined} onClick={() => setOpen(!open)}>{open ? <X size={subtle ? 22 : 29} strokeWidth={1.8} /> : <Menu size={24} strokeWidth={subtle ? 1.8 : 2.5} />}</button>  </div>;
+    <button ref={trigger} className={`${styles.trigger} ${open ? styles.active : ''}`} aria-label={open ? '메뉴 닫기' : '메뉴 열기'} aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? id : undefined} onClick={() => setOpen(!open)}>{open ? <X size={subtle ? 22 : 29} strokeWidth={1.8} /> : <Menu size={24} strokeWidth={subtle ? 1.8 : 2.5} />}</button>
+  </div>;
 }

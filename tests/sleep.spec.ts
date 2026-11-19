@@ -35,8 +35,15 @@ test('settings panel limits sounds to two, keeps unavailable music off and updat
   await chip('자연음').click();
   await expect(chip('자연음')).toHaveAttribute('aria-pressed', 'false');
   await expect(panel.getByText('사운드는 최대 2개까지 고를 수 있어요.', { exact: true })).toBeVisible();
-  // "Not allowed" shake runs on the whole sheet and replays on every rejected tap.
-  expect(await panel.evaluate(el => el.getAnimations().some(a => a.playState === 'running' || a.playState === 'finished'))).toBe(true);
+  // The limit feedback nudges the sheet by at most 4px for 240ms and replays on every rejected tap.
+  const feedback = await panel.evaluate(el => el.getAnimations().map(animation => ({
+    duration: animation.effect?.getTiming().duration,
+    positions: (animation.effect as KeyframeEffect | null)?.getKeyframes().map(frame => Number(/^translateX\((-?[\d.]+)px\)$/.exec(String(frame.transform))?.[1])),
+  })).find(item => item.positions && item.positions.length > 2 && item.positions.every(Number.isFinite) && item.positions.some(x => x !== 0)));
+  expect(feedback).toBeDefined();
+  expect(Number(feedback?.duration)).toBeLessThanOrEqual(250);
+  expect(Math.max(...feedback!.positions!.map(Math.abs))).toBeLessThanOrEqual(4);
+  expect(feedback?.positions?.at(-1)).toBe(0);
   await panel.evaluate(el => Promise.all(el.getAnimations().map(a => a.finished.catch(() => {}))));
   await chip('자연음').click();
   expect(await panel.evaluate(el => el.getAnimations().length)).toBeGreaterThan(0);

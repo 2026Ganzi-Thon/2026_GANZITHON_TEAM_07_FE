@@ -11,8 +11,8 @@ const NOTICES: Record<Exclude<SleepNotice, null>, string> = {
   unavailable: '수면 유도 음악은 음원이 준비되면 들을 수 있어요.',
 };
 
-/** A short side-to-side shake of the whole panel signals "not allowed"; skipped for reduced motion. */
-const SHAKE: Keyframe[] = [0, -10, 9, -7, 6, -4, 2, 0].map(x => ({ transform: `translateX(${x}px)` }));
+/** A subtle side-to-side nudge of the whole panel signals "not allowed"; skipped for reduced motion. */
+const SHAKE: Keyframe[] = [0, -4, 3, -2, 1, 0].map(x => ({ transform: `translateX(${x}px)` }));
 
 export function SleepSettings({ settings, notice, noticeSeq, dispatch }: { settings: Settings; notice: SleepNotice; noticeSeq: number; dispatch: Dispatch<SleepAction> }) {
   const root = useRef<HTMLDivElement>(null);
@@ -20,7 +20,7 @@ export function SleepSettings({ settings, notice, noticeSeq, dispatch }: { setti
     if (notice !== 'limit' || !noticeSeq) return;
     const target = root.current?.closest('dialog') ?? root.current;
     if (!target || typeof target.animate !== 'function' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const animation = target.animate(SHAKE, { duration: 380, easing: 'ease-out' });
+    const animation = target.animate(SHAKE, { duration: 240, easing: 'ease-out' });
     return () => animation.cancel();
   }, [notice, noticeSeq]);
   return <div ref={root} className={styles.settings} data-shake={notice === 'limit' ? noticeSeq : undefined}>
