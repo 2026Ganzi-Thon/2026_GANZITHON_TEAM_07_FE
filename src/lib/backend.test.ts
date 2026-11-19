@@ -95,3 +95,51 @@ describe('auth api', () => {
     await expect(authApi.me()).resolves.toBeNull();
   });
 });
+
+describe('logout during token rotation (PR #14 review)', () => {
+  const bodyOf = (call: unknown[]) => JSON.parse((call[1] as RequestInit).body as string);
+  it('revokes the rotated refresh token when logout itself hits 401 first', async () => {
+    authSession.set(tokens(1));
+    const fetcher = vi.fn()
+      .mockResolvedValueOnce(fail(401, 'UNAUTHORIZED'))
+      .mockResolvedValueOnce(ok(tokens(2)))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
+    vi.stubGlobal('fetch', fetcher);
+    await authApi.logout();
+    expect(fetcher.mock.calls.map(call => call[0])).toEqual(['/api/v1/auth/logout', '/api/v1/auth/refresh', '/api/v1/auth/logout']);
+    expect(bodyOf(fetcher.mock.calls[2])).toEqual({ refreshToken: 'refresh-2' });
+    expect(authSession.hasSession()).toBe(false);
+  });
+  it('waits for a rotation started by another request and revokes the newest token', async () => {
+    authSession.set(tokens(1));
+    let releaseRefresh!: () => void;
+    const fetcher = vi.fn(async (url: string, init: RequestInit) => {
+      if (url.endsWith('/auth/refresh')) { await new Promise<void>(resolve => { releaseRefresh = resolve; }); return ok(tokens(2)); }
+      if (url.endsWith('/auth/logout')) return new Response(null, { status: 204 });
+      return new Headers(init.headers).get('Authorization') === 'Bearer access-2' ? ok({ fine: true }) : fail(401, 'UNAUTHORIZED');
+    });
+    vi.stubGlobal('fetch', fetcher);
+    const other = backend('records', { auth: true });
+    await vi.waitFor(() => expect(fetcher.mock.calls.some(call => String(call[0]).endsWith('/auth/refresh'))).toBe(true));
+    const loggingOut = authApi.logout();
+    releaseRefresh();
+    await loggingOut; await other.catch(() => {});
+    const logout = fetcher.mock.calls.find(call => String(call[0]).endsWith('/auth/logout'))!;
+    expect(bodyOf(logout)).toEqual({ refreshToken: 'refresh-2' });
+    expect(authSession.hasSession()).toBe(false);
+  });
+  it('does not revive the session when a refresh finishes after logout', async () => {
+    authSession.set(tokens(1));
+    let releaseRefresh!: () => void;
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+      if (url.endsWith('/auth/refresh')) { await new Promise<void>(resolve => { releaseRefresh = resolve; }); return ok(tokens(2)); }
+      return fail(401, 'UNAUTHORIZED');
+    }));
+    const pending = backend('records', { auth: true });
+    await vi.waitFor(() => expect(releaseRefresh).toBeTypeOf('function'));
+    authSession.clear('signed-out');
+    releaseRefresh();
+    await expect(pending).rejects.toMatchObject({ code: SESSION_EXPIRED });
+    expect(authSession.hasSession()).toBe(false);
+  });
+});

@@ -8,6 +8,7 @@ export type SessionChange = 'signed-in' | 'signed-out' | 'expired';
 const REFRESH_KEY = 'teslang:refresh-token';
 let access: string | null = null;
 let memoryRefresh: string | null = null; // fallback when sessionStorage is blocked
+let clears = 0; // bumps on every clear so a refresh that finishes afterwards cannot revive the session
 const listeners = new Set<(change: SessionChange) => void>();
 
 function storage(): Storage | null {
@@ -16,6 +17,8 @@ function storage(): Storage | null {
 
 export const authSession = {
   access: () => access,
+  /** Changes whenever the session is cleared (logout/expiry). */
+  generation: () => clears,
   refreshToken(): string | null {
     try { return storage()?.getItem(REFRESH_KEY) ?? memoryRefresh; } catch { return memoryRefresh; }
   },
@@ -27,6 +30,7 @@ export const authSession = {
   },
   clear(change: Exclude<SessionChange, 'signed-in'>) {
     const had = this.hasSession();
+    clears++;
     access = null; memoryRefresh = null;
     try { storage()?.removeItem(REFRESH_KEY); } catch { /* nothing stored */ }
     if (had) listeners.forEach(listener => listener(change));

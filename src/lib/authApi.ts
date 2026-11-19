@@ -1,5 +1,5 @@
 import { authSession } from './authSession';
-import { backend, SESSION_EXPIRED } from './backend';
+import { backend, SESSION_EXPIRED, settleRefresh } from './backend';
 import { decodeBackendProfile, decodeLogin, decodeSocialLogin } from './contracts';
 import type { Profile } from './domain';
 import { ApiError } from './errors';
@@ -26,10 +26,14 @@ export const authApi = {
     try { return decodeBackendProfile(await backend('auth/me', { auth: true })); }
     catch (error) { if (error instanceof ApiError && error.code === SESSION_EXPIRED) return null; throw error; }
   },
-  /** Revokes the refresh token on the server when possible; the local session is cleared either way. */
+  /**
+   * Revokes the refresh token on the server when possible; the local session is cleared either way.
+   * PR #14 review: wait for an in-flight rotation and read the token at send time, so the token that is
+   * revoked is the newest one (a 401 → refresh → resend also sends the rotated token).
+   */
   logout: async () => {
-    const refreshToken = authSession.refreshToken();
-    try { if (refreshToken) await backend('auth/logout', { method: 'POST', auth: true, body: { refreshToken } }); }
+    await settleRefresh();
+    try { if (authSession.refreshToken()) await backend('auth/logout', { method: 'POST', auth: true, body: () => ({ refreshToken: authSession.refreshToken() }) }); }
     catch { /* best effort: an unreachable server must not keep the user signed in on this device */ }
     finally { authSession.clear('signed-out'); }
   },
