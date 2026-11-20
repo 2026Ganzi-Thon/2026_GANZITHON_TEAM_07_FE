@@ -1,0 +1,17 @@
+.splash,.checking,.error { height:100%; width:100%; background:#fff; }
+.splash { display:grid; place-items:center; overflow:hidden; }
+.group { display:flex; flex-direction:column; align-items:center; gap:32px; width:100%; transform:translateY(12px); }
+.sheep { width:min(250px,65vw); height:auto; object-fit:contain; animation:breath 2.6s ease-in-out infinite; }
+.loading { margin:0; color:#605c55; font-family:var(--font-display); font-size:30px; font-weight:400; line-height:1.4; font-synthesis:none; }
+.dots { display:inline-flex; width:1.1em; }
+.dots span { animation:dot 1.4s ease-in-out infinite; }
+.dots span:nth-child(2) { animation-delay:.16s; }
+.dots span:nth-child(3) { animation-delay:.32s; }
+.content { height:100%; min-height:0; animation:arrive .3s ease-out both; }
+.error { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:24px; text-align:center; }
+.error button { min-height:44px; padding:10px 24px; border-radius:14px; background:#605c55; color:#fff; }
+@keyframes breath { 50% { transform:translateY(-4px) scale(1.025); } }
+@keyframes dot { 0%,80%,100% { opacity:.35;transform:translateY(0); } 40% { opacity:1;transform:translateY(-3px); } }
+@keyframes arrive { from { opacity:0; } to { opacity:1; } }
+@media(max-height:480px) { .group { transform:none;gap:12px; }.sheep { width:180px; }.loading { font-size:26px; } }
+@media(prefers-reduced-motion:reduce) { .sheep,.dots span,.content { animation:none; } }

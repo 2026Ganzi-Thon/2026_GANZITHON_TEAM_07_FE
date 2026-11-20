@@ -1,17 +1,18 @@
 /* SC09 login, Figma 151:11030 (402x874, top 48px is the device status bar owned by the browser).
    Measured via get_design_context 2026-11-18: wordmark 170x55.73 at x36/y112, subtitle Pretendard SemiBold 16 #2D2D2D at y181,
    statue 432x648 at x52/y237 with blur 6.55px, buttons 315 wide, radius 8, gap 6,
-   secondary #868079 44px. Button stack bottom sits 92px above the frame bottom. Page background white. */
-.page { position: relative; height: 100%; min-height: 0; display: flex; flex-direction: column; overflow: hidden auto; background: #fff; color: var(--text); isolation: isolate; }
+   secondary #868079 44px. Button stack bottom sits 92px above the frame bottom. Page background white.
+   2026-11-20: supplied replacement statue uses contain in the background layer; final reference overrides are below. Historical offset/blur no longer applies. */
+.page { position: relative; height: 100%; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden auto; background: #fff; color: var(--text); isolation: isolate; }
 .back { position: absolute; z-index: 2; top: calc(8px + var(--safe-top)); left: 8px; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: #848587; }
-/* The statue bleeds past the right/bottom edge like the frame; the wrapper clips it so nothing scrolls sideways. */
-.backdrop { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
-.statue { position: absolute; left: 12.94%; top: calc(189px + var(--safe-top)); width: 432px; max-width: none; height: auto; filter: blur(3.28px); /* Figma layer blur 6.55 ≈ CSS blur(6.55 / 2) */ pointer-events: none; user-select: none; }
-.hero { padding: calc(64px + var(--safe-top)) 36px 0; }
+/* Base geometry; supplied-reference background composition is defined below. */
+.backdrop { position: relative; grid-row: 2; min-height: 0; margin: 12px 20px 0; pointer-events: none; }
+.statue { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center; pointer-events: none; user-select: none; }
+.hero { grid-row: 1; padding: calc(64px + var(--safe-top)) 36px 0; }
 .hero h1 { margin: 0; line-height: 0; }
 .hero h1 img { display: block; width: 170px; height: auto; }
 .hero p { margin: 13px 0 0; font-size: 16px; font-weight: 600; line-height: normal; color: #2d2d2d; word-break: keep-all; }
-.actions { margin: auto auto 0; width: min(315px, calc(100% - 72px)); display: grid; gap: 6px; padding: 24px 0 calc(92px + var(--safe-bottom)); }
+.actions { grid-row: 3; margin: 0 auto; width: min(315px, calc(100% - 72px)); display: grid; gap: 6px; padding: 24px 0 calc(92px + var(--safe-bottom)); }
 .secondary { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; border-radius: 8px; padding: 0 48px; font-size: 14px; line-height: normal; }
 .secondary { min-height: 44px; background: #868079; color: #fff; font-weight: 400; }
 .secondary:disabled { opacity: .6; }
@@ -21,4 +22,27 @@
 .demo button[aria-pressed=true] { border-color: #868079; background: #f3efe9; color: var(--text); font-weight: 600; }
 .note { margin: 4px 0 0; font-size: 11px; line-height: 1.6; color: var(--secondary); text-align: center; word-break: keep-all; }
 @media (max-height: 700px) { .actions { padding-bottom: calc(32px + var(--safe-bottom)); } .hero { padding-top: calc(56px + var(--safe-top)); } }
-@media (max-height: 480px) { .statue { width: 300px; top: calc(120px + var(--safe-top)); } }
+@media (max-height: 480px) and (min-width: 600px) {
+ .page { grid-template-columns: 1fr 1fr; grid-template-rows: auto minmax(0, 1fr); }
+ .hero { grid-column: 1; }
+ .backdrop { grid-column: 2; grid-row: 1 / -1; margin: 16px 24px; }
+ .actions { grid-column: 1; grid-row: 2; align-self: end; padding: 12px 0 calc(20px + var(--safe-bottom)); }
+}
+
+/* Reference composition: statue forms the background, with the entry action over it. */
+.page { display: block; }
+.hero { position: relative; z-index: 1; padding-top: calc(64px + var(--safe-top)); }
+.backdrop { position: absolute; inset: 27% 0 0; margin: 0; }
+.statue { width: 100%; height: 100%; object-fit: contain; object-position: right bottom; }
+.actions { position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; padding: 0 0 calc(92px + var(--safe-bottom)); }
+@media(max-height:700px) { .actions { padding-bottom: calc(48px + var(--safe-bottom)); } }
+@media(max-height:480px) and (min-width:600px) { .hero { max-width: 50%; }.backdrop { inset: 6% 0 0 42%; }.actions { right: 50%; width: min(280px,44%); padding-bottom: 28px; } }
+
+/* A landscape viewport still contains a narrow app frame. Keep the action full width. */
+@media(max-height:480px) {
+ .hero { max-width:none; padding:calc(16px + var(--safe-top)) 24px 0; }
+ .hero h1 img { width:120px; }
+ .hero p { font-size:12px; max-width:190px; margin-top:8px; }
+ .backdrop { inset:22% 0 0 30%; }
+ .actions { left:0; right:0; width:calc(100% - 48px); padding-bottom:calc(16px + var(--safe-bottom)); }
+}

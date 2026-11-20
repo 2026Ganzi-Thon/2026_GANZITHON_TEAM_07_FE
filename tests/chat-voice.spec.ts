@@ -81,36 +81,24 @@ test('finish cancellation preserves draft, messages and scroll', async ({ page }
   expect(await scroll.evaluate(el => el.scrollTop)).toBe(0);
 });
 
-test('speech interim updates one chat bubble, final sends once, cards remain accessible', async ({ page }, info) => {
+test('speech updates the composer only; reviewed final sends once and ignores stale events', async ({ page }) => {
   await speech(page); await login(page); await enter(page);
-  await page.getByRole('button', { name: '음성 대화 시작' }).click();
-  await expect(page.getByRole('region', { name: '음성 대화', exact: true })).toBeVisible();
-  const portrait = page.getByRole('img', { name: '말랑이를 안고 있는 테스' });
-  await expect(portrait).toHaveAttribute('src', '/assets/design/socrates-sleeping-sheep.png');
-  await expect.poll(() => portrait.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth === 402 && el.naturalHeight === 682)).toBe(true);
-  await expect(page.getByRole('button', { name: '음성 대화 중 채팅 보기' }).last().locator('img')).toHaveAttribute('src', '/assets/design/voice-chat-icon.png');
-  await emit(page, '출근길');
-  await page.getByRole('button', { name: '음성 대화 중 채팅 보기' }).last().click();
-  await expect(page.getByTestId('live-transcript')).toHaveText('출근길듣는 중');
-  await emit(page, '출근길에 지하철을');
-  await expect(page.getByTestId('live-transcript')).toHaveCount(1);
-  await expect(page.getByTestId('live-transcript')).toContainText('출근길에 지하철을');
-  await page.screenshot({ path: `artifacts/voice-live-${info.project.name}.png` });
-  await emit(page, '출근길에 지하철을 놓쳤어', true);
-  await emit(page, '출근길에 지하철을 놓쳤어', true);
-  await expect(page.getByRole('region', { name: '감정 선택' })).toBeVisible();
-  await expect(page.getByRole('log').getByText('출근길에 지하철을 놓쳤어', { exact: true })).toHaveCount(1);
+  await page.getByRole('button',{name:'음성 대화 시작'}).click();
+  await emit(page,'출근길');await expect(page.getByLabel('전사된 이야기')).toHaveText('출근길');
+  await page.evaluate(()=>{const w=window as any;w.oldResult=w.speechQA.instances.at(-1).onresult;});
+  await emit(page,'출근길에 지하철을 놓쳤어',true);
+  await page.evaluate(()=>{(window as any).oldResult({results:[{isFinal:true,0:{transcript:'중복된 늦은 결과'}}]});});
+  await page.getByRole('button',{name:'음성 대화 중 채팅 보기'}).last().click();
+  await expect(page.getByRole('textbox')).toHaveValue('출근길에 지하철을 놓쳤어');
+  await expect(page.getByRole('log')).not.toContainText('출근길');
   await expect(page.getByTestId('live-transcript')).toHaveCount(0);
-  await page.getByRole('group', { name: '대표 감정', exact: true }).getByRole('button', { name: '불안', exact: true }).click();
-  await page.getByRole('button', { name: '이 마음으로 이어가기' }).click();
-  await page.getByRole('button', { name: '5점', exact: true }).click();
-  await page.getByRole('button', { name: '천천히 이어가기' }).click();
-  await expect.poll(() => page.evaluate(() => (window as unknown as { speechQA: { instances: unknown[] } }).speechQA.instances.length)).toBeGreaterThan(1);
-  await page.getByRole('button', { name: '음성 화면', exact: true }).click();
-  await page.screenshot({ path: `artifacts/voice-view-${info.project.name}.png` });
-  await page.getByRole('button', { name: '음성 대화 중단' }).click();
-  await expect(page.getByRole('textbox')).toBeEnabled();
+  await page.getByRole('textbox').fill('출근길에 버스를 놓쳤어');
+  await page.getByRole('button',{name:'메시지 보내기'}).click();
+  await expect(page.getByRole('region',{name:'감정 선택'})).toBeVisible();
+  await expect(page.getByRole('log').getByText('출근길에 버스를 놓쳤어',{exact:true})).toHaveCount(1);
+  await expect(page.getByRole('button',{name:'중단',exact:true})).toHaveCount(0);
 });
+
 
 test('mute and stop preserve interim as draft, ignore stale finals and release microphone', async ({ page }) => {
   await speech(page); await login(page); await enter(page);
@@ -146,35 +134,27 @@ test('denied and unsupported recognition stays usable as text without fake liste
   await expect(page.getByRole('region', { name: '감정 선택' })).toBeVisible();
 });
 
-test('voice keeps a typed draft and an interrupted utterance through end cancellation', async ({ page }) => {
-  await speech(page); await login(page); await enter(page);
-  await page.getByRole('textbox').fill('나중에 보낼 글');
-  await page.getByRole('button', { name: '음성 대화 시작' }).click();
-  await page.getByRole('button', { name: '음성 대화 중 채팅 보기' }).last().click();
-  await emit(page, '그냥 걱정돼요', true);
-  await expect(page.getByRole('log')).toContainText('그냥 걱정돼요');
-  await expect.poll(() => page.evaluate(() => (window as unknown as { speechQA: { instances: unknown[] } }).speechQA.instances.length)).toBeGreaterThan(1);
-  await expect(page.getByRole('textbox')).toHaveValue('나중에 보낼 글');
-  await expect(page.getByRole('status').filter({ hasText: '그대의 이야기를 듣고 있소' })).toBeVisible();
-  expect(await page.evaluate(() => (window as unknown as { speechQA: { captureDuringSpeech: number } }).speechQA.captureDuringSpeech)).toBe(0);
-  await emit(page, '아직 말이 끝나지');
-  await expect(page.getByTestId('live-transcript')).toContainText('아직 말이 끝나지');
-  await page.getByRole('button', { name: '끝내기', exact: true }).click();
-  await expect(page.getByRole('dialog')).toBeVisible();
-  await page.getByRole('button', { name: '계속 대화하기', exact: true }).click();
-  await page.getByRole('button', { name: '음소거', exact: true }).click();
-  await expect(page.getByRole('textbox')).toHaveValue('나중에 보낼 글 아직 말이 끝나지');
-  await expect(page.getByRole('log')).not.toContainText('아직 말이 끝나지');
+test('voice appends successive utterances and preserves them through finish cancellation',async({page})=>{
+ await speech(page);await login(page);await enter(page);
+ await page.getByRole('textbox').fill('나중에 보낼 글');await page.getByRole('button',{name:'음성 대화 시작'}).click();
+ await emit(page,'그냥 걱정돼요',true);
+ await expect.poll(()=>page.evaluate(()=>(window as any).speechQA.instances.length)).toBe(2);
+ await emit(page,'아직 말이 끝나지');await emit(page,'아직 말이 끝나지 않았어요');
+ await page.getByRole('button',{name:'음성 대화 중 채팅 보기'}).last().click();
+ const value='나중에 보낼 글 그냥 걱정돼요 아직 말이 끝나지 않았어요';
+ await expect(page.getByRole('textbox')).toHaveValue(value);await expect(page.getByRole('log')).not.toContainText('걱정돼요');
+ await page.getByRole('button',{name:'끝내기',exact:true}).click();await page.getByRole('button',{name:'계속 대화하기',exact:true}).click();
+ await expect(page.getByRole('textbox')).toHaveValue(value);
 });
+
 
 test('network retry and hidden page release recognition without losing unfinished speech', async ({ page }) => {
   await speech(page); await login(page); await enter(page);
   await page.getByRole('button', { name: '음성 대화 시작' }).click();
-  await page.getByRole('button', { name: '음성 대화 중 채팅 보기' }).last().click();
   await emit(page, '연결이 끊기기 전');
   await page.evaluate(() => (window as unknown as { speechQA: { instances: { onerror: (event: unknown) => void }[] } }).speechQA.instances.at(-1)!.onerror({ error: 'network' }));
   await expect(page.getByRole('alert')).toContainText('음성 인식 서비스에 연결하지 못했어요');
-  await expect(page.getByRole('textbox')).toHaveValue('연결이 끊기기 전');
+  await expect(page.locator('textarea')).toHaveValue('연결이 끊기기 전');
   await page.getByRole('button', { name: '다시 시도하기', exact: true }).click();
   await expect.poll(() => page.evaluate(() => (window as unknown as { speechQA: { instances: unknown[] } }).speechQA.instances.length)).toBe(2);
   await emit(page, '화면을 떠나기 전');
@@ -207,7 +187,8 @@ test('voice keeps Figma controls and the compact panel reachable at small sizes'
     await page.setViewportSize(viewport);
     const statue = await view.getByRole('img', { name: '말랑이를 안고 있는 테스' }).boundingBox();
     const viewBox = await view.boundingBox();
-    expect(statue!.y - viewBox!.y).toBeGreaterThanOrEqual(viewport.height <= 600 ? 54 : 64);
+    // The supplied-reference layout uses a percentage offset; check clipping rather than the old fixed offset.
+    expect(statue!.y - viewBox!.y).toBeGreaterThanOrEqual(0);
     await emit(page, '말하는 내용이 길어져도 화면 안에서 읽고 중단할 수 있어요. '.repeat(5));
     for (const button of await view.getByRole('button').all()) {
       await button.scrollIntoViewIfNeeded();
@@ -220,7 +201,7 @@ test('voice keeps Figma controls and the compact panel reachable at small sizes'
   }
   await page.keyboard.press('Escape');
   await expect(view).toHaveCount(0);
-  await expect(page.getByTestId('live-transcript')).toHaveCount(1);
+  await expect(page.getByRole('textbox')).not.toHaveValue('');
 });
 
 
@@ -323,43 +304,19 @@ test('Korean words and particles remain together in chat and finish dialog', asy
 });
 
 
-test('voice input resumes after cards and shows replies without speaking', async ({ page }, info) => {
-  await page.addInitScript(() => {
-    Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: class { text: string; constructor(text: string) { this.text = text; } } });
-  });
-  await speech(page); await login(page); await enter(page);
-  await page.getByRole('button', { name: '음성 대화 시작' }).click();
-  await emit(page, '출근길에 지하철을 놓쳤어', true);
-  await page.getByRole('group', { name: '대표 감정', exact: true }).getByRole('button', { name: '불안', exact: true }).click();
-  await page.getByRole('button', { name: '이 마음으로 이어가기' }).click();
-  await page.getByRole('button', { name: '5점', exact: true }).click();
-  await page.getByRole('button', { name: '천천히 이어가기' }).click();
-  await expect.poll(() => page.evaluate(() => (window as unknown as { speechQA: { instances: unknown[] } }).speechQA.instances.length), { timeout: 10000 }).toBeGreaterThan(1);
-  await expect(page.getByRole('status').filter({ hasText: '그대의 이야기를 듣고 있소' })).toBeVisible();
-  await page.getByRole('button', { name: '음성 화면', exact: true }).click();
-  await expect(page.getByLabel('테스의 답변')).toBeVisible();
-
-  expect(await page.evaluate(() => (window as unknown as { speechQA: { speaks: string[] } }).speechQA.speaks)).toEqual([]);
-  await page.screenshot({ path: `artifacts/d49-voice-input-${info.project.name}.png`, scale: 'css' });
-  await emit(page, '회의에서 내 의견을 충분히 설명하지 못해서 아쉬웠고 다음에는 차분하게 이야기하고 싶어요.');
-  for (const [width, height] of [[360, 640], [390, 844], [430, 932], [844, 390], [1280, 720]]) {
-    await page.setViewportSize({ width, height });
-    const mic = page.getByRole('button', { name: '마이크 음소거', exact: true });
-    await mic.scrollIntoViewIfNeeded();
-    const box = await mic.boundingBox();
-    expect(box).not.toBeNull();
-    expect(box!.y).toBeGreaterThanOrEqual(0);
-    expect(box!.y + box!.height).toBeLessThanOrEqual(height);
-    expect(await page.getByLabel('음성 대화 시간').locator('../..').evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
-    await expect(page.getByLabel('인식 중인 이야기')).toBeVisible();
-  }
-
-  await page.getByRole('button', { name: '음성 대화 중단' }).click();
-  await page.getByRole('button', { name: '대화 설정', exact: true }).click();
-  await expect(page.getByRole('dialog').getByRole('checkbox')).toHaveCount(0);
-  await expect(page.getByRole('dialog')).toContainText('테스의 답변은 글로 보여요.');
-
+test('voice restarts explicitly after cards without speaking replies',async({page})=>{
+ await speech(page);await login(page);await enter(page);
+ await page.getByRole('button',{name:'음성 대화 시작'}).click();await emit(page,'출근길에 지하철을 놓쳤어',true);
+ await page.getByRole('button',{name:'음성 대화 중 채팅 보기'}).last().click();await page.getByRole('button',{name:'메시지 보내기'}).click();
+ await page.getByRole('group',{name:'대표 감정',exact:true}).getByRole('button',{name:'불안',exact:true}).click();
+ await page.getByRole('button',{name:'이 마음으로 이어가기'}).click();await page.getByRole('button',{name:'5점',exact:true}).click();await page.getByRole('button',{name:'천천히 이어가기'}).click();
+ await expect(page.getByRole('button',{name:'음성 대화 시작'})).toBeEnabled();await expect(page.getByRole('button',{name:'중단',exact:true})).toHaveCount(0);
+ await page.getByRole('button',{name:'음성 대화 시작'}).click();await emit(page,'다음에는 차분하게 말하고 싶어요');
+ await expect(page.getByLabel('전사된 이야기')).toHaveText('다음에는 차분하게 말하고 싶어요');
+ expect(await page.evaluate(()=>(window as any).speechQA.speaks)).toEqual([]);
+ await page.getByRole('button',{name:'음성 입력 안내'}).click();await expect(page.getByRole('dialog')).toContainText('전송 버튼을 눌러주세요');
 });
+
 
 test('microphone check distinguishes denied permission and cancels late permission without capturing', async ({ page }) => {
   await speech(page); await login(page); await enter(page);
@@ -383,15 +340,11 @@ test('microphone check distinguishes denied permission and cancels late permissi
 });
 
 
-test('invalid final utterance keeps draft and starts listening again', async ({ page }) => {
-  await speech(page); await login(page); await enter(page);
-  await page.getByRole('button', { name: '음성 대화 시작' }).click();
-  await emit(page, 'ㄴㄴ', true);
-  await expect.poll(() => page.evaluate(() => (window as unknown as { speechQA: { instances: unknown[] } }).speechQA.instances.length)).toBeGreaterThan(1);
-  await page.getByRole('button', { name: '음성 대화 중 채팅 보기' }).last().click();
-  await expect(page.getByRole('textbox')).toHaveValue('ㄴㄴ');
-  await emit(page, '친구가 약속을 취소해서 서운해', true);
-  await expect(page.getByRole('region', { name: '감정 선택' })).toBeVisible();
+test('unclear transcription stays editable and is not sent before correction',async({page})=>{
+ await speech(page);await login(page);await enter(page);await page.getByRole('button',{name:'음성 대화 시작'}).click();await emit(page,'ㄴㄴ',true);
+ await page.getByRole('button',{name:'음성 대화 중 채팅 보기'}).last().click();await expect(page.getByRole('textbox')).toHaveValue('ㄴㄴ');
+ await expect(page.getByRole('alert')).toHaveCount(0);await expect(page.getByRole('log')).not.toContainText('ㄴㄴ');
+ await send(page,'친구가 약속을 취소해서 서운해');await expect(page.getByRole('region',{name:'감정 선택'})).toBeVisible();
 });
 
 
@@ -404,4 +357,28 @@ test('started recognition without any result times out rather than listening for
   await expect(page.getByRole('status').filter({ hasText: '그대의 이야기를 듣고 있소' })).toHaveCount(0);
   await page.getByRole('button', { name: '글로 계속하기', exact: true }).click();
   await expect(page.getByRole('textbox')).toBeEnabled();
+});
+
+
+test('voice-only info opens at top right, closes with focus and preserves chat return',async({page},info)=>{
+ await speech(page);await login(page);await enter(page);
+ await expect(page.getByRole('button',{name:'대화 설정'})).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'음성 입력 안내'})).toHaveCount(0);
+ await page.getByRole('button',{name:'음성 대화 시작'}).click();
+ const help=page.getByRole('button',{name:'음성 입력 안내',exact:true});
+ await expect(help).toBeVisible();
+ for(const viewport of [{width:360,height:740},{width:390,height:844},{width:430,height:932},{width:844,height:390},{width:1280,height:720}]) {
+  await page.setViewportSize(viewport);
+  const h=(await help.boundingBox())!,b=(await page.getByRole('button',{name:'음성 대화 중 채팅 보기',exact:true}).first().boundingBox())!;
+  expect(h.x).toBeGreaterThanOrEqual(b.x+b.width);expect(Math.abs(h.y-b.y)).toBeLessThan(1);
+  const frame=(await help.locator('..').boundingBox())!;expect(Math.abs(h.x+h.width-(frame.x+frame.width-16))).toBeLessThan(2);
+  await help.click();const modal=page.getByRole('dialog',{name:'음성 입력 안내'});
+  await expect(modal).toContainText('전송 버튼을 눌러주세요.');
+  await page.screenshot({path:info.outputPath(`voice-info-${viewport.width}.png`),scale:'css'});
+  await page.keyboard.press('Escape');await expect(modal).toHaveCount(0);await expect(help).toBeFocused();
+ }
+ await page.getByRole('button',{name:'음성 대화 중 채팅 보기',exact:true}).first().click();
+ await expect(help).toHaveCount(0);await expect(page.getByRole('button',{name:'중단',exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'중단',exact:true}).click();
+ await expect(page.getByRole('textbox',{name:'테스에게 보낼 이야기'})).toBeEnabled();
 });

@@ -1,11 +1,11 @@
 import { MicrophoneCheck } from './MicrophoneCheck';
-import { ArrowLeft, Mic, MicOff, X } from 'lucide-react';
+import { ArrowLeft, Info, Mic, MicOff, X } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { DESIGN_ASSETS } from '../../lib/assets';
 import type { useVoice } from './useVoice';
 import styles from './VoiceView.module.css';
 
-export function VoiceView({ voice, status, reply, onChat }: { voice: ReturnType<typeof useVoice>; status: string; reply?: string; onChat: () => void }) {
+export function VoiceView({ voice, status, draft, onChat, onInfo }: { voice: ReturnType<typeof useVoice>; status: string; draft: string; onChat: () => void; onInfo: () => void }) {
   const back = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     const previous = document.activeElement;
@@ -15,6 +15,7 @@ export function VoiceView({ voice, status, reply, onChat }: { voice: ReturnType<
   const time = `${String(Math.floor(voice.elapsed / 60)).padStart(2, '0')}:${String(voice.elapsed % 60).padStart(2, '0')}`;
   return <section className={styles.view} aria-label="음성 대화" onKeyDown={event => { if (event.key === 'Escape') onChat(); }}>
     <button ref={back} className={styles.back} onClick={onChat} aria-label="음성 대화 중 채팅 보기"><ArrowLeft size={22} strokeWidth={1.6} /></button>
+    <button className={`${styles.back} ${styles.info}`} onClick={event => { event.currentTarget.focus({ preventScroll: true }); onInfo(); }} aria-label="음성 입력 안내"><Info size={22} strokeWidth={1.6} /></button>
     <img className={styles.statue} src={DESIGN_ASSETS.voiceStatue} width={402} height={682} alt="말랑이를 안고 있는 테스" />
     <div className={styles.panel}>
       <div className={styles.heading}>
@@ -22,10 +23,9 @@ export function VoiceView({ voice, status, reply, onChat }: { voice: ReturnType<
         <p role="status">{status}</p>
       </div>
       <div className={styles.content}>
-        {!voice.error && (voice.interim
-          ? <p className={styles.transcript} aria-label="인식 중인 이야기">{voice.interim}</p>
-          : reply ? <div className={styles.reply} aria-label="테스의 답변"><strong>테스</strong><p>{reply}</p></div>
-          : <p className={styles.hint}>{voice.muted ? '마이크를 켜면 다시 말할 수 있어요.' : '말하면 글로 나타나고, 문장이 확정되면 자동으로 보내요.'}</p>)}
+        {!voice.error && (draft
+          ? <div><p className={styles.transcript} aria-label="전사된 이야기">{draft}</p><p className={styles.hint}>채팅에서 확인하고 보내주세요.</p></div>
+          : <p className={styles.hint}>{voice.muted ? '마이크를 켜면 다시 말할 수 있어요.' : '말한 내용을 채팅에서 확인한 뒤 보내주세요.'}</p>)}
         {voice.error && <div className={styles.error} role="alert"><p>{voice.error}</p><MicrophoneCheck /><button onClick={voice.retry}>다시 시도하기</button><button onClick={() => { voice.stop(); voice.dismissError(); onChat(); }}>글로 계속하기</button></div>}
       </div>
       <div className={styles.controls}>

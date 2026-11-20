@@ -18,7 +18,7 @@ export function SleepSettings({ settings, notice, noticeSeq, dispatch }: { setti
   const root = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (notice !== 'limit' || !noticeSeq) return;
-    const target = root.current?.closest('dialog') ?? root.current;
+    const target = root.current;
     if (!target || typeof target.animate !== 'function' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const animation = target.animate(SHAKE, { duration: 240, easing: 'ease-out' });
     return () => animation.cancel();
@@ -31,7 +31,7 @@ export function SleepSettings({ settings, notice, noticeSeq, dispatch }: { setti
           const Icon = ICONS[sound.id];
           return <button key={sound.id} type="button" className={styles.chip} aria-pressed={settings.sounds.includes(sound.id)} aria-disabled={!sound.available || undefined}
             onClick={() => dispatch({ type: 'toggleSound', sound: sound.id })}>
-            <Icon size={17} strokeWidth={2} aria-hidden="true" />{sound.label}{!sound.available && <small>준비 중</small>}
+            {sound.id === 'WHITE' ? <img src="/assets/design/sleep-waves-icon.png" width={17} height={17} alt="" /> : <Icon size={17} strokeWidth={2} aria-hidden="true" />}{sound.label}{!sound.available && <small>준비 중</small>}
           </button>;
         })}
       </div>

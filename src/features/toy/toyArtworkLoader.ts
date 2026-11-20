@@ -5,6 +5,8 @@ import type { ArtworkPose } from './artworkDeformation';
 import type { Point } from './designs';
 
 const pending = new Map<ArtworkId, Promise<HTMLImageElement>>();
+const loaded = new Map<ArtworkId, HTMLImageElement>();
+export const cachedToyArtwork = (id: ArtworkId) => loaded.get(id) ?? null;
 const masks = new Map<ArtworkId, Uint8ClampedArray>();
 const WIDTH = 192, HEIGHT = 192;
 export function loadToyArtwork(id: ArtworkId) {
@@ -18,7 +20,7 @@ export function loadToyArtwork(id: ArtworkId) {
           const ctx = canvas.getContext('2d', { willReadFrequently: true });
           if (!ctx) throw new Error('Toy hit mask unavailable');
           ctx.drawImage(image, 0, 0, WIDTH, HEIGHT); masks.set(id, ctx.getImageData(0, 0, WIDTH, HEIGHT).data);
-          resolve(image);
+          loaded.set(id, image); resolve(image);
         } catch (error) { pending.delete(id); reject(error); }
       };
       image.onerror = () => { pending.delete(id); reject(new Error('Toy artwork unavailable')); };

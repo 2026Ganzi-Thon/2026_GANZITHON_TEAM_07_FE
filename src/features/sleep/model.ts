@@ -1,13 +1,13 @@
 export type SleepSound = 'WHITE' | 'RAIN' | 'NATURE' | 'MALANGI' | 'MUSIC';
 export type SleepTimer = 15 | 30 | 60 | 120;
 
-/** Figma order. MUSIC has no supplied track yet, so it stays visible but unavailable. */
+/** Reference order. WHITE is the legacy internal key for the supplied wave recording. */
 export const SLEEP_SOUNDS: readonly { id: SleepSound; label: string; available: boolean }[] = [
-  { id: 'WHITE', label: '백색소음', available: true },
+  { id: 'WHITE', label: '파도소리', available: true },
   { id: 'RAIN', label: '빗소리', available: true },
   { id: 'NATURE', label: '자연음', available: true },
   { id: 'MALANGI', label: '말랑이 ASMR', available: true },
-  { id: 'MUSIC', label: '수면 유도 음악', available: false },
+  { id: 'MUSIC', label: '수면 유도 음악', available: true },
 ];
 export const SLEEP_TIMERS: readonly SleepTimer[] = [15, 30, 60, 120];
 export const MAX_SLEEP_SOUNDS = 2;
@@ -59,6 +59,10 @@ export function sleepSummary(settings: SleepSettings) {
 }
 
 export function remainingSeconds(endAt: number, now: number) { return Math.max(0, Math.ceil((endAt - now) / 1000)); }
+export function clockRemaining(seconds: number) {
+  const value = Math.max(0, Math.floor(seconds));
+  return `${Math.floor(value / 60).toString().padStart(2, '0')}:${(value % 60).toString().padStart(2, '0')}`;
+}
 export function formatRemaining(seconds: number) {
   const hours = Math.floor(seconds / 3600), minutes = Math.floor((seconds % 3600) / 60), rest = seconds % 60;
   return [hours ? `${hours}시간` : '', minutes ? `${minutes}분` : '', !hours && rest ? `${rest}초` : ''].filter(Boolean).join(' ') || '0초';

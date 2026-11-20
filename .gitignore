@@ -17,6 +17,7 @@ coverage/
 .openai/
 .sites-runtime/
 .codex/
+.vercel/
 .idea/
 .vscode/
 .DS_Store

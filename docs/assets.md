@@ -1,5 +1,11 @@
 # 자산·서체 기록
 
+## 수면 후속 자산 · 2026-11-20
+
+- 제공 ‘파도소리 아이콘.png’를 `public/assets/design/sleep-waves-icon.png`로 원본 그대로 추가했다. 해시는 design manifest에 기록했다. 내부 WHITE 키의 표시만 파도소리로 바꾼다.
+- 제공 수면유도음악1·2를 `public/assets/audio/sleep/music-1.mp3`, `music-2.mp3`로 추가하고 순서 반복한다. 파도·빗소리·자연소리는 기존 수록 파일과 동일함을 해시로 확인했다. 원본 MP3를 편집하지 않고 재생 게인/페이드만 적용했다. 상세 출처와 해시는 `public/assets/audio/LICENSES.md`를 따른다.
+- 화면·전환은 제공 이미지와 녹화 영상 기준이며 녹화 원본과 QA 미디어는 앱 자산에 포함하지 않는다. 기존 수면 양 이미지를 재사용한다.
+
 ## 말랑이 재질 업데이트 · 2026-11-18
 
 버터 원화 교체, 하트의 전체 파괴 후 조작 흐름 통일, 제공 음원과 움직임에 반응하는 슬랑이 지속음을 반영했다. 최종 동작·코드·출처·재현 절차는 [변경 명세](design/material-refresh-2026-11-18.md)를 따른다. 최종 확인한 왁뿌볼 추출 WAV3개를 프로젝트에 포함해 일반 실행과 로컬의 소리를 통일했다. 별도 환경변수나 원본 영상은 실행에 필요하지 않다.
@@ -79,9 +85,12 @@ D45 말랑이9종은 총5,299,417바이트다. 원본 파일·복사 파일·man
 - 공식 배포처: https://github.com/orioncactus/pretendard
 - 파일: `public/fonts/PretendardVariable.woff2`, 2,057,688 bytes. SHA-256: `9599f12fd42fc0bce1cd50b47a0c022e108d7aa64dd0d1bb0ed44f3282d900b4`.
 - 공식 저장소에서 11/15 수령, 수정 없음. SIL OFL1.1 원문 `Pretendard-LICENSE.txt` 동봉. Figma 설치본의 정확한 버전은 미확인.
-- 제공 꾹꾹체: `public/fonts/MemomentKkukkukk.ttf`, 5,384,836 bytes. 메뉴18px·MY 항목16px·추천 제목20px·동적 요약15px/24.4px, Regular400에만 적용한다. 인위적인 굵기 합성을 끄고 실패 시 Pretendard로 대체한다.
-- TTF SHA-256: `632244da34f4c8ac752ae0aa9b7d649721fb7dd1361dfb0cc6a6e7fa1d9309b9`. 사용자 제공 파일을 그대로 복사했으며 OTF 중복 포함·WOFF 변환·서브셋 처리는 하지 않았다.
-- 2026-11-16 [제작사 공식 안내](https://www.memoment.kr/font)와 [다운로드 출처인 눈누](https://noonnu.cc/font_page/1663)를 재확인했다. 콘텐츠 사용은 허용하지만 웹 임베딩 및 폰트 파일 수정·재배포는 제한한다. 현재 TTF를 @font-face로 제공하는 구조와 Git 파일 포함이 이 제한에 해당한다고 판단하며, 비영리 대회 예외나 별도 허락은 확인하지 못했다. 현재 화면 작업의 서체는 유지하되 기획·디자인과 대체 서체를 논의해 최종 배포 전 교체한다. 저장소의 파일과 기존 커밋 이력 정리 범위도 협의한다. 현재 포함 사실을 배포 허가로 해석하지 않는다.
+- 표시 서체: `public/fonts/Cafe24DongdongRegular.otf` (사용자 제공 Cafe24 동동체 Regular, 1,875,928 bytes). 원본을 변환·서브셋·수정 없이 사용한다.
+- SHA-256: `9768b4c22405d8aea8f84f0f59748f80fa4e78ef32a4b64851a427cd8bbd2bab`.
+- 적용: 상단 메뉴(설정/MY 행 제외), MY 메뉴 항목, 말랑이 추천 제목, 수면 설정의 구역 제목·사운드·타이머 선택. 본문·입력·추천의 남은 문장(500/600)은 Pretendard를 유지한다. 동동체는 Regular400이며 인위적인 굵기 합성을 사용하지 않는다.
+- [Cafe24 공식 사용 안내](https://help.cafe24.com/faq/web-hosting/introduce/new-renewal-change/cafe24_free_fonts_usage/) 확인(2026-11-20): 개인/기업 상업적 사용, 웹폰트, 번들/임베딩 허용. 폰트 파일 자체의 유료 판매 금지. [공식 폰트 배포처](https://fonts.cafe24.com/).
+- 기존 MemomentKkukkukk의 @font-face·토큰 참조 및 배포용 TTF 파일은 제거했다. 과거 Git 이력까지 삭제한 것은 아니다. 이전 꾹꾹체 사용 조건 기록은 이력으로만 남는다.
+- 이번 Figma 재조회는 사이드패널 도구 오류로 실패했다. 기존 글자 크기·간격을 유지하면서 제공 서체를 적용했으며, 최신 원본 수치와 일치한다고 보장하지 않는다.
 
 ## 말랑이 렌더링과 아이콘
 
@@ -129,3 +138,7 @@ D45에서 제공9종 모두 연결했다. 메인 기본은 양이며 추천은 �
 팀 제공 원본 PNG를 `public/assets/design/emotions/`에 바이트 그대로 보관했다. 모두507×507 RGBA이며 총1,284,114바이트다. 원래 파일명·SHA-256은 기존 manifest에 추가했다. 파일 수정/변환 없이 CSS로 표시 크기만 조정했다.
 
 주간 캘린더·날짜별 기록 목록·목록 탭에 적용했다. 감정값 연결 및 대체 표시는 [D43 감정 이미지 기록](design/emotion-artwork-2026-11-16.md)을 따른다. 대화/API 감정 목록 확정과는 별개이며 긍정 감정도 실제 기록값이 있을 때 표시한다. 이번 수령으로 자산의 외부 라이선스를 새로 발급받았다는 의미는 아니다.
+
+## 로그인 석상 교체 — 2026-11-20
+
+팀 제공 `사색하는 고대 그리스 철학자 조각상 1.png` 원본(364×651)을 `public/assets/design/login-socrates.png`로 복사했다. 파일은 수정하지 않았으며 SHA-256은 `40c29bcf59753118e41b872489198faf82be7e293110293ec2ad6ba1722fb7a1`이다. 로그인 전용으로 사용하고 기존 `socrates.png` 참조는 다른 화면에 유지한다. 이미지 자체의 흐림을 사용하며 추가 CSS blur는 적용하지 않는다.

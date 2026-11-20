@@ -61,7 +61,7 @@
 .detailPage .usedToy { margin-top: 31px; min-height: 367px; }
 
 /* Figma text nodes measured on 2026-11-15. Body text remains Pretendard. */
-.recommend h2 { font-family: var(--font-display); font-weight: 400; font-synthesis: none; }
+.recommend, .recommend h2 { font-family: var(--font-display); font-weight: 400; font-synthesis: none; }
 .insight blockquote { font-family: 'Pretendard', sans-serif; font-weight: 600; font-synthesis: none; }
 .smallAction { display: flex; align-items: flex-start; gap: 6px; }
 .smallAction svg { flex-shrink: 0; margin-top: 2px; }
@@ -154,3 +154,6 @@
 .resultFirstView > .insight,
 .resultFirstView > .alternatives,
 .resultFirstView > .resultActions { flex-shrink: 0; }
+
+.resultPending > div { display:flex; flex-direction:column; justify-content:center; align-items:center; }
+.resultPending [role=status] { padding:24px; text-align:center; }

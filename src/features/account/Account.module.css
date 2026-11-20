@@ -19,6 +19,8 @@
 .settingsPage > div { padding: 22px 34px calc(26px + var(--safe-bottom)); }
 .profile > div { min-width: 0; }
 .profile p { overflow-wrap: anywhere; }
+.honorific { margin-left: 4px; white-space: nowrap; }
+.profile .email { font-size: 12px; line-height: 1.6; word-break: normal; overflow-wrap: anywhere; }
 @media(max-width:370px) { .settingsPage > div { padding-left: 24px; padding-right: 24px; } .profileCard { padding-left: 14px; padding-right: 14px; } }
 
 /* Figma text nodes measured on 2026-11-15. Body text remains Pretendard. */

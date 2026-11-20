@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_SLEEP_SETTINGS, formatRemaining, initialSleepState, remainingSeconds, sleepReducer, sleepSummary, timerLabel } from './model';
+import { DEFAULT_SLEEP_SETTINGS, clockRemaining, formatRemaining, initialSleepState, remainingSeconds, sleepReducer, sleepSummary, timerLabel } from './model';
 
 describe('sleep settings', () => {
   it('starts from the Figma ready-screen default', () => {
@@ -18,14 +18,14 @@ describe('sleep settings', () => {
     state = sleepReducer(state, { type: 'toggleSound', sound: 'RAIN' });
     expect(state).toEqual({ settings: { ...DEFAULT_SLEEP_SETTINGS, sounds: ['WHITE'] }, notice: null, noticeSeq: 2 });
     state = sleepReducer(state, { type: 'toggleSound', sound: 'MALANGI' });
-    expect(sleepSummary({ ...state.settings, minutes: 120 })).toBe('백색소음 및 말랑이 ASMR · 2시간 타이머로 설정했어요');
+    expect(sleepSummary({ ...state.settings, minutes: 120 })).toBe('파도소리 및 말랑이 ASMR · 2시간 타이머로 설정했어요');
   });
 
-  it('does not select a sound whose track has not been supplied', () => {
+  it('selects the supplied music as one sound category', () => {
     const state = sleepReducer({ ...initialSleepState, settings: { ...DEFAULT_SLEEP_SETTINGS, sounds: [] } }, { type: 'toggleSound', sound: 'MUSIC' });
-    expect(state.settings.sounds).toEqual([]);
-    expect(state.notice).toBe('unavailable');
-    expect(sleepSummary(state.settings)).toBe('사운드 없이 · 30분 타이머로 설정했어요');
+    expect(state.settings.sounds).toEqual(['MUSIC']);
+    expect(state.notice).toBe(null);
+    expect(sleepSummary(state.settings)).toBe('수면 유도 음악 · 30분 타이머로 설정했어요');
   });
 
   it('clamps brightness and ignores unknown timers', () => {
@@ -45,5 +45,9 @@ describe('sleep settings', () => {
     expect(formatRemaining(2 * 3600)).toBe('2시간');
     expect(formatRemaining(89)).toBe('1분 29초');
     expect(formatRemaining(0)).toBe('0초');
+    expect(clockRemaining(1800)).toBe('30:00');
+    expect(clockRemaining(7200)).toBe('120:00');
+    expect(clockRemaining(1699)).toBe('28:19');
+    expect(clockRemaining(-1)).toBe('00:00');
   });
 });

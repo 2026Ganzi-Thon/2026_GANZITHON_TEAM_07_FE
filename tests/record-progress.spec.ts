@@ -114,7 +114,7 @@ test('recommendation candidates only select until the CTA is activated', async (
   await expect(page.getByRole('link', { name: '왁뿌볼 만지러 가기' })).toBeVisible();
   await page.screenshot({ path: `artifacts/toy-selected-${info.project.name}.png`, fullPage: true });
   await page.getByRole('link', { name: '왁뿌볼 만지러 가기' }).click();
-  await expect(page).toHaveURL(/\/malangi\?type=WAKPPU/);
+  await expect(page).toHaveURL(/\/\?play=WAKPPU/);
   await expect(page.getByTestId('toy-interaction')).toBeEnabled();
   await page.getByRole('button', { name: '왁뿌볼', exact: true }).click();
   await page.getByRole('button', { name: '하트 모양' }).click();

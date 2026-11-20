@@ -6,6 +6,14 @@
 - `touch-foam-1..3.wav`, `touch-release-1..3.wav`: user-supplied 스퀴시.mp3 excerpts. Release3 omits a tonal ending. See supplied-material-manifest.json for source hashes and processing.
 - `touch-wax-1..3.wav`: final excerpts from the supplied recording, byte-identical to the accepted local samples (0.66/0.70/0.62 seconds, stereo 44.1 kHz, 3 ms boundary fades). Included in the app assets for all environments; no local override is required. See supplied-material-manifest.json and scripts/extract_wax_reference.py.
 
+## Sleep music / ambience update · 2026-11-20
+
+User-supplied files copied byte-for-byte. External licensing has not been independently verified. No source MP3 edits; playback uses fades and gain adjustment.
+- `sleep/music-1.mp3` ← 수면유도음악1.mp3, SHA256 `85954bec669227c6178a07961bc751fad08f5970bc7dd401ac1f05f6462772a4`
+- `sleep/music-2.mp3` ← 수면유도음악2.mp3, SHA256 `7ed213fe264e437bebd2c36e7fee1062fab3e8684e73f42a66c3eb825e50aa66`
+- Music playlist repeats 1 → 2; playback gain .8 / 2.25 compensates approximately 9dB source-level difference, before the shared .35 master gain. No pitch changes.
+- The newly supplied waves/rain/nature files match the hashes below. WHITE remains the internal key, but the displayed label is now 파도소리.
+
 ## Sleep ambience · 2026-11-19
 
 Team-supplied recordings, copied byte-for-byte into `sleep/` (no processing; looped at runtime). External licensing not separately confirmed.

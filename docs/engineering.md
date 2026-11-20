@@ -1,5 +1,23 @@
 # 프론트엔드 기술 구성과 작업 기준
 
+## 음성 초안과 기록 모양 메타데이터 — 2026-11-20 최신
+
+useVoice는 final/interim 모두 composer 초안만 갱신한다. 전송은 명시적인 send 경로에서만 호출하고 해당 시점에 인식기를 중단한다. 인식 세대/인스턴스가 바뀌면 이전 이벤트를 무시한다. 채팅 보기·편집·중단·오류에서 초안을 보존한다. 최종 인식 뒤 자동 메시지 전송 정책은 폐기했다.
+
+recordArtwork는 API 모드/계정 ID/기록 ID/createdAt 키에 유효한 ArtworkId 하나만 localStorage에 저장한다. 계정·기록 격리, 카테고리 일치 검증, 최초 모양 불변, 상세에서 삭제 성공 후 정리, 저장소 접근 실패 시 현재 탭 메모리 대체를 제공한다. 대화/감정/오디오를 영속화하는 예외가 아니다. 백엔드는 category만 제공하므로 기기 간 동기화 및 기존 기록 복원은 불가능하다. 미상 세부 모양은 추천 종류로만 표시한다.
+
+[전체 변경·QA](manual-voice-and-mobile-2026-11-20.md).
+
+## 상담 날짜와 체험 경로 계약 — 2026-11-20 최신
+
+`decodeServerRecord`는 백엔드 UTC LocalDateTime의 오프셋 없는 createdAt만 Z로 보완한다. 일반 문자열이나 mock 날짜 전체에 일괄 UTC 보정을 하지 않는다. Home의 `play` 쿼리가 단일 체험 상태이며 `/malangi`는 호환 리다이렉트다. 즉시 선택 캐시를 늦은 요청 응답으로 덮어쓰지 않고 로컬 저장을 순차화한다. 세부 계약은 [API 점검](api-audit-and-play-2026-11-20.md)을 따른다.
+
+## 현재 적용 — 서버 계약과 선택 UI (2026-11-20 후속)
+
+real 모드는 실제 상담·기록 API를 사용한다. 완료 기록은 영속 저장하고, 중간 대화는 현재 탭에서만 이어간다. 서버에 없는 중간 저장·회원정보·비밀번호 기능을 만들어진 것처럼 표시하지 않는다. [계약/제약](backend-integration-plan-2026-11-20.md).
+
+첫 말랑이 터치는 체험 전환만 한다. 슬랑이/스퀴시/왁뿌볼 탭과 종류별 3개 모양, 부족한 폭에서만 소리 버튼 줄바꿈, 스트레스→화남 표시, 로그인·음성 참고 이미지 배치를 적용한다. [화면 명세](design/play-tabs-and-reference-2026-11-20.md). 아래 과거 상태와 다르면 이 기준을 우선한다.
+
 ## 말랑이 재질 업데이트 · 2026-11-18
 
 버터 원화 교체, 하트의 전체 파괴 후 조작 흐름 통일, 제공 음원과 움직임에 반응하는 슬랑이 지속음을 반영했다. 최종 동작·코드·출처·재현 절차는 [변경 명세](design/material-refresh-2026-11-18.md)를 따른다. 최종 확인한 왁뿌볼 추출 WAV3개를 프로젝트에 포함해 일반 실행과 로컬의 소리를 통일했다. 별도 환경변수나 원본 영상은 실행에 필요하지 않다.
@@ -113,7 +131,7 @@ npm run test:e2e
 
 기본 주소는 `http://127.0.0.1:5173`이다. MSW의 Service Worker는 localhost 또는 HTTPS에서 동작한다. 휴대폰 실기기에서는 localhost가 개발 PC를 가리키지 않으므로 HTTPS 미리보기 배포 등 접속 구성을 별도로 준비한다.
 
-기본 빌드는 real 모드로 인증만 백엔드 API를 호출한다. 대화·기록·말랑이는 MSW 예시 데이터이며 `npm run build:mock`은 인증까지 예시 모드로 빌드한다. 앱 공개 운영 전 나머지 API 어댑터·데이터 정책을 구현하고 예시 handler의 배포 방식을 결정해야 한다. SPA 배포 시 `/chat` 직접 접근을 위한 index.html fallback도 필요하다.
+기본 빌드는 real 모드로 인증·상담·기록 API를 호출한다. 말랑이 inventory는 로컬 MSW 상태이며 `npm run build:mock`은 인증까지 예시 모드로 빌드한다. 앱 공개 운영 전 나머지 API 어댑터·데이터 정책을 구현하고 예시 handler의 배포 방식을 결정해야 한다. SPA 배포 시 `/chat` 직접 접근을 위한 index.html fallback도 필요하다.
 
 패키지 설치·코드 작성과 검증은 승인된 범위에 포함한다. 외부 배포·새 서비스 계정 연결·Git 커밋과 푸시는 별도 요청이 있을 때 진행한다.
 
@@ -172,7 +190,7 @@ D34(2026-11-15): D34 적용 기준으로 세 종류를 처음부터 개방했다
 
 ## 실제 API 모드·인증 — #13 (2026-11-18)
 
-- 모드: `src/lib/apiMode.ts`. 기본은 real이고(2026-11-19), Vite `--mode mock`(`dev:mock`/`build:mock`) 또는 `VITE_API_MODE=mock`이면 mock이다. mock은 전부 MSW, real은 `/api/v1/auth`만 백엔드이고 나머지 `/__preview__`는 MSW가 계속 응답한다. real에서는 로그인한 계정을 `/__preview__/bind`로 예시 저장소에 연결해 계정별로 나눈다.
+- 모드: `src/lib/apiMode.ts`. 기본은 real이고(2026-11-19), Vite `--mode mock`(`dev:mock`/`build:mock`) 또는 `VITE_API_MODE=mock`이면 mock이다. mock은 전부 MSW, real은 `/api/v1/auth`, `/api/v1/counseling`, `/api/v1/records`를 백엔드로 연결한다. 로컬 말랑이 inventory의 `/__preview__`에는 MSW가 응답한다. real에서는 로그인한 계정을 `/__preview__/bind`로 예시 저장소에 연결해 계정별로 나눈다.
 - 백엔드 응답 `{ success, data, error }`는 `contracts.ts`의 `decodeEnvelope`에서 풀고, 실패는 `ApiError(status, code, details)`로 바꾼다. 화면은 `code`(예: `INVALID_CREDENTIALS`, `EMAIL_ALREADY_REGISTERED`)로 문구를 고른다.
 - 로그아웃(PR #14 리뷰): 진행 중인 토큰 갱신이 끝날 때까지 기다리고, 요청 본문은 보낼 때 읽는다(`body` 함수). 그래서 401 → 갱신 → 재전송에서도 최신 Refresh 토큰을 폐기한다. 로그아웃 뒤 끝난 갱신은 `authSession.generation()`이 달라 저장하지 않는다.
 - 토큰: `authSession.ts`(Access 메모리, Refresh `sessionStorage`). 저장 정책을 바꿀 때는 이 파일만 수정한다. refresh 거절 시 `expired` 이벤트로 프로필 외 캐시를 지우고 프로필을 null로 만든다. 진행 중인 프로필 조회를 지우면 화면이 대기 상태에 멈추므로 프로필 쿼리는 지우지 않는다.

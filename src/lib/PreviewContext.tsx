@@ -24,7 +24,7 @@ export function PreviewProvider({ children }: { children: ReactNode }) {
   return <PreviewContext.Provider value={value.current}>{children}</PreviewContext.Provider>;
 }
 export function usePreview() { const value = useContext(PreviewContext); if (!value) throw new Error('PreviewProvider required'); return value; }
-export function useProfile() { return useQuery({ queryKey: ['preview', 'me'], queryFn: accountApi.me, staleTime: Infinity }); }
+export function useProfile(enabled = true) { return useQuery({ queryKey: ['preview', 'me'], queryFn: accountApi.me, staleTime: Infinity, enabled }); }
 export function RequirePreview({ children }: { children: ReactNode }) {
   const user = useProfile(); const location = useLocation();
   if (user.isPending) return <div className="bootError" role="status">화면을 준비하고 있어요.</div>;
