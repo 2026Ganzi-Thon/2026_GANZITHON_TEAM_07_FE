@@ -7,7 +7,7 @@
 .bubble button:hover { background: #f0ebe3; }
 @media(max-height:450px) { .trigger { width: 56px; height: 56px; }.bubble { bottom: 74px; gap: 4px; padding: 7px; } }
 
-/* Figma text nodes measured on 2026-11-15. Body text remains Pretendard. */
+/* Existing geometry; supplied Dongdong replacement. Body text remains Pretendard. */
 .bubble button { font-family: var(--font-display); font-weight: 400; font-synthesis: none; }
 
 /* D36: home menu opens downwards; the bottom entry remains separate. */
@@ -17,7 +17,7 @@
 .bubble svg { flex-shrink: 0; }
 
 @media(max-height:350px) { .dock[data-placement=top] .bubble { overflow-y: auto; } }
-.bubble .settingsItem { font-family: 'Pretendard', sans-serif; font-size: 16px; font-weight: 600; }
+.bubble .settingsItem { font-family: var(--font-display); font-size: 16px; font-weight: 400; }
 .bubble { opacity: 0; visibility: hidden; transform: translateY(8px) scale(.97); transform-origin: bottom right; transition: opacity .22s ease, transform .22s ease, visibility .22s; pointer-events: none; }
 .bubble[data-open=true] { opacity: 1; visibility: visible; transform: none; pointer-events: auto; }
 .dock[data-placement=top] .bubble { width: 164px; padding: 6px; gap: 4px; top: 58px; border-radius: 13px; transform-origin: top right; }

@@ -6,7 +6,7 @@ export function settingsReturnFor(location: { pathname: string; search: string; 
 }
 export function readSettingsReturn(value: unknown): { to: string; state?: unknown } {
   if (value && typeof value === 'object' && 'to' in value && typeof value.to === 'string'
-    && /^(?:\/|\/(?:archive|malangi|chat|results\/[^/?#]+|records\/[^/?#]+)(?:\?[^#]*)?)$/.test(value.to)) {
+    && /^(?:\/(?:\?play=(?:SLANGI|SQUISHY|WAKPPU))?|\/(?:archive|malangi|chat|sleep|results\/[^/?#]+|records\/[^/?#]+)(?:\?[^#]*)?)$/.test(value.to)) {
     return { to: value.to, state: 'state' in value ? value.state : undefined };
   }
   return { to: '/' };

@@ -43,8 +43,8 @@ test('result, archive, detail and MY remain readable across mobile, landscape an
   await page.getByRole('button', { name: '3점', exact: true }).click();
   await page.getByRole('button', { name: '대화 마무리하기' }).click();
   await expect(page.getByText('기록을 보관함에 남겼어요')).toBeVisible();
-  await expect(page.getByRole('heading', { name: '지금 마음에 맞는 말랑이' })).toHaveCSS('font-family', /MemomentKkukkukk/);
-  await expect(page.locator('blockquote')).toHaveCSS('font-family', /MemomentKkukkukk/);
+  await expect(page.getByRole('heading', { name: '지금 마음에 맞는 말랑이' })).toHaveCSS('font-family', /Cafe24Dongdong/);
+  await expect(page.locator('blockquote')).toHaveCSS('font-family', /Pretendard/);
   await inspect(page, 'result', info.project.name);
   await page.getByRole('link', { name: '마음 보관함으로', exact: true }).click();
   await expect(page.getByRole('region', { name: '월간 기록 달력' })).toBeVisible();

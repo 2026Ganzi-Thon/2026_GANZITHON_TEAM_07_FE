@@ -2,6 +2,7 @@
 export const DESIGN_ASSETS = {
   lamb: '/assets/design/sheep-squishy.png',
   socrates: '/assets/design/socrates.png',
+  loginStatue: '/assets/design/login-socrates.png',
   socratesWithToy: '/assets/design/socrates-with-toy.png',
   voiceStatue: '/assets/design/socrates-sleeping-sheep.png',
   voiceChatIcon: '/assets/design/voice-chat-icon.png',

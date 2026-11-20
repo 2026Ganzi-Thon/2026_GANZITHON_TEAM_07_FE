@@ -1,12 +1,13 @@
 import { readSettingsReturn } from '../../components/SettingsLink';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronRight, HeartHandshake, LogOut } from 'lucide-react';
 import { Modal } from '../../components/ui';
 import { Page } from '../../components/Page';
 import { accountApi } from '../../lib/api';
-import { usePreview, useProfile } from '../../lib/PreviewContext';
+import { API_MODE } from '../../lib/apiMode';
+import { usePreview } from '../../lib/PreviewContext';
 import s from '../../components/Page.module.css';
 import styles from './Account.module.css';
 import { DESIGN_ASSETS } from '../../lib/assets';
@@ -14,11 +15,13 @@ export { Login } from './Login';
 export function Settings() {
   const location = useLocation();
   const settingsReturn = readSettingsReturn(location.state?.settingsReturn);
-  const user = useProfile(); const preview = usePreview(); const client = useQueryClient(); const navigate = useNavigate();
+  // Login supplies only id/nickname; refresh the shared profile on MY entry for the server email.
+  const user = useQuery({ queryKey: ['preview', 'me'], queryFn: accountApi.me, staleTime: 0 });
+  const preview = usePreview(); const client = useQueryClient(); const navigate = useNavigate();
   const [sheet, setSheet] = useState<'about' | null>(null);
-  const logout = useMutation({ mutationFn: accountApi.logout, onSuccess: () => { preview.drafts.clear(); client.removeQueries({ queryKey: ['preview'] }); client.setQueryData(['preview', 'me'], null); navigate('/', { replace: true }); } });
-  return <Page title="MY" back={settingsReturn.to} backState={settingsReturn.state} className={styles.settingsPage}><div className={styles.profileCard}><div className={styles.profile}><span className={styles.userIcon}><img src={DESIGN_ASSETS.myProfile} width={71} height={71} alt="프로필 이미지" /></span><div><strong>{user.data?.nickname ?? '테슬랑에 오신 걸 환영해요'}</strong>{!user.data && <p>계정을 연결하고 마음을 남겨보세요</p>}</div></div>{!user.data && <Link className={s.secondary} to="/login?next=/settings">로그인하기</Link>}</div>
-    <div className={styles.links}><Link to="/archive?manage=1" state={{ settingsReturn }}><span className={styles.menuDot} />기록 관리 / 삭제 / 가리기</Link><Link to="/help" state={{ from: 'settings', settingsReturn }}><span className={styles.menuDot} />도움 연결</Link><button disabled title="계정 연결 후 제공"><span className={styles.menuDot} />회원정보 수정</button><button disabled title="계정 연결 후 제공"><span className={styles.menuDot} />비밀번호 찾기/변경</button><button onClick={e => { e.currentTarget.focus(); setSheet('about'); }}><span className={styles.menuDot} />서비스 이용 안내<ChevronRight size={17} /></button></div>
+  const logout = useMutation({ mutationFn: accountApi.logout, onSuccess: () => { preview.drafts.clear(); preview.entry = null; client.removeQueries({ queryKey: ['preview'] }); client.setQueryData(['preview', 'me'], null); navigate(API_MODE === 'real' ? '/login' : '/', { replace: true }); } });
+  return <Page title="MY" back={settingsReturn.to} backState={settingsReturn.state} className={styles.settingsPage}><div className={styles.profileCard}><div className={styles.profile}><span className={styles.userIcon}><img src={DESIGN_ASSETS.myProfile} width={71} height={71} alt="프로필 이미지" /></span><div>{user.data ? <><strong>{user.data.nickname}<span className={styles.honorific}>{'\u00a0'}님</span></strong>{user.data.email && <p className={styles.email}>{user.data.email}</p>}</> : <><strong>테슬랑에 오신 걸 환영해요</strong><p>계정을 연결하고 마음을 남겨보세요</p></>}</div></div>{!user.data && <Link className={s.secondary} to="/login?next=/settings">로그인하기</Link>}</div>
+    <div className={styles.links}><Link to="/archive?manage=1" state={{ settingsReturn }}><span className={styles.menuDot} />기록 관리 / 삭제 / 가리기</Link><Link to="/help" state={{ from: 'settings', settingsReturn }}><span className={styles.menuDot} />도움 연결</Link><button onClick={e => { e.currentTarget.focus(); setSheet('about'); }}><span className={styles.menuDot} />서비스 이용 안내<ChevronRight size={17} /></button></div>
 
     {logout.isError && <p role="alert" className={s.error}>{logout.error.message}</p>}{user.data && <button className={s.secondary} onClick={() => logout.mutate()} disabled={logout.isPending}><LogOut size={17} />{logout.isPending ? '나가는 중…' : '로그아웃'}</button>}
     {sheet && <Modal title="서비스 이용 안내" onClose={() => setSheet(null)}><p>테스와 이야기를 나누고, 마음 보관함에서 기록을 돌아볼 수 있어요. 말랑이를 누르거나 늘리며 잠시 쉬어가세요.</p><p>테슬랑은 전문 상담이나 치료를 대신하지 않아요.</p><Link className={s.secondary} to="/help" state={{ from: 'settings', settingsReturn }}>도움 연결 보기</Link></Modal>}

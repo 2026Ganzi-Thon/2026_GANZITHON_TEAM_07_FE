@@ -55,9 +55,6 @@ export function EmailAuth({ destination }: { destination: string }) {
       <input id={`${id}-email`} type="email" inputMode="email" autoComplete={mode === 'login' ? 'username' : 'email'} autoCapitalize="none" spellCheck={false} maxLength={255}
         value={email} onChange={event => setEmail(event.target.value)} disabled={submit.isPending} required />
     </label>
-    {mode === 'signup' && <label className={styles.field} htmlFor={`${id}-nickname`}>닉네임
-      <input id={`${id}-nickname`} autoComplete="nickname" maxLength={50} value={nickname} onChange={event => setNickname(event.target.value)} disabled={submit.isPending} required />
-    </label>}
     <label className={styles.field} htmlFor={`${id}-password`}>비밀번호
       <span className={styles.passwordRow}>
         <input id={`${id}-password`} type={reveal ? 'text' : 'password'} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} maxLength={72}
@@ -66,6 +63,9 @@ export function EmailAuth({ destination }: { destination: string }) {
       </span>
     </label>
     {mode === 'signup' && <p id={`${id}-password-hint`} className={styles.fieldHint}>8자 이상 72자 이하로 입력해 주세요.</p>}
+    {mode === 'signup' && <label className={styles.field} htmlFor={`${id}-nickname`}>닉네임
+      <input id={`${id}-nickname`} autoComplete="nickname" maxLength={50} value={nickname} onChange={event => setNickname(event.target.value)} disabled={submit.isPending} required />
+    </label>}
     {notice && <p className={s.small} role="status">{notice}</p>}
     {submit.isError && <p className={s.error} role="alert">{describeEmailAuthError(submit.error, mode === 'signup')}</p>}
     <button type="submit" className={s.primary} disabled={invalid || submit.isPending}>

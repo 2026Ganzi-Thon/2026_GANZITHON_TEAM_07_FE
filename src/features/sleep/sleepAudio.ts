@@ -4,11 +4,11 @@ export type SleepAudioStatus = 'idle' | 'playing' | 'unavailable';
 export interface SleepAudioState { status: SleepAudioStatus; asmrFailed: boolean; trackFailed: boolean }
 
 type Noise = 'white' | 'pink' | 'brown';
-interface Layer { gain: GainNode; nodes: AudioNode[]; sources: AudioScheduledSourceNode[]; timer?: ReturnType<typeof setTimeout> }
+interface Layer { gain: GainNode; nodes: AudioNode[]; sources: AudioScheduledSourceNode[]; timer?: ReturnType<typeof setTimeout>; media?: HTMLAudioElement }
 
 /**
  * Team-supplied ambient tracks (2026-11-19, see public/assets/audio/LICENSES.md), looped from a random offset.
- * WHITE plays the supplied wave recording (user decision: "파도 소리" goes in the 백색소음 slot).
+ * WHITE is the legacy internal key; the visible label is 파도소리.
  */
 const AMBIENT_TRACKS: Record<Exclude<SleepSound, 'MALANGI' | 'MUSIC'>, { file: string; level: number }> = {
   WHITE: { file: 'sleep/waves.mp3', level: .8 },
@@ -76,7 +76,11 @@ export class SleepAudio {
     const generation = ++this.generation;
     if (!this.ensureContext()) return;
     const context = this.context!, master = this.master!;
-    try { await context.resume(); } catch { this.update({ status: 'unavailable' }); return; }
+    const resumed = context.resume();
+    // Create/play streaming music within the user's gesture, including on mobile Safari.
+    this.update({ status: 'playing', trackFailed:false, asmrFailed:false });
+    this.setSounds(sounds);
+    try { await resumed; } catch { if(generation === this.generation) { this.stop(); this.update({ status: 'unavailable' }); } return; }
     // A stop/exit during resume() wins; never start sound after the user already ended it.
     if (this.disposed || generation !== this.generation) return;
     const now = context.currentTime;
@@ -101,13 +105,37 @@ export class SleepAudio {
       void this.loadSamples().then(() => { if (this.layers.get(id) === layer) this.scheduleAsmr(layer); });
       return;
     }
-    if (id === 'MUSIC') return;
+    if (id === 'MUSIC') { this.layers.set(id,layer); this.startMusic(layer); return; }
     this.layers.set(id, layer);
     void this.loadTrack(id).then(buffer => {
       if (this.layers.get(id) !== layer || !this.context) return; // deselected or stopped while loading
       if (buffer) this.startTrack(layer, buffer, AMBIENT_TRACKS[id].level);
       else { this.update({ trackFailed: true }); this.startNoise(layer, id); }
     });
+  }
+
+  private startMusic(layer: Layer) {
+    const context = this.context!;
+    const media = new Audio(); media.preload = 'auto';
+    layer.media = media;
+    const source = context.createMediaElementSource(media); source.connect(layer.gain); layer.nodes.push(source);
+    let index = 0;
+    const current = () => !this.disposed && this.layers.get('MUSIC') === layer && this.state.status === 'playing';
+    const play = () => {
+      if(!current()) return;
+      media.src = `/assets/audio/sleep/music-${index + 1}.mp3`;
+      const now = context.currentTime;
+      layer.gain.gain.cancelScheduledValues(now); layer.gain.gain.setValueAtTime(0,now); layer.gain.gain.linearRampToValueAtTime(index === 0 ? .8 : 2.25,now+1.5);
+      void media.play().catch(()=>{if(current())this.update({trackFailed:true});});
+    };
+    media.onended = () => { if(current()) { index=(index+1)%2; play(); } };
+    media.onerror = () => { if(current())this.update({trackFailed:true}); };
+    // Soften each track's last second without decoding both long tracks into memory.
+    media.ontimeupdate = () => {
+      if(!current() || !Number.isFinite(media.duration)) return;
+      if(media.duration-media.currentTime <= 1) layer.gain.gain.setTargetAtTime(0,context.currentTime,.25);
+    };
+    play();
   }
 
   private loadTrack(id: Exclude<SleepSound, 'MALANGI' | 'MUSIC'>) {
@@ -191,6 +219,10 @@ export class SleepAudio {
     const layer = this.layers.get(id);
     if (!layer || !this.context) return;
     this.layers.delete(id);
+    if(layer.media) {
+      const media=layer.media; media.onended=null; media.onerror=null; media.ontimeupdate=null;
+      setTimeout(()=>{media.pause();media.removeAttribute('src');media.load();},seconds*1000);
+    }
     if (layer.timer) clearTimeout(layer.timer);
     const now = this.context.currentTime;
     layer.gain.gain.cancelScheduledValues(now); layer.gain.gain.setValueAtTime(layer.gain.gain.value, now); layer.gain.gain.linearRampToValueAtTime(0, now + seconds);

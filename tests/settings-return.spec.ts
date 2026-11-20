@@ -28,11 +28,12 @@ test('archive settings returns to the same view and date, including help and man
   }
 });
 
-test('toy settings returns to the selected toy instead of home', async ({ page }) => {
+test('legacy toy entry redirects to Home play and settings restores that state', async ({ page }) => {
   await login(page, '/malangi?type=WAKPPU');
-  await page.getByRole('link', { name: 'MY 및 설정' }).click();
+  await page.getByRole('button', { name: '메뉴 열기' }).click();
+  await page.getByRole('button', { name: '설정/MY', exact: true }).click();
   await page.getByRole('link', { name: '뒤로가기', exact: true }).click();
-  await expect(page).toHaveURL(/\/malangi\?type=WAKPPU$/);
+  await expect(page).toHaveURL(/\/\?play=WAKPPU$/);
   await expect(page.getByRole('button', { name: '왁뿌볼 누르기 또는 드래그', exact: true })).toBeVisible();
 });
 

@@ -8,10 +8,10 @@
   font-display: swap;
 }
 
-/* Supplied TTF, unchanged. Only measured Figma display text uses this face. */
+/* User-supplied OTF, unchanged. Display text only; body text stays Pretendard. */
 @font-face {
-  font-family: 'MemomentKkukkukk';
-  src: url('/fonts/MemomentKkukkukk.ttf') format('truetype');
+  font-family: 'Cafe24Dongdong';
+  src: url('/fonts/Cafe24DongdongRegular.otf') format('opentype');
   font-style: normal;
   font-weight: 400;
   font-display: swap;

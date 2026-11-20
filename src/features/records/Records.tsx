@@ -1,5 +1,8 @@
+import { API_MODE } from '../../lib/apiMode';
+import { recordsApi } from '../../lib/recordsApi';
 import { useToyPreferences } from '../toy/ToyPreferences';
-import { DEFAULT_ARTWORK, isArtwork } from '../../lib/toyArtwork';
+import { DEFAULT_ARTWORK } from '../../lib/toyArtwork';
+import { artworkForType, readRecordArtwork, rememberRecordArtwork, forgetRecordArtwork } from '../../lib/recordArtwork';
 import { SettingsLink } from '../../components/SettingsLink';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
@@ -29,28 +32,39 @@ export function RecordBody({ record }: { record: DiaryRecord }) {
 export function Result() {
   const { designs } = useToyPreferences();
   const { id = '' } = useParams(); const user = useProfile(); const preview = usePreview(); const client = useQueryClient();
-  const draft = useRef(preview.drafts.get(id));
-  const [selected, setSelected] = useState<ToyType | null>(null);
+  const draft = useRef(API_MODE === 'mock' ? preview.drafts.get(id) : undefined);
+  const location = useLocation();
+  const savedSelection = location.state?.resultToy;
+  const [selected, setSelected] = useState<ToyType | null>(() => savedSelection && Object.hasOwn(TOYS, savedSelection) ? savedSelection : null);
   const options = useRef<HTMLDivElement>(null);
   const query = useQuery({ queryKey: ['preview', user.data!.id, 'record', id], staleTime: Infinity, queryFn: () => {
-    if (!draft.current) return previewApi.record(id);
+    if (!draft.current) return recordsApi.record(id);
     const fail = preview.faults.save; preview.faults.save = false;
     return previewApi.save(draft.current, fail);
   } });
   useEffect(() => { if (query.data) { preview.drafts.delete(id); draft.current = undefined; void client.invalidateQueries({ queryKey: ['preview', user.data!.id, 'records'] }); void client.invalidateQueries({ queryKey: ['preview', user.data!.id, 'inventory'] }); } }, [query.data, id, preview, client, user.data]);
-  useEffect(() => setSelected(null), [id]);
+  useEffect(() => setSelected(savedSelection && Object.hasOwn(TOYS, savedSelection) ? savedSelection : null), [id, savedSelection]);
   const active = selected ?? query.data?.recommended ?? 'SLANGI';
+  const [,refreshArtwork] = useState(0);
+  useEffect(() => {
+    if (query.data?.recommended) {
+      rememberRecordArtwork(user.data!.id,query.data,designs[query.data.recommended]);
+      refreshArtwork(value=>value+1);
+    }
+  },[query.data?.id,query.data?.createdAt,query.data?.recommended,user.data!.id]);
+  const artwork = (query.data && active === query.data.recommended ? readRecordArtwork(user.data!.id,query.data) : undefined)
+    ?? (artworkForType(active,designs[active]) ? designs[active] : DEFAULT_ARTWORK[active]);
   const advice = query.data ? adviceFor(query.data) : null;
   if (query.data?.hidden || query.data?.partial) return <Page title="마음 기록"><p>{query.data.hidden ? '가려 둔 기록이에요.' : '중간에 보관한 이야기예요.'}</p><PrimaryLink to={`/records/${id}`}>기록 확인하기</PrimaryLink></Page>;
-  return <Page title="오늘의 마음 정리" titlePlacement="hidden" className={styles.resultPage} action={<SettingsLink><Settings size={21} /></SettingsLink>}>{query.isPending ? <Pending>이야기를 정리하고 있어요.</Pending> : query.isError ? <><ErrorState message={query.error.message} retry={draft.current ? () => query.refetch() : undefined} /><p className={s.small}>{draft.current ? '저장 완료로 처리하지 않았어요. 다시 시도하면 입력 내용을 유지해요.' : '기록을 찾을 수 없어요. 새 대화를 시작할 수 있어요.'}</p></> : <div aria-label="상담 결과" role="region">
+  return <Page title="오늘의 마음 정리" titlePlacement="hidden" className={`${styles.resultPage} ${query.isPending ? styles.resultPending : ''}`} action={<SettingsLink returnState={{ ...location.state, resultToy: active }}><Settings size={21} /></SettingsLink>}>{query.isPending ? <Pending>이야기를 마무리하고 있어요.</Pending> : query.isError ? <><ErrorState message={query.error.message} retry={query.error instanceof ApiError && query.error.status === 404 ? undefined : () => query.refetch()} /><p className={s.small}>{draft.current ? '저장 완료로 처리하지 않았어요. 다시 시도하면 입력 내용을 유지해요.' : '기록을 불러오지 못했어요. 다시 조회해도 완료 요청을 중복으로 보내지 않아요.'}</p></> : <div aria-label="상담 결과" role="region">
       <div className={styles.resultFirstView}>
-      <section className={styles.recommend}><h2>지금 마음에 맞는 말랑이</h2><span className={styles.toyPill} aria-live="polite">{TOYS[active].name}</span><button className={styles.recommendArtwork} aria-label="다른 말랑이 선택 보기" onClick={() => { options.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); options.current?.querySelector<HTMLButtonElement>('button[aria-pressed=true]')?.focus({ preventScroll: true }); }}><Malangi variant={TOYS[active].tint} artwork={isArtwork(designs[active]) ? designs[active] : DEFAULT_ARTWORK[active]} /></button><p>{TOYS[active].instruction}</p></section>
-      <section className={styles.insight}><span>대화에서 남은 문장</span><blockquote>{query.data.summary}</blockquote>{advice && <p className={styles.smallAction}><img src={`/assets/design/advice-${advice.kind}.svg`} width={advice.kind === 'walk' ? 14 : 15} height={advice.kind === 'walk' ? 12 : 10} alt="" /><span>{advice.chosen ? '작은 실천' : '작은 조언'} · {advice.text}</span></p>}</section>
+      <section className={styles.recommend}><h2>지금 마음에 맞는 말랑이</h2><span className={styles.toyPill} aria-live="polite">{TOYS[active].name}</span><button className={styles.recommendArtwork} aria-label="다른 말랑이 선택 보기" onClick={() => { options.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); options.current?.querySelector<HTMLButtonElement>('button[aria-pressed=true]')?.focus({ preventScroll: true }); }}><Malangi variant={TOYS[active].tint} artwork={artwork} /></button><p>{TOYS[active].instruction}</p></section>
+      <section className={styles.insight}><span>오늘 나눈 이야기</span><blockquote>{query.data.keySentence || query.data.summary}</blockquote>{advice && <p className={styles.smallAction}><img src={`/assets/design/advice-${advice.kind}.svg`} width={advice.kind === 'walk' ? 14 : 15} height={advice.kind === 'walk' ? 12 : 10} alt="" /><span>{advice.chosen ? '작은 실천' : '작은 조언'} · {advice.text}</span></p>}</section>
       <section className={styles.alternatives} aria-label="다른 말랑이"><header><h2>다른 말랑이도 있어요</h2><span>눌러서 바꿀 수 있어요</span></header><div ref={options} role="group" aria-label="체험할 말랑이 선택">{(Object.keys(TOYS) as ToyType[]).map(type => {
         const content = <><i className={styles[type]} /><strong>{TOYS[type].name}</strong><small>{({ SLANGI: '불안 · 우울', SQUISHY: '속상함 · 슬픔', WAKPPU: '분노 · 스트레스' })[type]}</small></>;
         return <button key={type} aria-label={`${TOYS[type].name} 선택`} aria-pressed={active === type} onClick={() => setSelected(type)}>{content}</button>;
       })}</div></section>
-      <div className={styles.resultActions}><PrimaryLink to={`/malangi?type=${active}`}>{TOYS[active].name} 만지러 가기</PrimaryLink><Link className={styles.recordLink} to={`/records/${id}`}>저장된 기록 확인하기<ChevronRight size={12} /></Link></div>
+      <div className={styles.resultActions}><PrimaryLink to={`/?play=${active}&shape=${artwork}`} state={{ toyReturn: { to: `/results/${id}`, state: { resultToy: active } } }}>{TOYS[active].name} 만지러 가기</PrimaryLink><Link className={styles.recordLink} to={`/records/${id}`}>저장된 기록 확인하기<ChevronRight size={12} /></Link></div>
       </div>
       <div className={styles.saved} role="status"><Check size={14} />기록을 보관함에 남겼어요</div>
       <RecordBody record={query.data} /><div className={s.stack}><Link className={s.secondary} to="/archive">마음 보관함으로</Link><Link className={s.textLink} to="/">메인으로 돌아가기</Link></div>
@@ -62,37 +76,40 @@ const emotionColor = (emotion: string | null) => presentEmotion(emotion).color;
 export function RecordDetail() {
   const location = useLocation();
   const { id = '' } = useParams(); const user = useProfile(); const preview = usePreview(); const client = useQueryClient(); const navigate = useNavigate(); const [confirm, setConfirm] = useState(false);
-  const query = useQuery({ queryKey: ['preview', user.data!.id, 'record', id], queryFn: () => previewApi.record(id) });
+  const query = useQuery({ queryKey: ['preview', user.data!.id, 'record', id], queryFn: () => recordsApi.record(id) });
   const [params, setParams] = useSearchParams(); const history = params.get('view') === 'conversation'; const [revealed, setRevealed] = useState(false);
   const back = params.get('manage') === '1' ? '/archive?manage=1' : '/archive';
   useEffect(() => { setRevealed(false); }, [id, query.data?.hidden]);
-  const visibility = useMutation({ mutationFn: () => previewApi.setRecordHidden(id, !query.data?.hidden), onSuccess: async record => {
+  const visibility = useMutation({ mutationFn: () => recordsApi.setRecordHidden(id, !query.data?.hidden), onSuccess: async record => {
     await client.cancelQueries({ queryKey: ['preview', user.data!.id, 'records'] });
     client.setQueryData(['preview', user.data!.id, 'record', id], record);
     client.setQueryData<DiaryRecord[]>(['preview', user.data!.id, 'records'], previous => previous?.map(item => item.id === record.id ? record : item));
     await client.invalidateQueries({ queryKey: ['preview', user.data!.id, 'records'] });
     setRevealed(false);
+  }, onError: () => { void client.invalidateQueries({ queryKey: ['preview', user.data!.id, 'record', id] }); void client.invalidateQueries({ queryKey: ['preview', user.data!.id, 'records'] }); } });
+  const remove = useMutation({ mutationFn: () => { const fail = preview.faults.remove; preview.faults.remove = false; return recordsApi.deleteRecord(id, fail); }, onSuccess: async () => {
+    if (query.data) forgetRecordArtwork(user.data!.id,query.data);
+    preview.drafts.delete(id); client.removeQueries({ queryKey: ['preview', user.data!.id, 'record', id] }); client.removeQueries({ queryKey: ['preview', user.data!.id, 'record-messages', id] }); await client.invalidateQueries({ queryKey: ['preview', user.data!.id, 'records'] }); navigate(back, { replace: true });
   } });
-  const remove = useMutation({ mutationFn: () => { const fail = preview.faults.remove; preview.faults.remove = false; return previewApi.deleteRecord(id, fail); }, onSuccess: async () => {
-    preview.drafts.delete(id); client.removeQueries({ queryKey: ['preview', user.data!.id, 'record', id] }); await client.invalidateQueries({ queryKey: ['preview', user.data!.id, 'records'] }); navigate(back, { replace: true });
-  } });
+  const conversation = useQuery({ queryKey: ['preview', user.data!.id, 'record-messages', id], queryFn: () => recordsApi.messages(id), enabled: history && !!query.data && (!query.data.hidden || revealed) });
   const record = query.data;
+  const historicalArtwork = record ? readRecordArtwork(user.data!.id,record) : undefined;
   const cardActions = record && <footer className={styles.recordActions}>
     <button aria-label={record.hidden ? '보관함에 다시 표시하기' : '기록 가리기'} disabled={visibility.isPending} onClick={() => visibility.mutate()}>{visibility.isPending ? '변경 중…' : record.hidden ? '다시 표시' : '숨기기'}</button>
     <button className={styles.deleteRecord} aria-label="기록 삭제" disabled={visibility.isPending} onClick={event => { event.currentTarget.focus(); setConfirm(true); }}>삭제</button>
     {!record.hidden || revealed ? <button className={styles.detailLink} aria-label="대화 자세히 보기" onClick={() => { const next = new URLSearchParams(params); next.set('view', 'conversation'); setParams(next, { state: location.state }); }}>자세히 보기<ChevronRight size={13} /></button> : null}
   </footer>;
-  return <Page className={styles.detailPage} title={record ? new Date(record.createdAt).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' }) : '마음 기록'} back={history ? `/records/${id}${params.get('manage') === '1' ? '?manage=1' : ''}` : back} backState={location.state}>
+  return <Page className={styles.detailPage} title={record ? new Date(record.createdAt).toLocaleDateString('ko-KR', { timeZone:'Asia/Seoul', month: 'long', day: 'numeric', weekday: 'long' }) : '마음 기록'} back={history ? `/records/${id}${params.get('manage') === '1' ? '?manage=1' : ''}` : back} backState={location.state}>
     {query.isPending ? <Pending /> : query.isError ? <ErrorState message={query.error.message} retry={query.error instanceof ApiError && query.error.status === 404 ? undefined : () => query.refetch()} /> : record && <>
-      {visibility.isError && <p role="alert" className={s.error}>{visibility.error.message} 다시 눌러주세요.</p>}
+      {visibility.isError && <p role="alert" className={s.error}>{visibility.error.message} 현재 기록 상태를 다시 확인해 주세요.</p>}
       {record.hidden && !revealed ? <section className={styles.recordCard}><h2>가려 둔 기록이에요</h2><button className={s.secondary} onClick={() => setRevealed(true)}>이번에만 내용 보기</button>{cardActions}</section> : history ? <section className={styles.transcript} aria-label="저장된 대화 내용">
-        {record.messages?.length ? record.messages.map(message => <div key={message.id} className={`${chatStyles.message} ${message.role === 'user' ? chatStyles.user : chatStyles.assistant}`}>
+        {conversation.isPending ? <Pending /> : conversation.isError ? <ErrorState message={conversation.error.message} retry={() => conversation.refetch()} /> : conversation.data?.length ? conversation.data.map(message => <div key={message.id} className={`${chatStyles.message} ${message.role === 'user' ? chatStyles.user : chatStyles.assistant}`}>
           {message.role === 'assistant' && <span className={chatStyles.messageAvatar}><Avatar /></span>}<div className={chatStyles.bubble}>{message.text}</div><time className={chatStyles.time}>{message.time}</time>
         </div>) : <p>이 기록에는 대화 원문이 없어요.</p>}
         {record.context.primary && record.context.pre !== null && <EmotionSummary primary={record.context.primary} secondary={record.context.secondary} situation={record.context.slots.OPEN} score={record.context.pre} time={dateLabel(record.createdAt)} />}
       </section> : <>
         <section className={styles.detailSummary} aria-label="기록 요약">
-          <header className={styles.summaryMeta}><span className={styles.recordMeta}><i className={styles.emotionDot} style={{ background: emotionColor(record.context.primary) }} />{record.context.primary ?? '감정 미선택'} <time>{new Date(record.createdAt).toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' })}</time></span>{record.recommended && <span className={styles.recommendTag}>{TOYS[record.recommended].name} 추천</span>}</header>
+          <header className={styles.summaryMeta}><span className={styles.recordMeta}><i className={styles.emotionDot} style={{ background: emotionColor(record.context.primary) }} />{record.context.primary ?? '감정 미선택'} <time>{new Date(record.createdAt).toLocaleTimeString('ko-KR', { timeZone:'Asia/Seoul', hour: 'numeric', minute: '2-digit' })}</time></span>{record.recommended && <span className={styles.recommendTag}>{TOYS[record.recommended].name} 추천</span>}</header>
           <h2 className={styles.recordSummary}>{record.summary}</h2>
           <div className={styles.scoreRows}>{([['상담 전', record.context.pre], ['상담 후', record.context.post]] as const).map(([label, value]) => <div key={label}><span>{label}</span><span className={styles.track}><i style={{ width: `${(value ?? 0) * 10}%` }} /></span><strong>{value === null ? '미입력' : value}</strong></div>)}</div>
           {record.partial && <p className={styles.partialNote}>중간에 보관한 이야기</p>}
@@ -100,7 +117,7 @@ export function RecordDetail() {
           {record.context.slots.ACTION && <p className={styles.recordAction}><Check size={13} /><span>작은 실천 · {record.context.slots.ACTION}</span></p>}
           {cardActions}
         </section>
-        {record.recommended && <section className={styles.usedToy}><h2>당시 추천 말랑이 · {TOYS[record.recommended].name}</h2><Malangi variant={TOYS[record.recommended].tint} artwork={DEFAULT_ARTWORK[record.recommended]} /><PrimaryLink to={`/malangi?type=${record.recommended}`}>말랑이 만나기</PrimaryLink></section>}
+        {record.recommended && <section className={styles.usedToy}><h2>{historicalArtwork ? '당시 추천 말랑이' : '당시 추천 종류'} · {TOYS[record.recommended].name}</h2>{historicalArtwork && <Malangi variant={TOYS[record.recommended].tint} artwork={historicalArtwork} />}<PrimaryLink to={`/?play=${record.recommended}&shape=${readRecordArtwork(user.data!.id,record) ?? DEFAULT_ARTWORK[record.recommended]}`} state={{ toyReturn: { to: location.pathname + location.search, state: location.state } }}>말랑이 만나기</PrimaryLink></section>}
       </>}<Link className={s.secondary} to={back}>{params.get('manage') === '1' ? '기록 관리로' : '마음 보관함으로'}</Link>
     </>}
     {confirm && <Modal title="이 기록을 지울까요?" dismissible={!remove.isPending} onClose={() => { if (!remove.isPending) setConfirm(false); }}><p>이 기록과 대화 내용을 지워요. 삭제한 기록은 되돌릴 수 없어요.</p>{remove.isError && <p className={s.error} role="alert">{remove.error.message}</p>}<div className={s.stack}><button className={`${s.primary} ${s.danger}`} onClick={() => remove.mutate()} disabled={remove.isPending}>{remove.isPending ? '지우고 있어요…' : remove.isError ? '다시 삭제하기' : '기록 지우기'}</button><button className={s.secondary} onClick={() => setConfirm(false)} disabled={remove.isPending}>기록 유지하기</button></div></Modal>}

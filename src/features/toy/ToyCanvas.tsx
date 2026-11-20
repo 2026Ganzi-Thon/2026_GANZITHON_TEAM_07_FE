@@ -4,7 +4,7 @@ import { nextToyWakeAt, stepToy } from './physics';
 import { paintToy } from './paintToy';
 import type { ToyDesign } from './designs';
 import { Malangi } from '../../components/Malangi';
-import { loadToyArtwork } from './toyArtworkLoader';
+import { loadToyArtwork, cachedToyArtwork } from './toyArtworkLoader';
 import { TOY_ARTWORK, isArtwork } from '../../lib/toyArtwork';
 import { createWaxRenderer } from './waxArtworkRenderer';
 import { createArtworkRenderer } from './artworkRenderer';
@@ -23,7 +23,7 @@ export function ToyCanvas({ model, design, subscribe, visible }: { model: ToyMod
     return () => { cancelled = true; };
   }, [design.id]);
   const artwork = isArtwork(design.id) ? TOY_ARTWORK[design.id] : null;
-  const loaded = lamb?.id === design.id ? lamb.image : null;
+  const loaded = lamb?.id === design.id ? lamb.image : isArtwork(design.id) ? cachedToyArtwork(design.id) : null;
   const ready = available && (!artwork || loaded !== null);
   useEffect(() => {
     const element = canvas.current;

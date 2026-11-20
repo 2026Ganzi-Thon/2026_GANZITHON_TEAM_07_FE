@@ -221,5 +221,17 @@
     "source": "PNG embedded in team-provided SVG export '포근한 잠꾸러기 양 스티커 3.svg' (sha256 402a95411171843efdfc4f897ffe240f577a2524299ced0ae3878b3797a25c17, Figma sleep sheep 371x247), 2026-11-18",
     "modified": false,
     "note": "Base64 image bytes decoded unchanged (1536x1024 RGBA). The SVG's warm drop-shadow filter is reproduced in CSS because the 2MB SVG rendered late on first load."
+  },
+  {
+    "file": "login-socrates.png",
+    "sha256": "40c29bcf59753118e41b872489198faf82be7e293110293ec2ad6ba1722fb7a1",
+    "source": "team-provided PNG, login statue replacement 2026-11-20",
+    "modified": false
+  },
+  {
+    "file": "sleep-waves-icon.png",
+    "sha256": "01fcf4e83778216a58ce02ea2a288c59006e746ca25b07c02d6b4316057c842b",
+    "source": "team-provided PNG, wave sound icon 2026-11-20",
+    "modified": false
   }
 ]

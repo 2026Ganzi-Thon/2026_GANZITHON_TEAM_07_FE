@@ -4,10 +4,10 @@ const preview = process.env.QA_SERVER_MODE === 'preview';
 // Own ports so E2E never reuses a developer's `npm run dev` (real mode by default) on 5173.
 const port = preview ? 5183 : 5185;
 const baseURL = `http://127.0.0.1:${port}`;
-// real mode (auth.spec.ts): its own dev server whose /api proxy points at the test-only fake auth backend.
+// Authenticated entry/sleep/counseling use their own dev server and controlled auth backend.
 const realURL = 'http://127.0.0.1:5184';
 const fakeAuth = 'http://127.0.0.1:8099';
-const real = /auth\.spec\.ts/;
+const real = /(?:auth|live-counseling|sleep|entry-edge|mobile-viewport|manual-review)\.spec\.ts/;
 
 export default defineConfig({
   testDir: './tests',

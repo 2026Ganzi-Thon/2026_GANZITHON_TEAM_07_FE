@@ -1,4 +1,6 @@
 .page > div { padding: 14px 24px calc(26px + var(--safe-bottom)); }
+.loadingPage > div { display: flex; flex-direction: column; }
+.loading { flex: 1; display: grid; place-items: center; min-height: 160px; }
 .caption { color: #635c6f; font-size: 12px; line-height: 18px; letter-spacing: -.0039em; margin: 0 0 20px; }
 .tabs { display: flex; padding: 4px; border-radius: 12px; background: #eee9e3; gap: 4px; margin-bottom: 34px; }
 .tabs button { flex: 1; min-width: 0; min-height: 38px; padding: 8px 4px; border-radius: 8px; font-size: 12px; line-height: 18px; background: transparent; color: #635c6f; }

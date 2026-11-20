@@ -43,7 +43,7 @@ export const previewApi = {
 };
 /**
  * Account entry points used by screens. mock: preview demo accounts. real: backend auth, then the profile is
- * bound to the preview store so counseling/records/malangi examples keep working per real account.
+ * bound to the preview store so local toy inventory remains scoped per real account.
  */
 export const accountApi = {
   me: async (): Promise<Profile | null> => {
