@@ -1,4 +1,5 @@
 import type { CustomArtworkId } from '../../lib/toyArtwork';
+import type { ToyType } from '../../lib/domain';
 
 export const INNER_COLORS = [
   { name: '크림 화이트', body: '#f5f0e8', light: '#fffdf8', shade: '#d5cbc0' },
@@ -11,15 +12,24 @@ export interface WaxCrop { mode: 'circle' | 'outline'; zoom: number; x: number; 
 export const DEFAULT_CROP: WaxCrop = { mode: 'circle', zoom: 1, x: 0, y: 0 };
 export interface CustomWax {
   id: CustomArtworkId; source: Blob; image: Blob; crop: WaxCrop; color: number; createdAt: number;
+  toyType?: ToyType;
 }
+// Records written before custom soft toys have no type and remain wax toys.
+export const customToyType = (item: CustomWax): ToyType => item.toyType ?? 'WAKPPU';
 // Store bytes rather than browser-managed Blob file handles (portable to WebKit).
-function restorePhoto(value: unknown): unknown {
+export function restorePhoto(value: unknown): unknown {
   if (!value || typeof value !== 'object') return value;
   const v = value as Record<string,unknown>;
-  return { ...v,
+  const restored = { ...v,
     source: v.source instanceof ArrayBuffer ? new Blob([v.source], { type:'image/png' }) : v.source,
     image: v.image instanceof ArrayBuffer ? new Blob([v.image], { type:'image/png' }) : v.image,
   };
+  // Retired local experiment: retain the already-cut PNG as a transparent source.
+  // This removes point editing without deleting or reshaping a saved toy.
+  if (v.crop && typeof v.crop === 'object' && (v.crop as { mode?:unknown }).mode === 'manual') {
+    return { ...restored, source:restored.image, crop:{ ...DEFAULT_CROP, mode:'outline' } };
+  }
+  return restored;
 }
 export function validCustomWax(value: unknown): value is CustomWax {
   if (!value || typeof value !== 'object') return false;
@@ -29,6 +39,7 @@ export function validCustomWax(value: unknown): value is CustomWax {
     && v.source.type === 'image/png' && v.image.type === 'image/png'
     && v.source.size > 0 && v.source.size <= 6_000_000 && v.image.size > 0 && v.image.size <= 3_000_000
     && Number.isInteger(v.color) && v.color >= 0 && v.color < INNER_COLORS.length
+    && (v.toyType === undefined || ['SLANGI','SQUISHY','WAKPPU'].includes(v.toyType))
     && Number.isFinite(v.createdAt) && !!c && ['circle', 'outline'].includes(c.mode)
     && Number.isFinite(c.zoom) && c.zoom >= 1 && c.zoom <= 2.5
     && Number.isFinite(c.x) && Math.abs(c.x) <= 1 && Number.isFinite(c.y) && Math.abs(c.y) <= 1;
@@ -49,7 +60,12 @@ export async function readCustomWax(): Promise<CustomWax[]> {
   const db = await database();
   return new Promise((resolve, reject) => {
     const tx = db.transaction('wax', 'readonly'); const request = tx.objectStore('wax').getAll();
-    tx.oncomplete = () => { db.close(); resolve((request.result as unknown[]).map(restorePhoto).filter(validCustomWax).sort((a,b) => a.createdAt - b.createdAt).slice(0, MAX_CUSTOM_WAX)); };
+    tx.oncomplete = () => {
+      db.close();
+      const counts: Record<ToyType,number> = { SLANGI:0, SQUISHY:0, WAKPPU:0 };
+      resolve((request.result as unknown[]).map(restorePhoto).filter(validCustomWax)
+        .sort((a,b) => a.createdAt - b.createdAt).filter(item => ++counts[customToyType(item)] <= MAX_CUSTOM_WAX));
+    };
     tx.onabort = tx.onerror = () => { db.close(); reject(tx.error); };
   });
 }
@@ -60,14 +76,15 @@ export async function writeCustomWax(value: CustomWax, replacing?: CustomArtwork
   return new Promise<void>((resolve, reject) => {
     const tx = db.transaction('wax', 'readwrite'), store = tx.objectStore('wax');
     let full = false;
-    const count = store.count();
-    count.onsuccess = () => {
-      const existing = store.get(replacing ?? value.id);
-      existing.onsuccess = () => {
-        if (!existing.result && count.result >= MAX_CUSTOM_WAX) { full = true; tx.abort(); return; }
-        if (replacing) store.delete(replacing);
-        store.put({...value,source,image});
-      };
+    const all = store.getAll();
+    all.onsuccess = () => {
+      const rows = (all.result as unknown[]).map(restorePhoto).filter(validCustomWax);
+      const type = customToyType(value);
+      const existing = rows.find(item => item.id === (replacing ?? value.id));
+      if (existing && customToyType(existing) !== type) { tx.abort(); return; }
+      if (!existing && rows.filter(item => customToyType(item) === type).length >= MAX_CUSTOM_WAX) { full = true; tx.abort(); return; }
+      if (replacing) store.delete(replacing);
+      store.put({...value,toyType:type,source,image});
     };
     tx.oncomplete = () => { db.close(); resolve(); };
     tx.onabort = tx.onerror = () => { db.close(); reject(new Error(full ? '최대 6개까지 만들 수 있어요. 하나를 지우고 다시 만들어 주세요.' : '저장하지 못했어요. 기기 저장 공간과 브라우저 설정을 확인해 주세요.')); };

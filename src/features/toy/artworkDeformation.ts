@@ -1,9 +1,13 @@
 import type { Point } from './designs';
+import { customArtworkType } from '../../lib/toyArtwork';
 
 // Logical coordinates shared by the texture, deformation and alpha hit test.
 export const SHEEP_RECT = { x: 0, y: 45, width: 300, height: 200 };
 export interface ArtworkPose { anchor: Point; pull: Point; depth: number; shape?: string }
 export function artworkMaterial(shape = 'sheep') {
+  const customType = customArtworkType(shape);
+  if (customType === 'SLANGI') shape = 'slime-lavender';
+  if (customType === 'SQUISHY') shape = 'sheep';
   if (shape.startsWith('slime-')) return { radius: 38, stretch: .55, compression: .09, wait: 100, recover: 2600, ease: 13 };
   if (shape === 'pudding-squishy') return { radius: 32, stretch: .22, compression: .08, wait: 50, recover: 1500, ease: 18 };
   if (shape === 'dumpling') return { radius: 29, stretch: .12, compression: .075, wait: 180, recover: 2300, ease: 15 };
