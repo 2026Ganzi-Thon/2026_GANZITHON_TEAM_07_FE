@@ -17,9 +17,19 @@ export function createWaxRenderer(canvas: HTMLCanvasElement, image: HTMLImageEle
   fill.fillStyle = gradient; fill.fillRect(0, 0, texture.width, texture.height);
   const inner = document.createElement('canvas'); inner.width = canvas.width; inner.height = canvas.height;
   const soft = createArtworkRenderer(inner, texture, true, rect)!;
+  // Cloud-only shell tint. Keep the original inner gradient and PNG alpha;
+  // a light overlay preserves the shell's highlights and shaded texture.
+  const cloudShell = design.id === 'wax-cloud' ? document.createElement('canvas') : null;
+  if (cloudShell) {
+    cloudShell.width = image.naturalWidth; cloudShell.height = image.naturalHeight;
+    const ink = cloudShell.getContext('2d')!;
+    ink.drawImage(image, 0, 0); ink.globalCompositeOperation = 'source-atop';
+    ink.fillStyle = 'rgba(102,145,199,.12)'; ink.fillRect(0, 0, cloudShell.width, cloudShell.height);
+  }
+  const shellImage = cloudShell ?? image;
   // Rasterize the full-size PNG once; small chips reuse this screen-sized texture.
   const shell = document.createElement('canvas'); shell.width = 600; shell.height = 580;
-  const shellInk = shell.getContext('2d')!; shellInk.scale(2, 2); shellInk.drawImage(image, rect.x, rect.y, rect.width, rect.height);
+  const shellInk = shell.getContext('2d')!; shellInk.scale(2, 2); shellInk.drawImage(shellImage, rect.x, rect.y, rect.width, rect.height);
   // Lazily cache contacted alpha-clipped chips, so idle selection stays inexpensive.
   function chip(points: Point[]) {
     const center = centroid(points);
@@ -43,11 +53,11 @@ export function createWaxRenderer(canvas: HTMLCanvasElement, image: HTMLImageEle
     soft.draw({ anchor: model.visualAnchor, pull: model.visualPull, depth: model.opacity, shape: design.id });
     ctx.setTransform(canvas.width / 300, 0, 0, canvas.height / 290, 0, 0); ctx.clearRect(0, 0, 300, 290);
     ctx.drawImage(inner, 0, 0, 300, 290);
-    if (!model.cracks) { ctx.drawImage(image, rect.x, rect.y, rect.width, rect.height); return; }
+    if (!model.cracks) { ctx.drawImage(shellImage, rect.x, rect.y, rect.width, rect.height); return; }
     for (const [index, shard] of model.shards.entries()) {
       if (shard.brokenAt === null) {
         ctx.save(); polygon(ctx, shard.polygon); ctx.clip();
-        ctx.drawImage(image, rect.x, rect.y, rect.width, rect.height);
+        ctx.drawImage(shellImage, rect.x, rect.y, rect.width, rect.height);
         ctx.restore();
       } else if (!reduced && (design.id === 'butter' || design.id === 'heart')) {
         const origin = centroid(shard.polygon);
@@ -67,12 +77,12 @@ export function createWaxRenderer(canvas: HTMLCanvasElement, image: HTMLImageEle
         ctx.save(); ctx.globalAlpha = (1 - t) * .9;
         ctx.translate(shard.center.x + (shard.center.x - 150) * t * .12, shard.center.y + t * t * 28);
         ctx.rotate(t * (shard.center.x > 150 ? .4 : -.4)); ctx.scale(1 - t * .35, 1 - t * .35); ctx.translate(-shard.center.x, -shard.center.y);
-        polygon(ctx, shard.polygon); ctx.clip(); ctx.drawImage(image, rect.x, rect.y, rect.width, rect.height); ctx.restore();
+        polygon(ctx, shard.polygon); ctx.clip(); ctx.drawImage(shellImage, rect.x, rect.y, rect.width, rect.height); ctx.restore();
       }
     }
     if (model.shellRestore > 0) {
       ctx.save(); ctx.globalAlpha = model.shellRestore;
-      ctx.drawImage(image, rect.x, rect.y, rect.width, rect.height); ctx.restore();
+      ctx.drawImage(shellImage, rect.x, rect.y, rect.width, rect.height); ctx.restore();
     }
-  }, dispose() { brokenChips.flat().forEach(piece => { piece.tile.width = 0; }); soft.dispose(); texture.width = inner.width = shell.width = 0; } };
+  }, dispose() { brokenChips.flat().forEach(piece => { piece.tile.width = 0; }); soft.dispose(); texture.width = inner.width = shell.width = 0; if (cloudShell) cloudShell.width = 0; } };
 }

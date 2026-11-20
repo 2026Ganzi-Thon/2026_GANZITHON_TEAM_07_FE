@@ -6,6 +6,12 @@ function settle(model: ToyModel, end: number, start = 0) { for (let t = start + 
 const delta = (node: ToyModel['nodes'][number]) => Math.hypot(node.x - node.rest.x, node.y - node.rest.y);
 
 describe('local toy materials', () => {
+  it('keeps heart chips animating until their fade completes, then goes idle', () => {
+    const model = createToyModel('WAKPPU', 'heart'); model.hitTest = () => true;
+    hitShell(model, { x: 150, y: 132 }, 0);
+    expect(stepToy(model, .016, 700)).toBe(true);
+    expect(stepToy(model, .016, 920)).toBe(false);
+  });
   it('deforms the touched side more than the opposite side', () => {
     const model = createToyModel('SLANGI', 'drop');
     pressToy(model, { x: 245, y: 130 }, 0); moveToy(model, { x: 285, y: 130 }); settle(model, 1000);

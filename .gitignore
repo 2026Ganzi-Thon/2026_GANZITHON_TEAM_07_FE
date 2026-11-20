@@ -23,6 +23,11 @@ coverage/
 .DS_Store
 Thumbs.db
 *.log
+.android-build/
+*.apk
+*.aab
+*.keystore
+*.jks
 test-results/
 playwright-report/
 /artifacts/

@@ -107,9 +107,12 @@ export function configureShell(model: ToyModel, hitTest: (point: Point) => boole
     const shard = model.shards.find(value => pointInPolygon(value.polygon, point));
     if (shard) coverage.set(shard, (coverage.get(shard) ?? 0) + 1);
   }
-  // 12 samples ~= 108 logical square pixels. Rebuilding the partition covers
-  // the entire PNG; no tiny piece disappears when a distant cell is touched.
-  const centers = model.shards.filter(shard => (coverage.get(shard) ?? 0) >= 12).map(shard => shard.center);
+  // The heart's upper rim clips two cells into 9–11px-high slivers. Absorb them
+  // into adjacent cells before interaction; other shapes retain their partition.
+  // Each sample covers ~9 logical square pixels. Retessellation still covers
+  // the full PNG; taps never redirect to a different, unbroken cell.
+  const minimumSamples = model.shape === 'heart' ? 48 : 12;
+  const centers = model.shards.filter(shard => (coverage.get(shard) ?? 0) >= minimumSamples).map(shard => shard.center);
   model.shards = shards(centers);
   model.revision++;
 }
@@ -215,7 +218,7 @@ export function stepToy(model: ToyModel, elapsed: number, now: number, reducedMo
     if (Math.abs(tx - node.x) + Math.abs(ty - node.y) + Math.abs(node.vx) + Math.abs(node.vy) > .035) moving = true;
     else { node.x = tx; node.y = ty; node.vx = 0; node.vy = 0; }
   }
-  const fragmentMoving = model.shards.some(shard => shard.brokenAt !== null && now - shard.brokenAt < (model.shape === 'butter' ? 900 : 650)) && !reducedMotion;
+  const fragmentMoving = model.shards.some(shard => shard.brokenAt !== null && now - shard.brokenAt < (model.shape === 'butter' || model.shape === 'heart' ? 900 : 650)) && !reducedMotion;
   const deepening = !!model.pointer && model.depth < .9 && !solid;
   return moving || fragmentMoving || deepening || (progress > 0 && progress < 1 && !reducedMotion) || (restoreProgress > 0 && restoreProgress < 1 && !reducedMotion);
 }

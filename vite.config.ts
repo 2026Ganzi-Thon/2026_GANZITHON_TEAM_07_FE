@@ -15,6 +15,12 @@ export default defineConfig(({ mode }) => {
   };
   return {
     plugins: [react()],
+    // APK bundles local UI; its API requests still use the existing production proxy.
+    // Keep ordinary web builds and their same-origin /api contract unchanged.
+    ...(mode === 'android' ? { define: {
+      'import.meta.env.VITE_API_MODE': JSON.stringify('real'),
+      'import.meta.env.VITE_API_BASE_URL': JSON.stringify(env.VITE_API_BASE_URL || 'https://teslang-xi.vercel.app'),
+    } } : {}),
     server: { proxy: { '/api': api } },
     preview: { proxy: { '/api': api } },
     test: { include: ['src/**/*.test.ts'] },
