@@ -1,3 +1,4 @@
+import { isCustomArtwork } from '../../lib/toyArtwork';
 import { createArtworkRenderer } from './artworkRenderer';
 import { centroid, splitWaxCell, waxChipPose } from './waxFragments';
 import type { ToyModel } from './physics';
@@ -46,7 +47,7 @@ export function createWaxRenderer(canvas: HTMLCanvasElement, image: HTMLImageEle
   let chipSource: ToyModel['shards'] | null = null;
   let brokenChips: ReturnType<typeof chip>[][] = [];
   return { kind: 'canvas' as const, draw(model: ToyModel, now: number, reduced: boolean) {
-    if ((design.id === 'butter' || design.id === 'heart') && chipSource !== model.shards) {
+    if ((design.id === 'butter' || design.id === 'heart' || isCustomArtwork(design.id)) && chipSource !== model.shards) {
       brokenChips.forEach(pieces => pieces.forEach(piece => { piece.tile.width = 0; }));
       brokenChips = model.shards.map(() => []); chipSource = model.shards;
     }
@@ -59,7 +60,7 @@ export function createWaxRenderer(canvas: HTMLCanvasElement, image: HTMLImageEle
         ctx.save(); polygon(ctx, shard.polygon); ctx.clip();
         ctx.drawImage(shellImage, rect.x, rect.y, rect.width, rect.height);
         ctx.restore();
-      } else if (!reduced && (design.id === 'butter' || design.id === 'heart')) {
+      } else if (!reduced && (design.id === 'butter' || design.id === 'heart' || isCustomArtwork(design.id))) {
         const origin = centroid(shard.polygon);
         if (!brokenChips[index].length) brokenChips[index] = splitWaxCell(shard.polygon).map(points => chip(points));
         brokenChips[index].forEach((piece, i) => {

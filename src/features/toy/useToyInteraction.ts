@@ -1,8 +1,8 @@
+import { TOY_DESIGNS } from './designs';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, PointerEvent } from 'react';
 import type { ToyType } from '../../lib/domain';
 import { useToyPreferences } from './ToyPreferences';
-import { TOY_DESIGNS } from './designs';
 import { clearToy, configureShell, containsToyPoint, createToyModel, hasShell, hasSoftContact, moveToy, pressToy, releaseToy } from './physics';
 import { hitsArtwork, loadToyArtwork } from './toyArtworkLoader';
 import { isArtwork } from '../../lib/toyArtwork';
@@ -10,8 +10,8 @@ import { artworkMaterial } from './artworkDeformation';
 
 /** Shared input ownership; animation runs in the canvas, outside React rendering. */
 export function useToyInteraction(active: ToyType) {
-  const { designs, audio } = useToyPreferences();
-  const design = TOY_DESIGNS[active].find(value => value.id === designs[active])!;
+  const { designs, audio, options } = useToyPreferences();
+  const design = options(active).find(value => value.id === designs[active]) ?? TOY_DESIGNS[active][0];
   const model = useMemo(() => {
     const next = createToyModel(active, design.id), id = design.id;
     if (isArtwork(id)) next.hitTest = point => {

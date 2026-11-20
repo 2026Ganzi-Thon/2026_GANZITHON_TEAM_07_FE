@@ -14,5 +14,23 @@ export const TOY_ARTWORK = {
   'wax-cloud': { src: `${root}wax-cloud.png`, rect: { x: .194, y: 45.771, width: 297.674, height: 198.450 } },
 } satisfies Record<string, { src: string; rect: ArtworkRect }>;
 export type ArtworkId = keyof typeof TOY_ARTWORK;
-export const isArtwork = (id: string): id is ArtworkId => Object.hasOwn(TOY_ARTWORK, id);
+export type CustomArtworkId = `custom-${string}`;
+export type ArtworkKey = ArtworkId | CustomArtworkId;
+type Artwork = { src: string; rect: ArtworkRect };
+const customArtwork = new Map<CustomArtworkId, Artwork>();
+export const isCustomArtwork = (id: string): id is CustomArtworkId => id.startsWith('custom-');
+export const isArtwork = (id: string): id is ArtworkKey => Object.hasOwn(TOY_ARTWORK, id) || customArtwork.has(id as CustomArtworkId);
+export const getArtwork = (id: ArtworkKey): Artwork => {
+  if (isCustomArtwork(id)) {
+    const value = customArtwork.get(id);
+    if (!value) throw new Error('Custom artwork unavailable');
+    return value;
+  }
+  return TOY_ARTWORK[id];
+};
+export function registerCustomArtwork(id: CustomArtworkId, src: string) {
+  customArtwork.set(id, { src, rect: { x: 30, y: 25, width: 240, height: 240 } });
+}
+export function unregisterCustomArtwork(id: CustomArtworkId) { customArtwork.delete(id); }
+
 export const DEFAULT_ARTWORK: Record<ToyType, ArtworkId> = { SLANGI: 'slime-lavender', SQUISHY: 'sheep', WAKPPU: 'butter' };
