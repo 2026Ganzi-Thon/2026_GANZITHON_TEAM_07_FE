@@ -1,5 +1,16 @@
 # 프론트엔드 QA 기록
 
+## Vercel 운영 배포 — 2026-11-20
+
+- 대상: https://teslang-xi.vercel.app, main `5688d8b` / PR #16, Vercel 배포 READY. 실제 Node 24.x 클라우드 빌드 완료.
+- 비로그인 HTTP 확인: /, /login, /archive 200 HTML, mockServiceWorker.js 200 JavaScript, /api/v1/auth/me 401 JSON + Cache-Control no-store. 같은 출처 Origin을 보낸 요청도 프록시 처리되어 Railway CORS 403이 발생하지 않았다.
+- 기존 전용 QA 계정으로 실제 이메일 로그인 200, 새로고침 refresh/me 200, 상담 시작 201, 감정 선택/후속 메시지/종료 요청/완료 200 확인. 사용자 개인 계정이나 실제 상담 내용은 사용하지 않았다.
+- 결과 ID 11을 생성하고 결과 화면 → 저장된 기록 → 새로고침 → 저장된 대화 본문 재조회를 확인했다. 테스트 기록은 전용 QA 계정에만 남겼다. 자격증명/토큰/원문 응답은 Git에 포함하지 않았다.
+- 첫 종합 검사에서 이후 보관함 직접 진입이 한 번 30초 로딩 상태로 시간 초과했다. 이를 전체 통과로 처리하지 않았다. 후속 Chromium 및 WebKit에서 각각 로그인 → 기록 상세/보관함 왕복 4회 및 각 경로 새로고침 4회를 검사해 모두 통과했고, 이 과정의 인증/기록 API는 모두 200이었다. 최초 지연 원인은 확정하지 못했고 후속 검사에서 재현되지 않았다.
+- 실제 물리 휴대폰 마이크/음원 청취/QR 진입 검사는 미실행. WebKit 자동화는 iPhone 실기기 검사를 대신하지 않는다.
+- GitHub 자동 배포는 Vercel GitHub App 설치가 없어 미연결 상태다. 직접 Production 배포 성공과 자동 배포 검증을 구분한다.
+
+
 ## Vercel 로컬 배포 설정 — 2026-11-20
 
 - Node v24.15.0에서 TypeScript/Vite real 빌드 및 단위 테스트 158개/19파일 통과. package/lock의 Node 24.x 일치 확인. 기존 번들 해시 유지.

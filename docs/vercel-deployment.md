@@ -1,6 +1,15 @@
-# Vercel 배포 준비 — 2026-11-20
+# Vercel 배포 — 2026-11-20
 
-현재는 로컬 준비 단계다. Vercel 프로젝트·GitHub 자동 배포 연결·원격 배포는 아직 없다. 기존 UI/음성/기록 수정은 보존했고 백엔드는 변경하지 않았다.
+## 현재 배포 상태
+
+- 운영 주소: https://teslang-xi.vercel.app
+- Vercel 프로젝트: `chosm0204/teslang`, Node 24.x / Vite / npm ci / npm run build / dist.
+- PR #16 병합 커밋 `5688d8b`를 CLI로 Production 배포했다. 배포 ID: `dpl_5ErpUsLxMvSV9Er2VXvdcKTxnmqK` (READY).
+- 계정 로그인 없이 운영 주소에 접속할 수 있다. 앱의 이메일 로그인은 별도로 필요하다.
+- **GitHub 자동 배포는 아직 미연결:** Vercel API가 GitHub App 설치 필요(400)를 반환했다. 조직의 해당 저장소에 Vercel 앱 설치 후 저장소 연결과 Production Branch `main` 설정이 필요하다. 현재 main에 push만 해서는 배포가 갱신되지 않는다.
+- 기존 UI/음성/기록 수정은 보존했고 백엔드 코드는 변경하지 않았다.
+
+아래 로컬 준비 QA는 배포 전 검사 이력이다. 실제 배포 검사는 docs/qa.md의 운영 배포 항목을 따른다.
 
 ## 저장소 설정
 
@@ -17,10 +26,10 @@ Origin 변환과 API → 정적 파일 → SPA 순서를 한 곳에서 명시하
 ## 프로젝트를 만들 때
 
 1. 이 프론트엔드 GitHub 저장소를 Import하고 저장소 루트를 Root Directory로 선택한다.
-2. Production Branch는 `main`, Node는 24.x로 확인한다. 아직 로컬에만 있는 변경은 먼저 검토·반영해야 배포 코드에 포함된다.
+2. Production Branch는 `main`, Node는 24.x로 확인한다. 후속 변경도 main에 반영돼야 자동 배포 코드에 포함된다.
 3. `VITE_API_MODE=real`(기본값이므로 생략 가능). `VITE_API_BASE_URL`은 **비우거나 생략**한다. Railway URL을 넣으면 프록시를 우회해 CORS 오류가 다시 발생한다.
 4. `VITE_API_PROXY_TARGET`은 Vite 로컬 dev/preview 전용이며 Vercel 목적지는 `vercel.json`에서 관리한다. 백엔드 토큰·Claude 키 등 비밀값을 `VITE_*`에 넣지 않는다.
-5. Git 연결 후 main 변경은 Production 자동 배포 대상이다. 이번 작업에서는 연결/커밋/PR/배포를 하지 않았다.
+5. Git 연결 후 main 변경은 Production 자동 배포 대상이다. 최초 배포는 CLI로 완료했으며 GitHub App 설치와 Git 연결은 위 현재 상태를 따른다.
 
 ## 검증과 남은 확인
 
@@ -31,7 +40,7 @@ Origin 변환과 API → 정적 파일 → SPA 순서를 한 곳에서 명시하
 - Chromium/WebKit 인증 회귀 8/8 통과. 가입·새로고침 유지·토큰 갱신/만료·스플래시·뒤로가기·Origin 제거를 확인했다. 가짜 계약 서버와 실제 빌드 프론트를 사용하며 Vercel 클라우드 실행 결과와 구분한다.
 - 로컬 QA 도구는 Git 제외 `artifacts/vercel-{local-server,http-qa,routing.config}.cjs`에 있다. 검증용 패키지는 별도 tooling 디렉터리에 설치했고 앱 의존성에는 추가하지 않았다.
 
-첫 배포 후 실제 HTTPS 주소에서 API 응답/캐시 헤더, 로그인 유지·새로고침·뒤로가기, 상담 완료·기록 조회, 모바일 Safari/갤럭시의 마이크 권한·음원 재생을 확인해야 한다. 로컬 검증만으로 실제 Vercel 프록시나 모바일 음성 성공을 확정하지 않는다.
+실제 HTTPS 배포에서 API 프록시·로그인·새로고침 유지·상담 완료·기록 재조회를 검사했다. 물리 휴대폰의 마이크 권한·음원 청취·QR 진입은 별도 확인이 필요하다. 데스크톱 WebKit 검사를 실제 iPhone Safari 검사로 간주하지 않는다.
 
 ## 공식 근거
 

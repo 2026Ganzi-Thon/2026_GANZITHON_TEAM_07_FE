@@ -1,8 +1,12 @@
 # 프론트엔드 인수인계
 
-## Vercel 준비 — 2026-11-20 최신
+## 운영 배포 — 2026-11-20 최신
 
-Node 24.x와 Vercel의 API 프록시·SPA 새로고침 경로를 추가했다. API_BASE_URL은 빈 값으로 유지하며 API 캐시를 금지한다. 기존 화면/음성/기록 작업은 보존했다. 빌드·단위 158개·로컬 HTTP 32항목·Chromium/WebKit 인증 8개 통과. 아직 Vercel 프로젝트나 Git 자동 배포 연결은 없다. PR/배포 없이 로컬 검토 단계이며 [준비 문서](vercel-deployment.md)에 최초 연결 설정과 실제 배포 후 검증 항목을 정리했다.
+운영 주소는 https://teslang-xi.vercel.app 이다. PR #16을 main에 병합하고 `5688d8b`를 Vercel `chosm0204/teslang`에 Production 배포했다. Node 24.x·API 프록시·SPA 직접 경로를 적용했으며 백엔드 코드는 변경하지 않았다. 실제 이메일 로그인·상담 완료·기록 저장/재조회가 동작한다.
+
+**GitHub 자동 배포는 아직 미연결이다.** 조직 저장소에 Vercel GitHub App 설치가 필요하며, 설치 후 저장소 연결과 Production Branch main 확인을 해야 한다. 그 전에는 main push만으로 운영 화면이 바뀌지 않는다. [배포 설정과 상태](vercel-deployment.md), [검증 기록](qa.md).
+
+아래 각 작업의 “PR/배포 없이 로컬 검토” 문구는 당시의 이력이며, 현재 배포 상태는 이 항목을 우선한다.
 
 ## 전사문 확인 후 전송·추천 모양 보존·모바일 보완 — 2026-11-20 최신
 
