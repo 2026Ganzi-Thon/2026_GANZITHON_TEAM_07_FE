@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowRight, Check, Plus } from 'lucide-react';
 import { SAMPLE_EMOTIONS } from './model';
+import { EmotionIcon } from '../records/EmotionIcon';
 import styles from './Chat.module.css';
 
 export function EmotionCard({ onSubmit, primaryOptions = SAMPLE_EMOTIONS, secondaryOptions = SAMPLE_EMOTIONS }: { primaryOptions?: string[]; secondaryOptions?: string[]; onSubmit: (primary: string, secondary: string | null) => void }) {
@@ -10,7 +11,7 @@ export function EmotionCard({ onSubmit, primaryOptions = SAMPLE_EMOTIONS, second
   return <section className={styles.inputCard} aria-label="감정 선택">
     <span className={styles.cardEyebrow}>CHECK IN · 01</span><h2>가장 가까운 마음을 골라주세요</h2><p className={styles.cardDescription}>대표 감정 하나면 충분해요.</p>
     <div className={styles.emotions} role="group" aria-label="대표 감정">
-      {primaryOptions.map((emotion, i) => <button key={emotion} aria-pressed={primary === emotion} onClick={() => { setPrimary(emotion); if (secondary === emotion) setSecondary(null); }} className={primary === emotion ? styles.selectedEmotion : ''}><span className={styles.emotionMark} aria-hidden="true">{['◌', '⌁', '☂', '✳', '≋', '☁'][i]}</span>{emotion}{primary === emotion && <Check size={13} />}</button>)}
+      {primaryOptions.map(emotion => <button key={emotion} aria-pressed={primary === emotion} onClick={() => { setPrimary(emotion); if (secondary === emotion) setSecondary(null); }} className={primary === emotion ? styles.selectedEmotion : ''}><span className={styles.emotionArtwork}><EmotionIcon emotion={emotion} /></span>{emotion}{primary === emotion && <Check size={13} />}</button>)}
     </div>
     <button className={styles.expandSecondary} onClick={() => { setExpanded(!expanded); if (expanded) setSecondary(null); }} aria-expanded={expanded}><Plus size={13} />함께 느낀 감정도 있어요 <span>선택</span></button>
     {expanded && <div className={styles.secondaryOptions} role="group" aria-label="부가 감정"><p>있다면 하나 더 골라주세요.</p>{secondaryOptions.filter(e => e !== primary).map(emotion => <button key={emotion} aria-pressed={secondary === emotion} onClick={() => setSecondary(secondary === emotion ? null : emotion)}>{emotion}{secondary === emotion && <Check size={12} />}</button>)}</div>}
