@@ -1,5 +1,12 @@
 # 프론트엔드 QA 기록
 
+## 감정 아이콘·왁뿌볼 운영 회귀 — 2026-11-20
+
+- PR #17 / main `8f2d6ae`를 기존 Vercel Production에 배포(READY). 운영 JS/CSS 바이트가 로컬 검증 빌드와 일치.
+- 기존 전용 QA 계정의 실제 로그인·인증 유지·상담/감정 선택·완료·결과 18 저장·기록/대화 본문 재조회 통과. API 200/201, 페이지 오류 0.
+- 운영 Chromium/WebKit 390px에서 하트 7셀·구름 9셀 반복 누름, 전체 파괴→드래그→복원, 기록 상세 새로고침·보관함 이동 통과.
+- /, /login, /archive 200, 무인증 API 401 JSON/no-store. 실물 휴대폰·음원 청취 검사는 이번 범위 밖이며 APK는 웹 변경과 분리했다. [상세](emotion-wax-web-release.md).
+
 ## 감정 아이콘·왁뿌볼 웹 반영 준비 — 2026-11-20
 
 - 원격 main `56c9396`에서 분리한 `fix/emotion-wax-web`에 웹 변경 6개 소스 파일만 반영했다. package/lock/Vite/tsconfig/Vercel 설정은 main과 동일하며 APK 프로젝트·의존성·전용 주소는 미포함.
