@@ -230,3 +230,8 @@ real 상담·기록 연결은 [연동 현황](backend-integration-plan-2026-11-2
 ## 사진 커스텀 왁뿌볼 웹 반영 완료
 
 PR #18을 main에 병합하고 063f3fe를 기존 Vercel 운영 주소에 배포했다. [배포 및 운영 확인 결과](custom-wax-web-release.md). APK는 별도 유지. 아래 준비 시점의 미반영 설명과 구분한다.
+
+
+## 사진 말랑이 3종 — 로컬 후속
+
+`feature/custom-soft-toys`에서 슬랑이·스퀴시에도 사진 커스텀 연결. 사용자 후속 요청으로 세 종류 모두 직접 윤곽 지정은 제거했고 둥근 형태/투명 사진 윤곽만 제공한다. 기존 왁뿌볼 및 실험 중 만든 사진 보존, 종류별 목록/선택/재질 분리. [구현 및 QA](custom-soft-toys-and-outline.md). 웹 배포·main·APK는 변경하지 않았다.

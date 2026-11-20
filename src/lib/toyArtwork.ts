@@ -16,7 +16,7 @@ export const TOY_ARTWORK = {
 export type ArtworkId = keyof typeof TOY_ARTWORK;
 export type CustomArtworkId = `custom-${string}`;
 export type ArtworkKey = ArtworkId | CustomArtworkId;
-type Artwork = { src: string; rect: ArtworkRect };
+type Artwork = { src: string; rect: ArtworkRect; toyType?: ToyType };
 const customArtwork = new Map<CustomArtworkId, Artwork>();
 export const isCustomArtwork = (id: string): id is CustomArtworkId => id.startsWith('custom-');
 export const isArtwork = (id: string): id is ArtworkKey => Object.hasOwn(TOY_ARTWORK, id) || customArtwork.has(id as CustomArtworkId);
@@ -28,8 +28,9 @@ export const getArtwork = (id: ArtworkKey): Artwork => {
   }
   return TOY_ARTWORK[id];
 };
-export function registerCustomArtwork(id: CustomArtworkId, src: string) {
-  customArtwork.set(id, { src, rect: { x: 30, y: 25, width: 240, height: 240 } });
+export const customArtworkType = (id: string) => customArtwork.get(id as CustomArtworkId)?.toyType;
+export function registerCustomArtwork(id: CustomArtworkId, src: string, toyType: ToyType = 'WAKPPU') {
+  customArtwork.set(id, { src, toyType, rect: { x: 30, y: 25, width: 240, height: 240 } });
 }
 export function unregisterCustomArtwork(id: CustomArtworkId) { customArtwork.delete(id); }
 
