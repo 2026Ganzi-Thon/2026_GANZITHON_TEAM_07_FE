@@ -681,3 +681,7 @@ npm run test:e2e
 ## 사진 커스텀 3종 운영 확인 — 2026-11-20
 
 PR #19 / main 39515a4 운영 배포 완료. Chromium/WebKit에서 실제 로그인, 세 종류 사진 생성·재질 조작·새로고침·수정·삭제 및 채팅 진입/보관함/기존 기록 조회 통과. 사진 업로드 요청·JS 오류 없음. 배포 JS/CSS 해시 일치. WebKit 파일 경로 주입 첫 시도에서 PNG 해독 실패, 바이트 직접 전달 재검사 전체 통과. 실제 휴대폰·새 상담 저장·음성 전사 검증은 아님. 상세: [배포 결과](custom-soft-web-release.md).
+
+## APK 1.0.2 최신 사진 커스텀 통합
+
+앱 브랜치 5051dd8 기준 Android 빌드·Capacitor sync·Gradle assembleDebug 성공. 단위 테스트 167개 통과. APK v2 서명 및 이전 버전 인증서 일치, 87개 웹 자산/dist 일치, 버전·앱 이름·ZIP·비밀 파일 제외 확인. 실제 기기 연결 없어 설치 실행 검증은 별도. [빌드 기록](android-apk-spike.md).

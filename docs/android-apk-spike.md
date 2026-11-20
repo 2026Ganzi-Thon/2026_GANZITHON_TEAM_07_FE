@@ -2,7 +2,7 @@
 
 ## 1.0.2 최신 소스 반영
 
-main `39515a4`의 사진 커스텀 3종을 앱 브랜치에 통합. 앱 이름·아이콘·식별자 유지, versionCode 3 / versionName 1.0.2. 직접 윤곽 지정 없이 둥근 형태·투명 사진 윤곽만 제공. 설치 파일 빌드·서명 검증 진행 중이며 완료 결과는 후속 기록. APK 브랜치는 main에 병합하지 않음.
+main `39515a4`의 사진 커스텀 3종을 앱 브랜치에 통합. 앱 이름·아이콘·식별자 유지, versionCode 3 / versionName 1.0.2. 직접 윤곽 지정 없이 둥근 형태·투명 사진 윤곽만 제공. 설치 파일 빌드·서명·패키지 검증 완료. APK 브랜치는 main에 병합하지 않음.
 
 
 ## 소스 보관 범위
@@ -10,6 +10,19 @@ main `39515a4`의 사진 커스텀 3종을 앱 브랜치에 통합. 앱 이름·
 사용자 승인에 따라 `spike/android-apk` 브랜치만 원격에 보관한다. main 병합·PR 생성·웹 재배포는 하지 않는다. 설치 파일 APK/AAB, 서명키, 환경변수, local.properties, 빌드 캐시와 QA 산출물은 업로드하지 않는다. 소스·앱 이름/아이콘·Gradle Wrapper·재빌드 스크립트를 포함한다. 아래 로컬 작업/원격 미변경 설명은 각 빌드 당시의 기록이다.
 
 APK에 포함된 웹 수정은 별도로 PR #17에서 웹 main에 반영됐다. 이 브랜치는 `56c9396` 기반의 독립 APK 실험이며 웹 main으로 병합하기 위한 브랜치가 아니다.
+
+## 1.0.2 설치 파일 검증 결과
+
+- 소스: `5051dd8`, 앱 브랜치 `spike/android-apk`. main으로 병합하지 않음.
+- Android TypeScript/Vite 빌드, Capacitor sync, Gradle assembleDebug 성공. 단위 테스트 20파일/167개 통과.
+- APK: `artifacts/teslang-1.0.2.apk`, 45,846,758 bytes (43.72 MiB).
+- SHA256: `9a3c6c0f859b8c114e1b15a4af089277393dcf4efa9f9e2025c431ab0d1bd2ae`.
+- 앱 이름 `테슬랑`, `com.teslang.preview`, versionCode 3 / versionName 1.0.2, Android API 24 이상.
+- v2 서명 검증 및 이전 1.0.1과 인증서 일치 확인. 동일 서명 직접 설치용 debug APK이며 스토어 배포용 빌드가 아님.
+- 포함 웹 자산 87개와 dist 바이트 일치, 소스·자산·아이콘 235개와 빌드 입력 일치, ZIP 무결성, 비밀 파일 미포함, native 로그 비활성화 확인.
+- 패키지 설치가 지연되어 중단 후 기존 빌드 디렉터리를 재사용. package-lock SHA256 동일 확인 후 최신 소스를 복사해 빌드. E 드라이브 junction 미지원 시도는 실패했고 최종 빌드에는 사용하지 않음.
+- 실제 Android 기기가 연결되어 있지 않아 설치/업데이트·로그인·사진 선택·음성은 실기기 미검증. 웹 운영 Chromium/WebKit 검증과 구분.
+- 배포 태그 `android-v1.0.2`. APK는 Git 소스에 넣지 않고 GitHub Release 첨부 파일로 관리.
 
 ## 1.0.1 후속 구성
 
