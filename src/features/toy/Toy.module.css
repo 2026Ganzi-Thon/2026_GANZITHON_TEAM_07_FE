@@ -54,3 +54,9 @@
 .routeSurface { width: min(100%,360px); }
 @media(max-height:600px) { .center { padding-bottom: 136px; }.routeSurface { width: min(100%,240px); } }
 @media(max-height:450px) and (min-width:600px) { .center { margin-right: 34%; padding-bottom: 40px; } }
+
+.designPicker[data-custom=true] > div { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.designPicker[data-custom=true] > div > button:last-child > svg { width: 24px; height: 70px; margin: auto; }
+
+.designPicker[data-custom=true] > div > button:last-child { position: relative; }
+.designPicker[data-custom=true] > div > button:last-child[aria-pressed=true]::after { content: '+'; position: absolute; bottom: 3px; right: 3px; width: 20px; height: 20px; display: grid; place-items: center; background: #fff9f2e6; color: #7b7166; border-radius: 50%; font-size: 16px; }
