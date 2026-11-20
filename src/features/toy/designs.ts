@@ -1,7 +1,7 @@
-import type { ArtworkId } from '../../lib/toyArtwork';
+import type { ArtworkKey } from '../../lib/toyArtwork';
 import type { ToyType } from '../../lib/domain';
 
-export type Shape = ArtworkId | 'sheep' | 'drop' | 'pudding' | 'cloud' | 'mochi' | 'toast' | 'star' | 'pearl' | 'heart' | 'gem';
+export type Shape = ArtworkKey | 'sheep' | 'drop' | 'pudding' | 'cloud' | 'mochi' | 'toast' | 'star' | 'pearl' | 'heart' | 'gem';
 export interface ToyDesign { id: Shape; label: string; light: string; body: string; shade: string; wax: string }
 const design = (id: Shape, label: string, body: string, shade: string): ToyDesign => ({ id, label, body, shade, light: '#fffaf5', wax: body });
 export const TOY_DESIGNS: Record<ToyType, readonly ToyDesign[]> = {

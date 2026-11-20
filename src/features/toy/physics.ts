@@ -1,4 +1,4 @@
-import { isArtwork } from '../../lib/toyArtwork';
+import { isArtwork, isCustomArtwork } from '../../lib/toyArtwork';
 import { artworkMaterial, artworkRecovery } from './artworkDeformation';
 import type { ToyType } from '../../lib/domain';
 import { CENTER, outline } from './designs';
@@ -111,9 +111,13 @@ export function configureShell(model: ToyModel, hitTest: (point: Point) => boole
   // into adjacent cells before interaction; other shapes retain their partition.
   // Each sample covers ~9 logical square pixels. Retessellation still covers
   // the full PNG; taps never redirect to a different, unbroken cell.
-  const minimumSamples = model.shape === 'heart' ? 48 : 12;
+  const minimumSamples = model.shape === 'heart' || isCustomArtwork(model.shape) ? 48 : 12;
   const centers = model.shards.filter(shard => (coverage.get(shard) ?? 0) >= minimumSamples).map(shard => shard.center);
-  model.shards = shards(centers);
+  const previousCount = model.shards.length;
+  model.shards = shards(centers.length || !isCustomArtwork(model.shape) ? centers : [
+    [...coverage.entries()].sort((a,b) => b[1] - a[1])[0]?.[0].center ?? CENTER,
+  ]);
+  if (isCustomArtwork(model.shape) && model.shards.length > 1 && model.shards.length < previousCount) configureShell(model, hitTest);
   model.revision++;
 }
 export const hasSoftContact = (model: ToyModel) => model.type !== 'WAKPPU' || model.waxMode === 'break' && !hasShell(model);
@@ -218,7 +222,7 @@ export function stepToy(model: ToyModel, elapsed: number, now: number, reducedMo
     if (Math.abs(tx - node.x) + Math.abs(ty - node.y) + Math.abs(node.vx) + Math.abs(node.vy) > .035) moving = true;
     else { node.x = tx; node.y = ty; node.vx = 0; node.vy = 0; }
   }
-  const fragmentMoving = model.shards.some(shard => shard.brokenAt !== null && now - shard.brokenAt < (model.shape === 'butter' || model.shape === 'heart' ? 900 : 650)) && !reducedMotion;
+  const fragmentMoving = model.shards.some(shard => shard.brokenAt !== null && now - shard.brokenAt < (model.shape === 'butter' || model.shape === 'heart' || isCustomArtwork(model.shape) ? 900 : 650)) && !reducedMotion;
   const deepening = !!model.pointer && model.depth < .9 && !solid;
   return moving || fragmentMoving || deepening || (progress > 0 && progress < 1 && !reducedMotion) || (restoreProgress > 0 && restoreProgress < 1 && !reducedMotion);
 }

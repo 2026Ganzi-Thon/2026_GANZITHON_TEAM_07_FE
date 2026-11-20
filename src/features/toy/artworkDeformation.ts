@@ -7,7 +7,7 @@ export function artworkMaterial(shape = 'sheep') {
   if (shape.startsWith('slime-')) return { radius: 38, stretch: .55, compression: .09, wait: 100, recover: 2600, ease: 13 };
   if (shape === 'pudding-squishy') return { radius: 32, stretch: .22, compression: .08, wait: 50, recover: 1500, ease: 18 };
   if (shape === 'dumpling') return { radius: 29, stretch: .12, compression: .075, wait: 180, recover: 2300, ease: 15 };
-  if (['butter', 'heart', 'wax-cloud'].includes(shape)) return { radius: 31, stretch: .19, compression: .08, wait: 80, recover: 1700, ease: 20 };
+  if (shape.startsWith('custom-') || ['butter', 'heart', 'wax-cloud'].includes(shape)) return { radius: 31, stretch: .19, compression: .08, wait: 80, recover: 1700, ease: 20 };
   return { radius: 30, stretch: .17, compression: .075, wait: 90, recover: 1800, ease: 18 };
 }
 

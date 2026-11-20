@@ -1,21 +1,26 @@
 import { createContext, useContext, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type { ReactNode } from 'react';
-import { Volume2, VolumeX } from 'lucide-react';
-import { IconButton } from '../../components/ui';
+import { Volume2, VolumeX, Plus } from 'lucide-react';
+import { IconButton, Modal } from '../../components/ui';
 import type { ToyType } from '../../lib/domain';
 import { TactileAudio } from './audio';
-import { TOY_ARTWORK, DEFAULT_ARTWORK, isArtwork } from '../../lib/toyArtwork';
+import { TOY_ARTWORK, DEFAULT_ARTWORK, isArtwork, isCustomArtwork, getArtwork } from '../../lib/toyArtwork';
 import { loadToyArtwork } from './toyArtworkLoader';
 import type { ArtworkId } from '../../lib/toyArtwork';
 import { TOY_DESIGNS, outline, outlinePath } from './designs';
 import type { Shape } from './designs';
 import styles from './Toy.module.css';
+import { useCustomWax } from './useCustomWax';
+import { CustomWaxSheet } from './CustomWaxSheet';
+import type { ToyDesign } from './designs';
 
-interface Preferences { audio: TactileAudio; designs: Record<ToyType, Shape>; choose: (type: ToyType, shape: Shape) => void }
+interface Preferences { custom: ReturnType<typeof useCustomWax>; options: (type: ToyType) => readonly ToyDesign[]; audio: TactileAudio; designs: Record<ToyType, Shape>; choose: (type: ToyType, shape: Shape) => void }
 const PreferencesContext = createContext<Preferences | null>(null);
 export function ToyPreferencesProvider({ children }: { children: ReactNode }) {
   const [audio] = useState(() => new TactileAudio());
   const lifetime = useRef(0);
+  const custom = useCustomWax();
+  const options = (type: ToyType) => type === 'WAKPPU' ? [...TOY_DESIGNS.WAKPPU, ...custom.designs] : TOY_DESIGNS[type];
   useEffect(() => {
     // Decode sequentially between frames, before the user switches designs.
     let cancelled = false; let timer: ReturnType<typeof setTimeout>;
@@ -39,7 +44,7 @@ export function ToyPreferencesProvider({ children }: { children: ReactNode }) {
       queueMicrotask(() => { if (lifetime.current === generation) audio.dispose(); });
     };
   }, [audio]);
-  return <PreferencesContext.Provider value={{ audio, designs, choose: (type, shape) => { if (TOY_DESIGNS[type].some(design => design.id === shape)) setDesigns(previous => ({ ...previous, [type]: shape })); } }}>{children}</PreferencesContext.Provider>;
+  return <PreferencesContext.Provider value={{ audio, designs, custom, options, choose: (type, shape) => { if (TOY_DESIGNS[type].some(design => design.id === shape) || type === 'WAKPPU' && isCustomArtwork(shape) && isArtwork(shape)) setDesigns(previous => ({ ...previous, [type]: shape })); } }}>{children}</PreferencesContext.Provider>;
 }
 export function useToyPreferences() { const value = useContext(PreferencesContext); if (!value) throw new Error('ToyPreferencesProvider required'); return value; }
 export function SoundButton() {
@@ -57,9 +62,12 @@ export function SoundSettings() {
   </div>;
 }
 export function ToyDesignPicker({ active, disabled = false }: { active: ToyType; disabled?: boolean }) {
-  const { designs, choose } = useToyPreferences();
-  return <fieldset className={styles.designPicker} disabled={disabled}><legend>모양</legend><div>{TOY_DESIGNS[active].map(design => <button type="button" key={design.id} aria-label={`${design.label} 모양`} aria-pressed={designs[active] === design.id} onClick={() => choose(active, design.id)}>
-    {isArtwork(design.id) ? <img src={TOY_ARTWORK[design.id].src} alt="" /> : <svg viewBox="0 0 300 290" aria-hidden="true"><path d={outlinePath(outline(design.id))} fill={active === 'WAKPPU' ? design.wax : design.body} stroke={design.shade} strokeWidth="3" /><path d="M120 126q6 7 12 0M169 126q6 7 12 0M144 144q6 7 12 0" fill="none" stroke="#665d57" strokeWidth="3" strokeLinecap="round" /></svg>}
+  const { designs, choose, custom } = useToyPreferences();
+  const [showCustom, setShowCustom] = useState(false);
+  return <><fieldset data-custom={active === 'WAKPPU'} className={styles.designPicker} disabled={disabled}><legend>모양</legend><div>{TOY_DESIGNS[active].map(design => <button type="button" key={design.id} aria-label={`${design.label} 모양`} aria-pressed={designs[active] === design.id} onClick={() => choose(active, design.id)}>
+    {isArtwork(design.id) ? <img src={getArtwork(design.id).src} alt="" /> : <svg viewBox="0 0 300 290" aria-hidden="true"><path d={outlinePath(outline(design.id))} fill={active === 'WAKPPU' ? design.wax : design.body} stroke={design.shade} strokeWidth="3" /><path d="M120 126q6 7 12 0M169 126q6 7 12 0M144 144q6 7 12 0" fill="none" stroke="#665d57" strokeWidth="3" strokeLinecap="round" /></svg>}
 
-  </button>)}</div></fieldset>;
+  </button>)}{active === 'WAKPPU' && <button type="button" aria-label="내 왁뿌볼 만들기 및 관리" aria-pressed={isCustomArtwork(designs.WAKPPU)} disabled={!custom.ready} onClick={() => setShowCustom(true)}>
+      {isCustomArtwork(designs.WAKPPU) && isArtwork(designs.WAKPPU) ? <img src={getArtwork(designs.WAKPPU).src} alt=""/> : <Plus size={24} aria-hidden="true"/>}
+    </button>}</div></fieldset>{showCustom && (custom.error ? <Modal title="내 왁뿌볼" onClose={()=>setShowCustom(false)}><p role="alert">{custom.error}</p></Modal> : <CustomWaxSheet onClose={()=>setShowCustom(false)}/>)}</>;
 }
