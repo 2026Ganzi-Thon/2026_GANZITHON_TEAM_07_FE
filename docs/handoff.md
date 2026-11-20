@@ -225,3 +225,8 @@ real 상담·기록 연결은 [연동 현황](backend-integration-plan-2026-11-2
 `spike/custom-wax`에서만 구현. 왁뿌볼 + 버튼으로 사진 겉면·안쪽 색을 설정하고 전체 파괴 후 조작/복원. 사진은 IndexedDB에 최대 6개 보관. 서버 추천/기록 계약과 main/APK/운영은 그대로 유지. [구현·저장·검증 범위](custom-wax-spike.md) 참고.
 
 - 웹 반영 준비 후속: 보관 안내 문구 제거, 색상 테두리·가로 모양 버튼 크기 보완. 원격 main 30964a0과 기준 동일, Vercel 기존 프로젝트 설정 확인, Chromium/WebKit 총 12개 시나리오 통과. 커밋·배포는 미진행. APK는 별도 후순위.
+
+
+## 사진 커스텀 왁뿌볼 웹 반영 완료
+
+PR #18을 main에 병합하고 063f3fe를 기존 Vercel 운영 주소에 배포했다. [배포 및 운영 확인 결과](custom-wax-web-release.md). APK는 별도 유지. 아래 준비 시점의 미반영 설명과 구분한다.
